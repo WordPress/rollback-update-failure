@@ -162,11 +162,10 @@ class Rollback_Update_Failure {
 			/* translators: %1: plugin|theme, %2: plugin/theme slug */
 			return new WP_Error( 'extract_rollback_failed', sprintf( __( 'Extract rollback of %1$s %2$s failed.' ), $type, $slug ) );
 		}
-		if ( $unzip ) {
-			/* translators: %1: plugin|theme, %2: plugin/theme slug */
-			$success = new WP_Error( 'extract_rollback_succeeded', sprintf( __( 'Extract rollback of %1$s %2$s succeeded.' ), $type, $slug ) );
-			$result->merge_from( $success );
-		}
+
+		/* translators: %1: plugin|theme, %2: plugin/theme slug */
+		$success = new WP_Error( 'extract_rollback_succeeded', sprintf( __( 'Extract rollback of %1$s %2$s succeeded.' ), $type, $slug ) );
+		$result->merge_from( $success );
 
 		return $result;
 	}
