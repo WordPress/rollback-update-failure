@@ -16,9 +16,9 @@ This is a feature plugin based on the [PR](https://github.com/WordPress/wordpres
 
 The assumption is that most of the errors in large plugins/themes occurs during the `copy_dir()` part of `WP_Upgrader::install_package()`. There is at least one additional Trac tickets that is needed as well, [#52342](https://core.trac.wordpress.org/ticket/52342).
 
-Requires Trac ticket [#]() in order to do the acutal rollback in the event of a plugin/theme update failure.
+Requires Trac ticket [#52831](https://core.trac.wordpress.org/ticket/52381) in order to do the acutal rollback in the event of a plugin/theme update failure.
 
-There will be messaging in the `update-core.php` page in the event of an error and successful or unsuccessful rollback. No messaging is available, other than an update failure during a _shiny_ update.
+There will be messaging in the `update-core.php` page in the event of an error and successful or unsuccessful rollback.
 
 ## Testing
 
