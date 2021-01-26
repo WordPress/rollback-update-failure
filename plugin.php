@@ -1,34 +1,34 @@
 <?php
 /**
- * Zip Rollback
+ * Rollback Update Failure
  *
- * @package zip-rollback
+ * @package rollback-update-failure
  * @author Andy Fragen <andy@thefragens.com>
  * @license MIT
  */
 
 /**
- * Plugin Name: Zip Rollback
+ * Plugin Name: Rollback Update Failure
  * Author: Andy Fragen
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages via zip/unzip.
  * Version: 0.1
  * Network: true
  * License: MIT
  * Requires PHP: 5.6
- * Requires at least: 5.7-alpha
- * GitHub Plugin URI: https://github.com/afragen/zip-rollback
+ * Requires at least: 5.2
+ * GitHub Plugin URI: https://github.com/afragen/rollback-update-failure
  * Primary Branch: main
  */
 
 /**
- * Class Zip Rollback.
+ * Class Rollback_Update_Failure.
  *
  * Feature plugin to test feasibility of using zip/unzip for plugin/theme update failures.
  *
  * These to be added to `wp-admin/includes/class-wp-upgrader.php`.
  * WP_Upgrader::run()
  */
-class Zip_Rollback {
+class Rollback_Update_Failure {
 	/**
 	 * Constructor.
 	 */
@@ -37,7 +37,7 @@ class Zip_Rollback {
 		add_filter( 'upgrader_pre_install', array( $this, 'zip_to_rollback_dir' ), 15, 2 );
 
 		// Extract zip rollback if copy_dir returns WP_Error.
-		add_filter( 'upgrader_install_copy', array( $this, 'extract_rollback' ), 15, 3 );
+		add_filter( 'upgrader_post_copy', array( $this, 'extract_rollback' ), 15, 3 );
 	}
 
 	/**
@@ -172,4 +172,4 @@ class Zip_Rollback {
 	}
 }
 
-new Zip_Rollback();
+new Rollback_Update_Failure();
