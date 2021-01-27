@@ -11,7 +11,7 @@
  * Plugin Name: Rollback Update Failure
  * Author: Andy Fragen
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages via zip/unzip.
- * Version: 0.1
+ * Version: 0.2
  * Network: true
  * License: MIT
  * Requires PHP: 5.6
@@ -37,7 +37,7 @@ class Rollback_Update_Failure {
 		add_filter( 'upgrader_pre_install', array( $this, 'zip_to_rollback_dir' ), 15, 2 );
 
 		// Extract zip rollback if copy_dir returns WP_Error.
-		add_filter( 'upgrader_post_copy', array( $this, 'extract_rollback' ), 15, 3 );
+		add_filter( 'upgrader_post_copy', array( $this, 'extract_rollback' ), 15, 2 );
 	}
 
 	/**
@@ -129,6 +129,8 @@ class Rollback_Update_Failure {
 			return $result;
 		}
 
+		$type       = false;
+		$slug       = false;
 		$hook_extra = $args['hook_extra'];
 
 		// Exit early on plugin/theme installation.
@@ -140,11 +142,6 @@ class Rollback_Update_Failure {
 			}
 		}
 
-		// Start with a clean slate.
-		if ( $wp_filesystem->is_dir( $destination ) ) {
-			$wp_filesystem->delete( $destination, true );
-		}
-
 		// Setup variables.
 		if ( isset( $hook_extra['plugin'] ) ) {
 			$type = 'plugin';
@@ -154,6 +151,18 @@ class Rollback_Update_Failure {
 			$type = 'theme';
 			$slug = $hook_extra['theme'];
 		}
+
+		if ( ! $slug ) {
+			return new WP_Error( 'extract_rollback_faild', __( '$slug not identified.' ) );
+		}
+
+		$destination = trailingslashit( $args['destination'] ) . trailingslashit( $slug );
+
+		// Start with a clean slate.
+		if ( $wp_filesystem->is_dir( $destination ) ) {
+			$wp_filesystem->delete( $destination, true );
+		}
+
 		$rollback_dir = $wp_filesystem->wp_content_dir() . 'upgrade/rollback/';
 		$rollback     = $rollback_dir . "{$slug}.zip";
 
