@@ -11,7 +11,7 @@
  * Plugin Name: Rollback Update Failure
  * Author: Andy Fragen
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages via zip/unzip.
- * Version: 0.2
+ * Version: 0.2.1
  * Network: true
  * License: MIT
  * Requires PHP: 5.6
@@ -37,7 +37,7 @@ class Rollback_Update_Failure {
 		add_filter( 'upgrader_pre_install', array( $this, 'zip_to_rollback_dir' ), 15, 2 );
 
 		// Extract zip rollback if copy_dir returns WP_Error.
-		add_filter( 'upgrader_post_copy', array( $this, 'extract_rollback' ), 15, 2 );
+		add_filter( 'upgrader_install_complete', array( $this, 'extract_rollback' ), 15, 2 );
 	}
 
 	/**
@@ -57,12 +57,8 @@ class Rollback_Update_Failure {
 		global $wp_filesystem;
 
 		// Exit early on plugin/theme installation.
-		if ( isset( $hook_extra['type'] ) ) {
-			if ( 'plugin' === $hook_extra['type'] && ! isset( $hook_extra['plugin'] ) ) {
+		if ( isset( $hook_extra['action'] ) && 'install' === $hook_extra['action'] ) {
 				return $response;
-			} elseif ( 'theme' === $hook_extra['type'] && ! isset( $hook_extra['theme'] ) ) {
-				return $response;
-			}
 		}
 
 		// Setup variables.
@@ -114,32 +110,28 @@ class Rollback_Update_Failure {
 	 * Extract zipped rollback to original location.
 	 *
 	 * @since 5.x.0
+	 * @uses 'upgrader_install_complete' filter.
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
-	 * @param bool|WP_Error $result      Result from `copy_dir()`.
-	 * @param string        $destination File path of plugin/theme.
-	 * @param array         $args        Array of data for plugin/theme being updated.
+	 * @param bool|WP_Error $result  Result from `copy_dir()`.
+	 * @param array         $options Array of data for plugin/theme being updated.
 	 *
 	 * @return bool|WP_Error
 	 */
-	public function extract_rollback( $result, $destination, $args ) {
+	public function extract_rollback( $result, $options ) {
 		global $wp_filesystem;
+
+		$type       = false;
+		$slug       = false;
+		$hook_extra = $options['hook_extra'];
 
 		if ( ! is_wp_error( $result ) ) {
 			return $result;
 		}
 
-		$type       = false;
-		$slug       = false;
-		$hook_extra = $args['hook_extra'];
-
 		// Exit early on plugin/theme installation.
-		if ( isset( $hook_extra['type'] ) ) {
-			if ( 'plugin' === $hook_extra['type'] && ! isset( $hook_extra['plugin'] ) ) {
-				return new WP_Error( 'extract_rollback_error', __( '$hook_extra set for installation' ) );
-			} elseif ( 'theme' === $hook_extra['type'] && ! isset( $hook_extra['theme'] ) ) {
-				return new WP_Error( 'extract_rollback_error', __( '$hook_extra set for installation' ) );
-			}
+		if ( isset( $hook_extra['action'] ) && 'install' === $hook_extra['action'] ) {
+			return new WP_Error( 'extract_rollback_error', __( '$hook_extra set for installation' ) );
 		}
 
 		// Setup variables.
@@ -156,15 +148,14 @@ class Rollback_Update_Failure {
 			return new WP_Error( 'extract_rollback_faild', __( '$slug not identified.' ) );
 		}
 
-		$destination = trailingslashit( $args['destination'] ) . trailingslashit( $slug );
+		$destination  = trailingslashit( $options['destination'] ) . trailingslashit( $slug );
+		$rollback_dir = $wp_filesystem->wp_content_dir() . 'upgrade/rollback/';
+		$rollback     = $rollback_dir . "{$slug}.zip";
 
 		// Start with a clean slate.
 		if ( $wp_filesystem->is_dir( $destination ) ) {
 			$wp_filesystem->delete( $destination, true );
 		}
-
-		$rollback_dir = $wp_filesystem->wp_content_dir() . 'upgrade/rollback/';
-		$rollback     = $rollback_dir . "{$slug}.zip";
 
 		$unzip = unzip_file( $rollback, $destination );
 		if ( is_wp_error( $unzip ) ) {
