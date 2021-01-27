@@ -36,7 +36,7 @@ class Rollback_Update_Failure {
 		// Zip the plugin/theme being updated to rollback directory.
 		add_filter( 'upgrader_pre_install', array( $this, 'zip_to_rollback_dir' ), 15, 2 );
 
-		// Extract zip rollback if copy_dir returns WP_Error.
+		// Extract zip rollback if install_package returns WP_Error.
 		add_filter( 'upgrader_install_complete', array( $this, 'extract_rollback' ), 15, 2 );
 	}
 
@@ -113,7 +113,7 @@ class Rollback_Update_Failure {
 	 * @uses 'upgrader_install_complete' filter.
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
-	 * @param bool|WP_Error $result  Result from `copy_dir()`.
+	 * @param bool|WP_Error $result  Result from `WP_Upgrader::install_package()`.
 	 * @param array         $options Array of data for plugin/theme being updated.
 	 *
 	 * @return bool|WP_Error
