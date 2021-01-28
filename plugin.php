@@ -11,7 +11,7 @@
  * Plugin Name: Rollback Update Failure
  * Author: Andy Fragen
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages via zip/unzip.
- * Version: 0.2.1
+ * Version: 0.2.2
  * Network: true
  * License: MIT
  * Requires PHP: 5.6
@@ -37,7 +37,7 @@ class Rollback_Update_Failure {
 		add_filter( 'upgrader_pre_install', array( $this, 'zip_to_rollback_dir' ), 15, 2 );
 
 		// Extract zip rollback if install_package returns WP_Error.
-		add_filter( 'upgrader_install_complete', array( $this, 'extract_rollback' ), 15, 2 );
+		add_filter( 'upgrader_install_package_result', array( $this, 'extract_rollback' ), 15, 2 );
 	}
 
 	/**
@@ -110,7 +110,7 @@ class Rollback_Update_Failure {
 	 * Extract zipped rollback to original location.
 	 *
 	 * @since 5.x.0
-	 * @uses 'upgrader_install_complete' filter.
+	 * @uses 'upgrader_install_package_result' filter.
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 * @param bool|WP_Error $result  Result from `WP_Upgrader::install_package()`.
