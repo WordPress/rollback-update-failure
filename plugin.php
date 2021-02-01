@@ -159,18 +159,19 @@ class Rollback_Update_Failure {
 		$unzip = unzip_file( $rollback, $destination );
 		if ( is_wp_error( $unzip ) ) {
 			/* translators: %1: plugin|theme, %2: plugin/theme slug */
-			return new WP_Error( 'extract_rollback_failed', sprintf( __( 'Extract rollback of %1$s %2$s failed.', 'rollback-update-failure' ), $type, $slug ) );
+			return new WP_Error( 'extract_rollback_failed', sprintf( __( 'Rollback of %1$s %2$s failed.', 'rollback-update-failure' ), $type, $slug ) );
 		}
 
-		$error_code = $result->get_error_code();
-
 		/* translators: %1: plugin|theme, %2: plugin/theme slug */
-		$success_message = sprintf( __( 'Extract rollback of %1$s %2$s succeeded.', 'rollback-update-failure' ), $type, $slug );
+		$success_message = sprintf( __( 'Rollback of %1$s %2$s succeeded.', 'rollback-update-failure' ), $type, $slug );
 
+		$error_code = $result->get_error_code();
 		$result->add( $error_code, $success_message );
-		$error_msg = $result->get_error_messages( $error_code );
-		$result->remove( $error_code );
-		$result->add( $error_code, implode( ', ', $error_msg ) );
+		$error_messages = $result->get_error_messages( $error_code );
+
+		// Recreate WP_Error messages.
+		unset( $result->errors[ $error_code ] );
+		$result->add( $error_code, implode( ', ', $error_messages ) );
 
 		return $result;
 	}
