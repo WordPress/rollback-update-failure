@@ -11,7 +11,7 @@
  * Plugin Name: Rollback Update Failure
  * Author: Andy Fragen
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages via zip/unzip.
- * Version: 0.3.0
+ * Version: 0.4.0
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
@@ -162,9 +162,15 @@ class Rollback_Update_Failure {
 			return new WP_Error( 'extract_rollback_failed', sprintf( __( 'Extract rollback of %1$s %2$s failed.', 'rollback-update-failure' ), $type, $slug ) );
 		}
 
+		$error_code = $result->get_error_code();
+
 		/* translators: %1: plugin|theme, %2: plugin/theme slug */
-		$success = new WP_Error( 'extract_rollback_succeeded', sprintf( __( 'Extract rollback of %1$s %2$s succeeded.', 'rollback-update-failure' ), $type, $slug ) );
-		$result->merge_from( $success );
+		$success_message = sprintf( __( 'Extract rollback of %1$s %2$s succeeded.', 'rollback-update-failure' ), $type, $slug );
+
+		$result->add( $error_code, $success_message );
+		$error_msg = $result->get_error_messages( $error_code );
+		$result->remove( $error_code );
+		$result->add( $error_code, implode( ', ', $error_msg ) );
 
 		return $result;
 	}
