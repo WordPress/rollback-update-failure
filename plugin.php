@@ -11,7 +11,7 @@
  * Plugin Name: Rollback Update Failure
  * Author: Andy Fragen
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages via zip/unzip.
- * Version: 0.2.2
+ * Version: 0.3.0
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
@@ -114,17 +114,13 @@ class Rollback_Update_Failure {
 	 * @uses 'upgrader_install_package_result' filter.
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
-	 * @param bool|WP_Error $result  Result from `WP_Upgrader::install_package()`.
-	 * @param array         $options Array of data for plugin/theme being updated.
+	 * @param bool|WP_Error $result     Result from `WP_Upgrader::install_package()`.
+	 * @param array         $hook_extra Array of data for plugin/theme being updated.
 	 *
 	 * @return bool|WP_Error
 	 */
-	public function extract_rollback( $result, $options ) {
+	public function extract_rollback( $result, $hook_extra ) {
 		global $wp_filesystem;
-
-		$type       = false;
-		$slug       = false;
-		$hook_extra = $options['hook_extra'];
 
 		if ( ! is_wp_error( $result ) ) {
 			return $result;
@@ -136,20 +132,22 @@ class Rollback_Update_Failure {
 		}
 
 		// Setup variables.
+		$slug = false;
 		if ( isset( $hook_extra['plugin'] ) ) {
-			$type = 'plugin';
-			$slug = dirname( $hook_extra['plugin'] );
+			$type            = 'plugin';
+			$slug            = dirname( $hook_extra['plugin'] );
+			$destination_dir = "plugins/{$slug}";
 		}
 		if ( isset( $hook_extra['theme'] ) ) {
-			$type = 'theme';
-			$slug = $hook_extra['theme'];
+			$type            = 'theme';
+			$slug            = $hook_extra['theme'];
+			$destination_dir = "themes/{$slug}";
 		}
 
 		if ( ! $slug ) {
 			return new WP_Error( 'extract_rollback_failed', __( '$slug not identified.', 'rollback-update-failure' ) );
 		}
-
-		$destination  = trailingslashit( $options['destination'] ) . trailingslashit( $slug );
+		$destination  = $wp_filesystem->wp_content_dir() . trailingslashit( $destination_dir );
 		$rollback_dir = $wp_filesystem->wp_content_dir() . 'upgrade/rollback/';
 		$rollback     = $rollback_dir . "{$slug}.zip";
 

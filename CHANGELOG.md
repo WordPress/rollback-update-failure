@@ -1,6 +1,7 @@
 [unreleased]
 
 #### 0.3.0
+* update for `upgrader_install_package_result` filter and parameters passed
 * add text domain
 
 #### 0.2
