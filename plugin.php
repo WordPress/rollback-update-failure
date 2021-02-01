@@ -14,6 +14,7 @@
  * Version: 0.2.2
  * Network: true
  * License: MIT
+ * Text Domain: rollback-update-failure
  * Requires PHP: 5.6
  * Requires at least: 5.2
  * GitHub Plugin URI: https://github.com/afragen/rollback-update-failure
@@ -99,7 +100,7 @@ class Rollback_Update_Failure {
 
 				$zip->close();
 			} else {
-				return new WP_Error( 'zip_rollback_failed', __( 'Zip plugin/theme to rollback directory failed.' ) );
+				return new WP_Error( 'zip_rollback_failed', __( 'Zip plugin/theme to rollback directory failed.', 'rollback-update-failure' ) );
 			}
 		}
 
@@ -131,7 +132,7 @@ class Rollback_Update_Failure {
 
 		// Exit early on plugin/theme installation.
 		if ( isset( $hook_extra['action'] ) && 'install' === $hook_extra['action'] ) {
-			return new WP_Error( 'extract_rollback_error', __( '$hook_extra set for installation' ) );
+			return new WP_Error( 'extract_rollback_error', __( '$hook_extra set for installation', 'rollback-update-failure' ) );
 		}
 
 		// Setup variables.
@@ -145,7 +146,7 @@ class Rollback_Update_Failure {
 		}
 
 		if ( ! $slug ) {
-			return new WP_Error( 'extract_rollback_faild', __( '$slug not identified.' ) );
+			return new WP_Error( 'extract_rollback_failed', __( '$slug not identified.', 'rollback-update-failure' ) );
 		}
 
 		$destination  = trailingslashit( $options['destination'] ) . trailingslashit( $slug );
@@ -160,11 +161,11 @@ class Rollback_Update_Failure {
 		$unzip = unzip_file( $rollback, $destination );
 		if ( is_wp_error( $unzip ) ) {
 			/* translators: %1: plugin|theme, %2: plugin/theme slug */
-			return new WP_Error( 'extract_rollback_failed', sprintf( __( 'Extract rollback of %1$s %2$s failed.' ), $type, $slug ) );
+			return new WP_Error( 'extract_rollback_failed', sprintf( __( 'Extract rollback of %1$s %2$s failed.', 'rollback-update-failure' ), $type, $slug ) );
 		}
 
 		/* translators: %1: plugin|theme, %2: plugin/theme slug */
-		$success = new WP_Error( 'extract_rollback_succeeded', sprintf( __( 'Extract rollback of %1$s %2$s succeeded.' ), $type, $slug ) );
+		$success = new WP_Error( 'extract_rollback_succeeded', sprintf( __( 'Extract rollback of %1$s %2$s succeeded.', 'rollback-update-failure' ), $type, $slug ) );
 		$result->merge_from( $success );
 
 		return $result;
