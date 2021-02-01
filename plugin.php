@@ -86,7 +86,7 @@ class Rollback_Update_Failure {
 					RecursiveIteratorIterator::LEAVES_ONLY
 				);
 
-				foreach ( $files as $name => $file ) {
+				foreach ( $files as $file ) {
 					// Skip directories (they would be added automatically).
 					if ( ! $file->isDir() ) {
 						// Get real and relative path for current file.
