@@ -59,7 +59,7 @@ class Rollback_Update_Failure {
 
 		// Exit early on plugin/theme installation.
 		if ( isset( $hook_extra['action'] ) && 'install' === $hook_extra['action'] ) {
-				return $response;
+			return $response;
 		}
 
 		// Setup variables.
