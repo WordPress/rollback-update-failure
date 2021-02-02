@@ -28,7 +28,7 @@ There was much discussion regarding the thought that adding additional IO proces
 
 For the sake of testing assume any server timeout occurring during the update process might be releated to the additional IO processes creating the zipfile. Please report these in [GitHub Issues](https://github.com/afragen/rollback-update-failure/issues) and report your server details. ( Host, RAM, OS, etc. )
 
-To simulate a failure, uncomment the line in `extract_rollback()` setting `$result` to a new `WP_Error`.
+To simulate a failure, use the filter `add_filter( 'rollback_update_testing', '__return_true' );`
 
 ## Reporting
 

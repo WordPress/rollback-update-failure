@@ -4,4 +4,4 @@
 * update for `upgrader_install_package_result` filter and parameters passed
 * add text domain
 * update error message display
-* added line to uncomment in `extract_rollback` to simulate a failure.
+* added filter `rollback_update_testing` to simulate a failure.
