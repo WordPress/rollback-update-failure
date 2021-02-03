@@ -5,3 +5,4 @@
 * add text domain
 * update error message display
 * added filter `rollback_update_testing` to simulate a failure.
+* override filter if there's already a WP_Error
