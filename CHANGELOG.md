@@ -6,3 +6,4 @@
 * update error message display
 * added filter `rollback_update_testing` to simulate a failure.
 * override filter if there's already a WP_Error
+* add Rollback Testing plugin to this package
