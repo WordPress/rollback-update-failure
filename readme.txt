@@ -7,7 +7,7 @@ License: MIT
 Requires PHP: 5.6
 Requires at least: 5.2
 Tested up to: 5.7
-Stable Tag: main
+Stable Tag: 0.5.0
 
 Feature plugin for testing automatic rollback of a plugin or theme update failure.
 
@@ -42,3 +42,12 @@ Please submit [issues](https://github.com/afragen/rollback-update-failure/issues
 ## Changelog
 
 Please see the Github repository: [CHANGELOG.md](https://github.com/afragen/rollback-update-failure/blob/main/CHANGELOG.md).
+
+#### 0.5.0 / 2021-02-10
+* initial commit
+* use simpler hook for `extract_rollback`
+* update for `upgrader_install_package_result` filter and parameters passed
+* add text domain
+* update error message display
+* added filter `rollback_update_testing` to simulate a failure.
+* override filter if there's already a WP_Error

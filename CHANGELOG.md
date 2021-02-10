@@ -1,4 +1,6 @@
 [unreleased]
+
+#### 0.5.0 / 2021-02-10
 * initial commit
 * use simpler hook for `extract_rollback`
 * update for `upgrader_install_package_result` filter and parameters passed
