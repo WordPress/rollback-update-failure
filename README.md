@@ -1,3 +1,5 @@
+![Rollback Update Failure](./.wordpress-org/icon.svg)
+
 # Rollback Update Failure
 
 * Plugin Name: Rollback Update Failure
