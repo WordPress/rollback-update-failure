@@ -1,0 +1,8 @@
+README.md
+composer.lock
+.github
+.git
+.gitattributes
+.gitignore
+.svnignore
+.wordpress-org/
