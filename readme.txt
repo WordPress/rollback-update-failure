@@ -15,7 +15,7 @@ Feature plugin for testing automatic rollback of a plugin or theme update failur
 
 This is a feature plugin based on the [PR](https://github.com/WordPress/wordpress-develop/pull/860) for [#51857](https://core.trac.wordpress.org/ticket/51857).
 
-The assumption is that most of the errors in large plugins/themes occur during the `copy_dir()` part of `WP_Upgrader::install_package()`. Trac ticket [#52342](https://core.trac.wordpress.org/ticket/52342) brought more error reporting to `copy_dir()` and Trac ticket [#52831](https://core.trac.wordpress.org/ticket/52381) provides a filter hook in order to do the acutal rollback in the event of a plugin/theme update failure. As of WordPress 5.7-beta1 both of these tickets are in core.
+The assumption is that most of the errors in large plugins/themes occur during the `copy_dir()` part of `WP_Upgrader::install_package()`. Trac ticket [#52342](https://core.trac.wordpress.org/ticket/52342) brought more error reporting to `copy_dir()` and Trac ticket [#52831](https://core.trac.wordpress.org/ticket/52381) provides a filter hook in order to process the rollback in the event of a plugin/theme update failure. As of WordPress 5.7-beta1 both of these tickets are in core.
 
 It is during the `WP_Upgrader::install_package()` that the currently installed plugin is deleted in anticipation of copying the new update into that location. Having an empty plugin/theme folder or an incompletely copied update seems to be the most common issue.
 
