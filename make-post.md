@@ -2,11 +2,7 @@
 
 This feature plugin is an offshoot of [Matt's 9 Projects for 2019](https://make.wordpress.org/core/2018/12/08/9-priorities-for-2019/). Specifically it's a follow-up to [auto-updates for plugins and themes](https://make.wordpress.org/core/2020/02/26/feature-plugin-wp-auto-updates/). Our goal is to provide a safety mechanism of sorts should an update, including auto-updates, fail potentially leaving the user's site in an unstable state.
 
-This part of the project is **not** about ensuring that a **successful** update does not cause any issues.
-
-This is a feature plugin based on the [PR](https://github.com/WordPress/wordpress-develop/pull/860) for [#51857](https://core.trac.wordpress.org/ticket/51857). We are working towards inclusion in WordPress 5.8.
-
-The general overview is to provide a mechanism whereby a failed plugin or theme update does not leave the site in an unstable state.
+This is a feature plugin based on the [PR](https://github.com/WordPress/wordpress-develop/pull/860) for [#51857](https://core.trac.wordpress.org/ticket/51857). We are working towards inclusion in WordPress 5.8. The general overview is to provide a mechanism whereby a failed plugin or theme update does not leave the site in an unstable state. This part of the project is **not** about ensuring that a **successful** update does not cause any issues.
 
 Some of the issues of failed updates include:
 
