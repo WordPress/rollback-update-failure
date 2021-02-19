@@ -5,3 +5,4 @@
 phpcs.xml export-ignore
 .wordpress-org export-ignore
 .svnignore export-ignore
+make-post.md export-ignore

@@ -6,3 +6,4 @@ composer.lock
 .gitignore
 .svnignore
 .wordpress-org/
+make-post.md
