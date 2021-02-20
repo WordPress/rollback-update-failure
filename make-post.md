@@ -17,13 +17,9 @@ It is during the `WP_Upgrader::install_package()` that the currently installed p
 
 [Rollback Update Failure Feature Plugin](https://wordpress.org/plugins/rollback-update-failure) is available for feedback and testing. Contributions from the WordPress community are welcome on [the plugin's GitHub repository](https://github.com/afragen/rollback-update-failure).
 
-## Next Steps
-
-The [Rollback Update Failure feature plugin](https://wordpress.org/plugins/rollback-update-failure) is a early step towards inclusion in WordPress Core. We need your help. Simply installing and activating the plugin will help test whether or not the additional server IO processes may cause issue with resource starved shared hosting.
-
 ## Testing
 
-There was [much discussion](https://wordpress.slack.com/archives/CULBN711P/p1609968242405800) regarding the thought that adding additional IO processes for the zip and unzip process could result in server timeout issues on resource starved shared hosts. Activating the feature plugin will result in the creation of a ZIP file of the installed plugin/theme being updated every time an update is performed. The unzip only occurs during testing or a `WP_Error` resulting from `WP_Upgrader::install_package()`. Any issues would only happen during a plugin or theme update.
+There was [much discussion](https://wordpress.slack.com/archives/CULBN711P/p1609968242405800) regarding the thought that adding additional IO processes for the zip and unzip process could result in server timeout issues on resource starved shared hosts. Activating the feature plugin will result in the creation of a ZIP file of the installed plugin/theme being updated every time an update is performed. The unzip only occurs during testing or if a `WP_Error` is returned from `WP_Upgrader::install_package()`. Any issues would only happen during a plugin or theme update.
 
 For the sake of testing assume any server timeout occurring during the update process might be releated to the additional IO processes creating the zipfile. Please report these in [GitHub Issues](https://github.com/afragen/rollback-update-failure/issues) and report your server details. ( Host, RAM, OS, etc. )
 
@@ -32,3 +28,7 @@ There will be messaging in the event of an error and successful or unsuccessful 
 To simulate a failure, use the filter `add_filter( 'rollback_update_testing', '__return_true' );`
 
 Alternatively you can install the [Rollback Update Testing](https://gist.github.com/afragen/80b68a6c8826ab37025b05d4519bb4bf) plugin, activating it as needed. If you have [GitHub Updater](https://github.com/afragen/github-updater) installed, you can easily install this **Gist** from the **Install Plugin** tab. Select **Gist** as the **Remote Repository Host**.
+
+## Next Steps
+
+The [Rollback Update Failure feature plugin](https://wordpress.org/plugins/rollback-update-failure) is a early step towards inclusion in WordPress Core. We need your help. Simply installing and activating the plugin will help test whether or not the additional server IO processes may cause issue with resource starved shared hosting.
