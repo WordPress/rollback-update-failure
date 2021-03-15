@@ -1,5 +1,8 @@
 [unreleased]
 
+#### 0.5.1 / 2021-03-15
+* update error message for installation not update
+
 #### 0.5.0 / 2021-02-10
 * initial commit
 * use simpler hook for `extract_rollback`

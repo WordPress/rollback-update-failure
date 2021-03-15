@@ -7,7 +7,7 @@ License: MIT
 Requires PHP: 5.6
 Requires at least: 5.2
 Tested up to: 5.7
-Stable Tag: 0.5.0
+Stable Tag: 0.5.1
 
 Feature plugin for testing automatic rollback of a plugin or theme update failure.
 
@@ -42,6 +42,9 @@ Please submit [issues](https://github.com/afragen/rollback-update-failure/issues
 ## Changelog
 
 Please see the Github repository: [CHANGELOG.md](https://github.com/afragen/rollback-update-failure/blob/main/CHANGELOG.md).
+
+#### 0.5.1 / 2021-03-15
+* update error message for installation not update
 
 #### 0.5.0 / 2021-02-10
 * initial commit
