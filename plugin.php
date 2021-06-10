@@ -11,7 +11,7 @@
  * Plugin Name: Rollback Update Failure
  * Author: Andy Fragen
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages via zip/unzip.
- * Version: 0.5.1
+ * Version: 0.5.2
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
@@ -56,6 +56,11 @@ class Rollback_Update_Failure {
 	 */
 	public function zip_to_rollback_dir( $response, $hook_extra ) {
 		global $wp_filesystem;
+
+		// Exit early if $hook_extra is empty.
+		if ( empty( $hook_extra ) ) {
+			return $response;
+		}
 
 		// Exit early on plugin/theme installation.
 		if ( isset( $hook_extra['action'] ) && 'install' === $hook_extra['action'] ) {
