@@ -11,7 +11,7 @@
  * Plugin Name: Rollback Update Failure
  * Author: Andy Fragen
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages via zip/unzip.
- * Version: 0.5.2
+ * Version: 0.5.3
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
