@@ -30,11 +30,11 @@ For the sake of testing assume any server timeout occurring during the update pr
 
 To simulate a failure, use the filter `add_filter( 'rollback_update_testing', '__return_true' );`
 
-Alternatively you can install the [Rollback Update Testing](https://gist.github.com/afragen/80b68a6c8826ab37025b05d4519bb4bf) plugin, activating it as needed. If you have [GitHub Updater](https://github.com/afragen/github-updater) installed, you can easily install this **Gist** from the **Install Plugin** tab. Select **Gist** as the **Remote Repository Host**.
+Alternatively you can install the [Rollback Update Testing](https://gist.github.com/afragen/80b68a6c8826ab37025b05d4519bb4bf) plugin, activating it as needed. If you have [Git Updater](https://github.com/afragen/git-updater) installed, you can easily install this **Gist** from the **Install Plugin** tab. Select **Gist** as the **Remote Repository Host**.
 
 ## Updating
 
-Until this plugin is in the dot org plugin repository you can stay updated by installing  [GitHub Updater](https://github.com/afragen/github-updater)
+Until this plugin is in the dot org plugin repository you can stay updated by installing  [Git Updater](https://github.com/afragen/git-updater)
 
 ## Reporting
 
