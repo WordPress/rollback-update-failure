@@ -1,5 +1,7 @@
 [unreleased]
-*add @10up GitHub Actions integration for WordPress SVN
+
+#### 0.5.3 / 2021-07-01
+* add @10up GitHub Actions integration for WordPress SVN
 
 #### 0.5.2 / 2021-06-10
 * exit early if `$hook_extra` is empty

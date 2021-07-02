@@ -6,7 +6,7 @@ Tags: feature plugin, update, failure
 License: MIT
 Requires PHP: 5.6
 Requires at least: 5.2
-Tested up to: 5.7
+Tested up to: 5.8
 Stable Tag: 0.5.2
 
 Feature plugin for testing automatic rollback of a plugin or theme update failure.
@@ -42,6 +42,9 @@ Please submit [issues](https://github.com/afragen/rollback-update-failure/issues
 ## Changelog
 
 Please see the Github repository: [CHANGELOG.md](https://github.com/afragen/rollback-update-failure/blob/main/CHANGELOG.md).
+
+#### 0.5.3 / 2021-07-01
+* add @10up GitHub Actions integration for WordPress SVN
 
 #### 0.5.2 / 2021-06-10
 * exit early if `$hook_extra` is empty
