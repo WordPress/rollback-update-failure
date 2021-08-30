@@ -25,6 +25,8 @@ This is a feature plugin based on the [PR](https://github.com/WordPress/wordpres
 
 To avoid confusion: The "temp-backup" folder will NOT be used to "roll-back" a plugin to a previous version after an update. This folder will simply contain a transient backup of the previous version of a plugins/themes getting updated, and as soon as the update process finishes, the folder will be empty.
 
+This plugin will automatically deactivate itself once the feature has been committed to core.
+
 ## Testing
 
 * If the wp-content/temp-backup folder is not writable, there should be an error in the site-health screen.

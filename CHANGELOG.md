@@ -1,4 +1,5 @@
 [unreleased]
+* automatically deactivate plugin after feature committed to core
 
 #### 1.0.0 / 2021-08-30
 * updated to be on par with [PR #1492](https://github.com/WordPress/wordpress-develop/pull/1492), thanks @aristah

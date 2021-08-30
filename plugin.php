@@ -11,7 +11,7 @@
  * Plugin Name: Rollback Update Failure
  * Author: Andy Fragen
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages.
- * Version: 1.0.0
+ * Version: 1.0.0.1
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
@@ -43,6 +43,10 @@ class Rollback_Update_Failure {
 	 * Constructor.
 	 */
 	public function __construct() {
+		// Deactivate plugin when committed to core.
+		if ( version_compare( get_bloginfo('version'), '5.9.0-beta1', '>=' ) ) {
+			deactivate_plugins( __FILE__ );
+		}
 
 		// Add generic strings to Rollback_Update_Failure::$strings.
 		$this->strings['temp_backup_mkdir_failed']   = __( 'Could not create temp-backup directory.', 'rollback-update-failure' );
