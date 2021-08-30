@@ -3,15 +3,15 @@
  * Rollback Update Failure
  *
  * @package rollback-update-failure
- * @author Andy Fragen <andy@thefragens.com>
+ * @author Andy Fragen <andy@thefragens.com>, Ari Stathopolous <aristath@gmail.com>
  * @license MIT
  */
 
 /**
  * Plugin Name: Rollback Update Failure
  * Author: Andy Fragen
- * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages via zip/unzip.
- * Version: 0.5.3
+ * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages.
+ * Version: 1.0.0
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
@@ -74,7 +74,7 @@ class Rollback_Update_Failure {
 	 */
 	public function upgrader_pre_install( $response, $hook_extra ) {
 		global $wp_filesystem;
-		
+
 		// Early exit if $hook_extra is empty,
 		// or if this is an installation and not update.
 		if ( empty( $hook_extra ) || ( isset( $hook_extra['action'] ) && 'install' === $hook_extra['action'] ) ) {
@@ -402,11 +402,11 @@ class Rollback_Update_Failure {
 
 	/**
 	 * Additional tests for site-health.
-	 * 
+	 *
 	 * @since 5.9.0
-	 * 
+	 *
 	 * @param array $tests Available site-health tests.
-	 * 
+	 *
 	 * @return array
 	 */
 	public function site_status_tests( $tests ) {

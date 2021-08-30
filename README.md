@@ -14,21 +14,30 @@ Feature plugin for testing automatic rollback of a plugin or theme update failur
 
 ## Description
 
-This is a feature plugin based on the [PR](https://github.com/WordPress/wordpress-develop/pull/860) for [#51857](https://core.trac.wordpress.org/ticket/51857).
+This is a feature plugin based on the [PR](https://github.com/WordPress/wordpress-develop/pull/1492) for [#51857](https://core.trac.wordpress.org/ticket/51857).
 
-The assumption is that most of the errors in large plugins/themes occur during the `copy_dir()` part of `WP_Upgrader::install_package()`. Trac ticket [#52342](https://core.trac.wordpress.org/ticket/52342) brought more error reporting to `copy_dir()` and Trac ticket [#52831](https://core.trac.wordpress.org/ticket/52381) provides a filter hook in order to process the rollback in the event of a plugin/theme update failure. As of WordPress 5.7-beta1 both of these tickets are in core.
+* When updating a plugin/theme, the old version of the plugin/theme gets moved to a `wp-content/upgrade/temp-backup/plugins/PLUGINNAME` or `wp-content/upgrade/temp-backup/themes/THEMENAME` folder. The reason we chose to move instead of zip, is because zipping/unzipping are very resources-intensive processes, and would increase the risk on low-end, shared hosts. Moving on the other hand is performed instantly and won't be a bottleneck.
+* If the update fails, then the "backup" we kept in the `upgrade/temp-backup` folder gets restored to its original location
+* If the update succeeds, then the "backup" is deleted
+* 2 new checks were added in the site-health screen:
+  * Check to make sure that the rollbacks folder is writable.
+  * Check there is enough disk-space available to safely perform updates.
 
-It is during the `WP_Upgrader::install_package()` that the currently installed plugin/theme is deleted in anticipation of copying the new update into that location. Having an empty plugin/theme folder or an incompletely copied update seems to be the most common issue.
-
-There will be messaging in the event of an error and successful or unsuccessful rollback.
+To avoid confusion: The "temp-backup" folder will NOT be used to "roll-back" a plugin to a previous version after an update. This folder will simply contain a transient backup of the previous version of a plugins/themes getting updated, and as soon as the update process finishes, the folder will be empty.
 
 ## Testing
 
-There was much discussion regarding the thought that adding additional IO processes for the zip and unzip process could result in server timeout issues on resource starved shared hosts. Activating the feature plugin will result in the creation of a ZIP file of the installed plugin/theme being updated every time an update is performed. The unzip only occurs during testing or a `WP_Error` resulting from `WP_Upgrader::install_package()`.
+* If the wp-content/temp-backup folder is not writable, there should be an error in the site-health screen.
+* If the server has less than 20MB available, there should be an error in the site-health screen that updates may fail.
+* If the server has less than 100MB, it should be a notice that disk space is running low.
+* When updating a plugin, you should be able to see the old plugin in the wp-content/upgrade/temp-backup/plugins/PLUGINNAME folder. The same should apply for themes. Since updates sometimes run fast and we may miss the folder creation during testing, you can add return true; as the 1st line inside the WP_Upgrader->delete_temp_backup() method. This will return early and skip deleting the backup on update-success.
+* When a plugin update fails, the previous version should be restored. To test that, change the version of a plugin to a previous number, run the update, and on fail the previous version (the one where you changed the version number) should still be installed on the site. To simulate an update failure and confirm this works, you can use the snippet below:
 
-For the sake of testing assume any server timeout occurring during the update process might be releated to the additional IO processes creating the zipfile. Please report these in [GitHub Issues](https://github.com/afragen/rollback-update-failure/issues) and report your server details. ( Host, RAM, OS, etc. )
-
-To simulate a failure, use the filter `add_filter( 'rollback_update_testing', '__return_true' );`
+```
+add_filter( 'upgrader_install_package_result', function() {
+   return new WP_Error( 'simulated_error', 'Simulated Error' );
+});
+```
 
 Alternatively you can install the [Rollback Update Testing](https://gist.github.com/afragen/80b68a6c8826ab37025b05d4519bb4bf) plugin, activating it as needed.
 

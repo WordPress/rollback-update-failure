@@ -1,5 +1,9 @@
 [unreleased]
 
+#### 1.0.0 / 2021-08-30
+* updated to be on par with [PR #1492](https://github.com/WordPress/wordpress-develop/pull/1492), thanks @aristah
+* original zip rollback is now branch [zip-rollback](https://github.com/WordPress/rollback-update-failure/tree/zip-rollback)
+
 #### 0.5.3 / 2021-07-01
 * add @10up GitHub Actions integration for WordPress SVN
 
