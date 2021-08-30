@@ -30,21 +30,39 @@
  * WP_Upgrader::run()
  */
 class Rollback_Update_Failure {
+
+	/**
+	 * The error/notification strings used to update the user on the progress.
+	 *
+	 * @since 2.8.0
+	 * @var array $strings
+	 */
+	public $strings = array();
+
 	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		// Zip the plugin/theme being updated to rollback directory.
-		add_filter( 'upgrader_pre_install', array( $this, 'zip_to_rollback_dir' ), 15, 2 );
 
-		// Extract zip rollback if install_package returns WP_Error.
-		add_filter( 'upgrader_install_package_result', array( $this, 'extract_rollback' ), 15, 2 );
+		// Add generic strings to Rollback_Update_Failure::$strings.
+		$this->strings['temp_backup_mkdir_failed']   = __( 'Could not create temp-backup directory.', 'rollback-update-failure' );
+		$this->strings['temp_backup_move_failed']    = __( 'Could not move old version to the temp-backup directory.', 'rollback-update-failure' );
+		$this->strings['temp_backup_restore_failed'] = __( 'Could not restore original version.', 'rollback-update-failure' );
+
+		// Move the plugin/theme being updated to rollback directory.
+		add_filter( 'upgrader_pre_install', array( $this, 'upgrader_pre_install' ), 15, 2 );
+
+		// Restore backup if install_package returns WP_Error.
+		add_filter( 'upgrader_install_package_result', array( $this, 'upgrader_install_package_result' ), 15, 2 );
+
+		// Add extra tests for site-health.
+		add_filter( 'site_status_tests', array( $this, 'site_status_tests' ) );
 	}
 
 	/**
-	 * Create a zip archive of the plugin/theme being upgraded into a rollback directory.
+	 * Move the plugin/theme being upgraded into a rollback directory.
 	 *
-	 * @since 5.x.0
+	 * @since 5.9.0
 	 * @uses 'upgrader_pre_install' filter.
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
@@ -54,68 +72,36 @@ class Rollback_Update_Failure {
 	 *
 	 * @return bool|WP_Error
 	 */
-	public function zip_to_rollback_dir( $response, $hook_extra ) {
+	public function upgrader_pre_install( $response, $hook_extra ) {
 		global $wp_filesystem;
-
-		// Exit early if $hook_extra is empty.
-		if ( empty( $hook_extra ) ) {
+		
+		// Early exit if $hook_extra is empty,
+		// or if this is an installation and not update.
+		if ( empty( $hook_extra ) || ( isset( $hook_extra['action'] ) && 'install' === $hook_extra['action'] ) ) {
 			return $response;
 		}
 
-		// Exit early on plugin/theme installation.
-		if ( isset( $hook_extra['action'] ) && 'install' === $hook_extra['action'] ) {
-			return $response;
-		}
+		$args = array();
 
-		// Setup variables.
-		if ( isset( $hook_extra['plugin'] ) ) {
-			$slug = dirname( $hook_extra['plugin'] );
-			$src  = WP_PLUGIN_DIR . '/' . $slug;
-		}
-		if ( isset( $hook_extra['theme'] ) ) {
-			$slug = $hook_extra['theme'];
-			$src  = get_theme_root() . '/' . $slug;
-		}
-		$rollback_dir = $wp_filesystem->wp_content_dir() . 'upgrade/rollback/';
+		if ( isset( $hook_extra['plugin'] ) || isset( $hook_extra['theme'] ) ) {
+			$args = array(
+				'dir'  => isset( $hook_extra['plugin'] ) ? 'plugins' : 'themes',
+				'slug' => isset( $hook_extra['plugin'] ) ? dirname( $hook_extra['plugin'] ) : $hook_extra['theme'],
+				'src'  => isset( $hook_extra['plugin'] ) ? $wp_filesystem->wp_plugins_dir() : get_theme_root( $hook_extra['theme'] ),
+			);
 
-		// Zip can use a lot of memory. From `unzip_file()`.
-		wp_raise_memory_limit( 'admin' );
-
-		if ( $wp_filesystem->mkdir( $rollback_dir ) ) {
-			$path_prefix = strlen( $src ) + 1;
-			$zip         = new ZipArchive();
-
-			if ( true === $zip->open( "{$rollback_dir}{$slug}.zip", ZipArchive::CREATE | ZipArchive::OVERWRITE ) ) {
-				$files = new RecursiveIteratorIterator(
-					new RecursiveDirectoryIterator( $src ),
-					RecursiveIteratorIterator::LEAVES_ONLY
-				);
-
-				foreach ( $files as $file ) {
-					// Skip directories (they would be added automatically).
-					if ( ! $file->isDir() ) {
-						// Get real and relative path for current file.
-						$file_path     = $file->getRealPath();
-						$relative_path = substr( $file_path, $path_prefix );
-
-						// Add current file to archive.
-						$zip->addFile( $file_path, $relative_path );
-					}
-				}
-
-				$zip->close();
-			} else {
-				return new WP_Error( 'zip_rollback_failed', __( 'Zip plugin/theme to rollback directory failed.', 'rollback-update-failure' ) );
+			$temp_backup = $this->move_to_temp_backup_dir( $args );
+			if ( is_wp_error( $temp_backup ) ) {
+				return $temp_backup;
 			}
 		}
-
 		return $response;
 	}
 
 	/**
-	 * Extract zipped rollback to original location.
+	 * Restore backup to original location if update failed.
 	 *
-	 * @since 5.x.0
+	 * @since 5.9.0
 	 * @uses 'upgrader_install_package_result' filter.
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
@@ -124,65 +110,316 @@ class Rollback_Update_Failure {
 	 *
 	 * @return bool|WP_Error
 	 */
-	public function extract_rollback( $result, $hook_extra ) {
+	public function upgrader_install_package_result( $result, $hook_extra ) {
 		global $wp_filesystem;
 
-		if ( apply_filters( 'rollback_update_testing', false ) && ! is_wp_error( $result ) ) {
-			$result = new WP_Error( 'test rollback', 'Just testing rollback' );
-		}
-
-		if ( ! is_wp_error( $result ) ) {
+		// Early exit if $hook_extra is empty,
+		// or if this is an installation and not update.
+		if ( empty( $hook_extra ) || ( isset( $hook_extra['action'] ) && 'install' === $hook_extra['action'] ) ) {
 			return $result;
 		}
 
-		// Exit early on plugin/theme installation.
-		if ( isset( $hook_extra['action'] ) && 'install' === $hook_extra['action'] ) {
-			return new WP_Error( 'extract_rollback_install', __( 'Rollback Update Failure exit for installation not update', 'rollback-update-failure' ) );
+		if ( ! isset( $hook_extra['plugin'] ) && ! isset( $hook_extra['theme'] ) ) {
+			return $result;
 		}
 
-		// Setup variables.
-		$slug = false;
-		if ( isset( $hook_extra['plugin'] ) ) {
-			$type            = 'plugin';
-			$slug            = dirname( $hook_extra['plugin'] );
-			$destination_dir = "plugins/{$slug}";
+		$args = array(
+			'dir'  => isset( $hook_extra['plugin'] ) ? 'plugins' : 'themes',
+			'slug' => isset( $hook_extra['plugin'] ) ? dirname( $hook_extra['plugin'] ) : $hook_extra['theme'],
+			'src'  => isset( $hook_extra['plugin'] ) ? $wp_filesystem->wp_plugins_dir() : get_theme_root( $hook_extra['theme'] ),
+		);
+		if ( is_wp_error( $result ) ) {
+			$this->restore_temp_backup( $args );
+		} else {
+			$this->delete_temp_backup( $args );
 		}
-		if ( isset( $hook_extra['theme'] ) ) {
-			$type            = 'theme';
-			$slug            = $hook_extra['theme'];
-			$destination_dir = "themes/{$slug}";
-		}
-
-		if ( ! $slug ) {
-			return new WP_Error( 'extract_rollback_failed_slug', __( '$slug not identified.', 'rollback-update-failure' ) );
-		}
-		$destination  = $wp_filesystem->wp_content_dir() . trailingslashit( $destination_dir );
-		$rollback_dir = $wp_filesystem->wp_content_dir() . 'upgrade/rollback/';
-		$rollback     = $rollback_dir . "{$slug}.zip";
-
-		// Start with a clean slate.
-		if ( $wp_filesystem->is_dir( $destination ) ) {
-			$wp_filesystem->delete( $destination, true );
-		}
-
-		$unzip = unzip_file( $rollback, $destination );
-		if ( is_wp_error( $unzip ) ) {
-			/* translators: %1: plugin|theme, %2: plugin/theme slug */
-			return new WP_Error( 'extract_rollback_failed_unzip', sprintf( __( 'Rollback of %1$s %2$s failed.', 'rollback-update-failure' ), $type, $slug ) );
-		}
-
-		/* translators: %1: plugin|theme, %2: plugin/theme slug */
-		$success_message = sprintf( __( 'Rollback of %1$s %2$s succeeded.', 'rollback-update-failure' ), $type, $slug );
-
-		$error_code = $result->get_error_code();
-		$result->add( $error_code, $success_message );
-		$error_messages = $result->get_error_messages( $error_code );
-
-		// Recreate WP_Error messages.
-		unset( $result->errors[ $error_code ] );
-		$result->add( $error_code, implode( ', ', $error_messages ) );
 
 		return $result;
+	}
+
+	/**
+	 * Move the plugin/theme being upgraded into a temp-backup directory.
+	 *
+	 * @since 5.9.0
+	 *
+	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+	 *
+	 * @param array $args Array of data for the temp_backup. Must include a slug, the source and directory.
+	 *
+	 * @return bool|WP_Error
+	 */
+	public function move_to_temp_backup_dir( $args ) {
+		if ( empty( $args['slug'] ) || empty( $args['src'] ) || empty( $args['dir'] ) ) {
+			return false;
+		}
+		global $wp_filesystem;
+
+		$dest_folder = $wp_filesystem->wp_content_dir() . 'upgrade/temp-backup/';
+		// Create the temp-backup dir if it doesn't exist.
+		if (
+			(
+				! $wp_filesystem->is_dir( $dest_folder ) &&
+				! $wp_filesystem->mkdir( $dest_folder )
+			) ||
+			(
+				! $wp_filesystem->is_dir( $dest_folder . $args['dir'] . '/' ) &&
+				! $wp_filesystem->mkdir( $dest_folder . $args['dir'] . '/' )
+			)
+		) {
+			return new WP_Error( 'fs_temp_backup_mkdir', $this->strings['temp_backup_mkdir_failed'] );
+		}
+
+		$src  = trailingslashit( $args['src'] ) . $args['slug'];
+		$dest = $dest_folder . $args['dir'] . '/' . $args['slug'];
+
+		// Delete temp-backup folder if it already exists.
+		if ( $wp_filesystem->is_dir( $dest ) ) {
+			$wp_filesystem->delete( $dest, true );
+		}
+
+		// Move to the temp-backup folder.
+		if ( ! $wp_filesystem->move( $src, $dest, true ) ) {
+			return new WP_Error( 'fs_temp_backup_move', $this->strings['temp_backup_move_failed'] );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Restore the plugin/theme from the temp-backup directory.
+	 *
+	 * @since 5.9.0
+	 *
+	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+	 *
+	 * @param array $args Array of data for the temp_backup. Must include a slug, the source and directory.
+	 *
+	 * @return bool|WP_Error
+	 */
+	public function restore_temp_backup( $args ) {
+		if ( empty( $args['slug'] ) || empty( $args['src'] ) || empty( $args['dir'] ) ) {
+			return false;
+		}
+
+		global $wp_filesystem;
+		$src  = $wp_filesystem->wp_content_dir() . 'upgrade/temp-backup/' . $args['dir'] . '/' . $args['slug'];
+		$dest = trailingslashit( $args['src'] ) . $args['slug'];
+
+		if ( $wp_filesystem->is_dir( $src ) ) {
+
+			// Cleanup.
+			if ( $wp_filesystem->is_dir( $dest ) && ! $wp_filesystem->delete( $dest, true ) ) {
+				return new WP_Error( 'fs_temp_backup_delete', $this->strings['temp_backup_restore_failed'] );
+			}
+
+			// Move it.
+			if ( ! $wp_filesystem->move( $src, $dest, true ) ) {
+				return new WP_Error( 'fs_temp_backup_delete', $this->strings['temp_backup_restore_failed'] );
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Deletes a temp-backup.
+	 *
+	 * @since 5.9.0
+	 *
+	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+	 *
+	 * @param array $args Array of data for the temp_backup. Must include a slug, the source and directory.
+	 *
+	 * @return bool
+	 */
+	public function delete_temp_backup( $args ) {
+		global $wp_filesystem;
+		if ( empty( $args['slug'] ) || empty( $args['dir'] ) ) {
+			return false;
+		}
+		return $wp_filesystem->delete(
+			$wp_filesystem->wp_content_dir() . "upgrade/temp-backup/{$args['dir']}/{$args['slug']}",
+			true
+		);
+	}
+
+	/**
+	 * Test available disk-space for updates/upgrades.
+	 *
+	 * @since 5.9.0
+	 *
+	 * @return array The test results.
+	 */
+	public function get_test_available_updates_disk_space() {
+		$available_space       = (int) disk_free_space( WP_CONTENT_DIR . '/upgrade/' );
+		$available_space_in_mb = $available_space / MB_IN_BYTES;
+
+		$result = array(
+			'label'       => __( 'Disk-space available to safely perform updates', 'rollback-update-failure' ),
+			'status'      => 'good',
+			'badge'       => array(
+				'label' => __( 'Security', 'rollback-update-failure' ),
+				'color' => 'blue',
+			),
+			'description' => sprintf(
+				/* Translators: %s: Available disk-space in MB or GB. */
+				'<p>' . __( '%s available disk space was detected, update routines can be performed safely.', 'rollback-update-failure' ),
+				size_format( $available_space )
+			),
+			'actions'     => '',
+			'test'        => 'available_updates_disk_space',
+		);
+
+		if ( 100 > $available_space_in_mb ) {
+			$result['description'] = __( 'Available disk space is low, less than 100MB available.', 'rollback-update-failure' );
+			$result['status']      = 'recommended';
+		}
+
+		if ( 20 > $available_space_in_mb ) {
+			$result['description'] = __( 'Available disk space is critically low, less than 20MB available. Proceed with caution, updates may fail.', 'rollback-update-failure' );
+			$result['status']      = 'critical';
+		}
+
+		if ( ! $available_space ) {
+			$result['description'] = __( 'Could not determine available disk space for updates.', 'rollback-update-failure' );
+			$result['status']      = 'recommended';
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Test if plugin and theme updates temp-backup folders are writable or can be created.
+	 *
+	 * @since 5.9.0
+	 *
+	 * @return array The test results.
+	 */
+	public function get_test_update_temp_backup_writable() {
+		$result = array(
+			'label'       => __( 'Plugin and theme update temp-backup folder is writable', 'rollback-update-failure' ),
+			'status'      => 'good',
+			'badge'       => array(
+				'label' => __( 'Security', 'rollback-update-failure' ),
+				'color' => 'blue',
+			),
+			'description' => sprintf(
+				/* Translators: %s: "wp-content/upgrade/temp-backup". */
+				'<p>' . __( 'The %s folder used to improve the stability of plugin and theme updates is writable.', 'rollback-update-failure' ),
+				'<code>wp-content/upgrade/temp-backup</code>'
+			),
+			'actions'     => '',
+			'test'        => 'update_temp_backup_writable',
+		);
+
+		global $wp_filesystem;
+		if ( ! $wp_filesystem ) {
+			if ( ! function_exists( 'WP_Filesystem' ) ) {
+				require_once wp_normalize_path( ABSPATH . '/wp-admin/includes/file.php' );
+			}
+			WP_Filesystem();
+		}
+		$wp_content = $wp_filesystem->wp_content_dir();
+
+		$upgrade_folder_exists      = $wp_filesystem->is_dir( "$wp_content/upgrade" );
+		$upgrade_folder_is_writable = $wp_filesystem->is_writable( "$wp_content/upgrade" );
+		$backup_folder_exists       = $wp_filesystem->is_dir( "$wp_content/upgrade/temp-backup" );
+		$backup_folder_is_writable  = $wp_filesystem->is_writable( "$wp_content/upgrade/temp-backup" );
+		$plugins_folder_exists      = $wp_filesystem->is_dir( "$wp_content/upgrade/temp-backup/plugins" );
+		$plugins_folder_is_writable = $wp_filesystem->is_writable( "$wp_content/upgrade/temp-backup/plugins" );
+		$themes_folder_exists       = $wp_filesystem->is_dir( "$wp_content/upgrade/temp-backup/themes" );
+		$themes_folder_is_writable  = $wp_filesystem->is_writable( "$wp_content/upgrade/temp-backup/themes" );
+
+		if ( $plugins_folder_exists && ! $plugins_folder_is_writable && $themes_folder_exists && ! $themes_folder_is_writable ) {
+			$result['status']      = 'critical';
+			$result['label']       = __( 'Plugins and themes temp-backup folders exist but are not writable', 'rollback-update-failure' );
+			$result['description'] = sprintf(
+				/* translators: %s: '<code>wp-content/upgrade/temp-backup/plugins</code>' */
+				'<p>' . __( 'The %1$s and %2$s folders exist but are not writable. These folders are used to improve the stability of plugin updates. Please make sure the server has write permissions to these folders.', 'rollback-update-failure' ) . '</p>',
+				'<code>wp-content/upgrade/temp-backup/plugins</code>',
+				'<code>wp-content/upgrade/temp-backup/themes</code>'
+			);
+			return $result;
+		}
+
+		if ( $plugins_folder_exists && ! $plugins_folder_is_writable ) {
+			$result['status']      = 'critical';
+			$result['label']       = __( 'Plugins temp-backup folder exists but is not writable', 'rollback-update-failure' );
+			$result['description'] = sprintf(
+				/* translators: %s: '<code>wp-content/upgrade/temp-backup/plugins</code>' */
+				'<p>' . __( 'The %s folder exists but is not writable. This folder is used to improve the stability of plugin updates. Please make sure the server has write permissions to this folder.', 'rollback-update-failure' ) . '</p>',
+				'<code>wp-content/upgrade/temp-backup/plugins</code>'
+			);
+			return $result;
+		}
+
+		if ( $themes_folder_exists && ! $themes_folder_is_writable ) {
+			$result['status']      = 'critical';
+			$result['label']       = __( 'Themes temp-backup folder exists but is not writable', 'rollback-update-failure' );
+			$result['description'] = sprintf(
+				/* translators: %s: '<code>wp-content/upgrade/temp-backup/themes</code>' */
+				'<p>' . __( 'The %s folder exists but is not writable. This folder is used to improve the stability of theme updates. Please make sure the server has write permissions to this folder.', 'rollback-update-failure' ) . '</p>',
+				'<code>wp-content/upgrade/temp-backup/themes</code>'
+			);
+			return $result;
+		}
+
+		if ( ( ! $plugins_folder_exists || ! $themes_folder_exists ) && $backup_folder_exists && ! $backup_folder_is_writable ) {
+			$result['status']      = 'critical';
+			$result['label']       = __( 'The temp-backup folder exists but is not writable', 'rollback-update-failure' );
+			$result['description'] = sprintf(
+				/* translators: %s: '<code>wp-content/upgrade/temp-backup</code>' */
+				'<p>' . __( 'The %s folder exists but is not writable. This folder is used to improve the stability of plugin and theme updates. Please make sure the server has write permissions to this folder.', 'rollback-update-failure' ) . '</p>',
+				'<code>wp-content/upgrade/temp-backup</code>'
+			);
+			return $result;
+		}
+
+		if ( ! $backup_folder_exists && $upgrade_folder_exists && ! $upgrade_folder_is_writable ) {
+			$result['status']      = 'critical';
+			$result['label']       = __( 'The upgrade folder exists but is not writable', 'rollback-update-failure' );
+			$result['description'] = sprintf(
+				/* translators: %s: '<code>wp-content/upgrade</code>' */
+				'<p>' . __( 'The %s folder exists but is not writable. This folder is used to for plugin and theme updates. Please make sure the server has write permissions to this folder.', 'rollback-update-failure' ) . '</p>',
+				'<code>wp-content/upgrade</code>'
+			);
+			return $result;
+		}
+
+		if ( ! $upgrade_folder_exists && ! $wp_filesystem->is_writable( $wp_content ) ) {
+			$result['status']      = 'critical';
+			$result['label']       = __( 'The upgrade folder can not be created', 'rollback-update-failure' );
+			$result['description'] = sprintf(
+				/* translators: %1$s: <code>wp-content/upgrade</code>. %2$s: <code>wp-content</code>. */
+				'<p>' . __( 'The %1$s folder does not exist, and the server does not have write permissions in %2$s to create it. This folder is used to for plugin and theme updates. Please make sure the server has write permissions in %2$s.', 'rollback-update-failure' ) . '</p>',
+				'<code>wp-content/upgrade</code>',
+				'<code>wp-content</code>'
+			);
+			return $result;
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Additional tests for site-health.
+	 * 
+	 * @since 5.9.0
+	 * 
+	 * @param array $tests Available site-health tests.
+	 * 
+	 * @return array
+	 */
+	public function site_status_tests( $tests ) {
+
+		$tests['direct']['update_temp_backup_writable']  = array(
+			'label' => __( 'Updates temp-backup folder access' ),
+			'test'  => array( $this, 'get_test_update_temp_backup_writable' ),
+		);
+		$tests['direct']['available_updates_disk_space'] = array(
+			'label' => __( 'Available disk space' ),
+			'test'  => array( $this, 'get_test_available_updates_disk_space' ),
+		);
+		return $tests;
 	}
 }
 
