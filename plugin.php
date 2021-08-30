@@ -17,7 +17,7 @@
  * Text Domain: rollback-update-failure
  * Requires PHP: 5.6
  * Requires at least: 5.2
- * GitHub Plugin URI: https://github.com/afragen/rollback-update-failure
+ * GitHub Plugin URI: https://github.com/WordPress/rollback-update-failure
  * Primary Branch: main
  */
 
