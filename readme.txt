@@ -33,7 +33,7 @@ To avoid confusion: The "temp-backup" folder will NOT be used to "roll-back" a p
 * When a plugin update fails, the previous version should be restored. To test that, change the version of a plugin to a previous number, run the update, and on fail the previous version (the one where you changed the version number) should still be installed on the site. To simulate an update failure and confirm this works, you can use the snippet below:
 
     add_filter( 'upgrader_install_package_result', function() {
-       return new WP_Error( 'simulated_error', 'Simulated Error' );
+        return new WP_Error( 'simulated_error', 'Simulated Error' );
     });
 
 Alternatively you can install the [Rollback Update Testing](https://gist.github.com/afragen/80b68a6c8826ab37025b05d4519bb4bf) plugin, activating it as needed.
