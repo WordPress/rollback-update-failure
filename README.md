@@ -3,7 +3,7 @@
 # Rollback Update Failure
 
 * Plugin Name: Rollback Update Failure
-* Contributors: afragen
+* Contributors: afragen, aristath
 * Tags: feature plugin, update, failure, auto-update
 * License: MIT
 * Requires PHP: 5.6
