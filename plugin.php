@@ -23,11 +23,6 @@
 
 /**
  * Class Rollback_Update_Failure.
- *
- * Feature plugin to test feasibility of using zip/unzip for plugin/theme update failures.
- *
- * These to be added to `wp-admin/includes/class-wp-upgrader.php`.
- * WP_Upgrader::run()
  */
 class Rollback_Update_Failure {
 
