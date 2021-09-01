@@ -1,5 +1,7 @@
 [unreleased]
-* automatically deactivate plugin after feature committed to core
+
+#### 1.1.0 / 2021-09-01
+* automatically deactivate plugin after feature committed to core, currently set to `5.9-beta1`
 * check for disabled function `disk_free_space()` and degrade gracefully
 
 #### 1.0.0 / 2021-08-30

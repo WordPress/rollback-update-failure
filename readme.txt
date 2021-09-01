@@ -7,7 +7,7 @@ License: MIT
 Requires PHP: 5.6
 Requires at least: 5.2
 Tested up to: 5.8
-Stable Tag: 1.0.0
+Stable Tag: 1.1.0
 
 Feature plugin for testing automatic rollback of a plugin or theme update failure.
 
@@ -49,6 +49,10 @@ Please submit [issues](https://github.com/afragen/rollback-update-failure/issues
 ## Changelog
 
 Please see the Github repository: [CHANGELOG.md](https://github.com/afragen/rollback-update-failure/blob/main/CHANGELOG.md).
+
+#### 1.1.0 / 2021-09-01
+* automatically deactivate plugin after feature committed to core, currently set to `5.9-beta1`
+* check for disabled function `disk_free_space()` and degrade gracefully
 
 #### 1.0.0 / 2021-08-30
 * updated to be on par with [PR #1492](https://github.com/WordPress/wordpress-develop/pull/1492), thanks @aristah
