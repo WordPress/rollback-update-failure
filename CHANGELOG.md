@@ -1,5 +1,8 @@
 [unreleased]
-* automatically deactivate plugin after feature committed to core
+
+#### 1.1.0 / 2021-09-01
+* automatically deactivate plugin after feature committed to core, currently set to `5.9-beta1`
+* check for disabled function `disk_free_space()` and degrade gracefully
 
 #### 1.0.0 / 2021-08-30
 * updated to be on par with [PR #1492](https://github.com/WordPress/wordpress-develop/pull/1492), thanks @aristah
