@@ -7,7 +7,7 @@ License: MIT
 Requires PHP: 5.6
 Requires at least: 5.2
 Tested up to: 5.8
-Stable Tag: 1.1.1
+Stable Tag: 1.1.2
 
 Feature plugin for testing automatic rollback of a plugin or theme update failure.
 
@@ -49,6 +49,9 @@ Please submit [issues](https://github.com/afragen/rollback-update-failure/issues
 ## Changelog
 
 Please see the Github repository: [CHANGELOG.md](https://github.com/afragen/rollback-update-failure/blob/main/CHANGELOG.md).
+
+#### 1.1.2 / 2021-09-17
+* update version check
 
 #### 1.1.1 / 2021-09-07
 * update check for `disk_free_space()`
