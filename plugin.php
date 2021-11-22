@@ -11,7 +11,7 @@
  * Plugin Name: Rollback Update Failure
  * Author: Andy Fragen, Ari Stathopolous
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages.
- * Version: 1.1.3
+ * Version: 1.1.3.1
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
@@ -177,7 +177,7 @@ class Rollback_Update_Failure {
 		}
 
 		// Move to the temp-backup folder.
-		if ( ! $wp_filesystem->move( $src, $dest, true ) ) {
+		if ( ! $this->move_dir( $src, $dest ) ) {
 			return new WP_Error( 'fs_temp_backup_move', $this->strings['temp_backup_move_failed'] );
 		}
 
@@ -212,7 +212,7 @@ class Rollback_Update_Failure {
 			}
 
 			// Move it.
-			if ( ! $wp_filesystem->move( $src, $dest, true ) ) {
+			if ( ! $this->move_dir( $src, $dest ) ) {
 				return new WP_Error( 'fs_temp_backup_delete', $this->strings['temp_backup_restore_failed'] );
 			}
 		}
@@ -240,6 +240,53 @@ class Rollback_Update_Failure {
 			true
 		);
 	}
+
+/**
+ * Moves a directory from one location to another via the rename() PHP function.
+ * If the renaming failed, falls back to copy_dir().
+ *
+ * Assumes that WP_Filesystem() has already been called and setup.
+ *
+ * @since 5.9.0
+ *
+ * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+ *
+ * @param string $from        Source directory.
+ * @param string $to          Destination directory.
+ * @param string $working_dir Remote file source directory. Optional.
+ *
+ * @return true|WP_Error True on success, WP_Error on failure.
+ */
+function move_dir( $from, $to, $working_dir = '' ) {
+	global $wp_filesystem;
+
+	if ( 'direct' === $wp_filesystem->method ) {
+		$wp_filesystem->rmdir( $to );
+		if ( @rename( $from, $to ) ) {
+			return true;
+		}
+	}
+
+	if ( ! $wp_filesystem->is_dir( $to ) ) {
+		if ( ! $wp_filesystem->mkdir( $to, FS_CHMOD_DIR ) ) {
+
+			// Clear the working folder?
+			if ( ! empty( $working_dir ) ) {
+				$wp_filesystem->delete( $working_dir, true );
+			}
+
+			return new WP_Error( 'mkdir_failed_move_dir', __( 'Could not create directory.' ), $to );
+		}
+	}
+	$result = copy_dir( $from, $to );
+
+	// Clear the working folder?
+	if ( ! empty( $working_dir ) ) {
+		$wp_filesystem->delete( $working_dir, true );
+	}
+
+	return $result;
+}
 
 	/**
 	 * Test available disk-space for updates/upgrades.

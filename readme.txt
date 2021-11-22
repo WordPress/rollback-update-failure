@@ -6,7 +6,7 @@ Tags: feature plugin, update, failure
 License: MIT
 Requires PHP: 5.6
 Requires at least: 5.2
-Tested up to: 5.8
+Tested up to: 5.9
 Stable Tag: 1.1.3
 
 Feature plugin for testing automatic rollback of a plugin or theme update failure.

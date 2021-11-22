@@ -27,6 +27,8 @@ To avoid confusion: The "temp-backup" folder will NOT be used to "roll-back" a p
 
 This plugin will automatically deactivate itself once the feature has been committed to core.
 
+There is a change to `WP_Upgrader::install_package()` that can't be implemented in the plugin. :sad:
+
 ## Testing
 
 * If the `wp-content/temp-backup` folder is not writable, there should be an error in the site-health screen.

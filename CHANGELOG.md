@@ -1,4 +1,5 @@
 [unreleased]
+* update to use `move_dir()` instead of `$wp_filesystem->move()`
 
 #### 1.1.3 / 2021-09-17
 * update version check
