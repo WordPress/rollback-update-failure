@@ -7,7 +7,7 @@ License: MIT
 Requires PHP: 5.6
 Requires at least: 5.2
 Tested up to: 5.9
-Stable Tag: 1.1.3
+Stable Tag: 1.2.0
 
 Feature plugin for testing automatic rollback of a plugin or theme update failure.
 
@@ -49,6 +49,11 @@ Please submit [issues](https://github.com/afragen/rollback-update-failure/issues
 ## Changelog
 
 Please see the Github repository: [CHANGELOG.md](https://github.com/afragen/rollback-update-failure/blob/main/CHANGELOG.md).
+
+#### 1.2.0 / 2021-12-17
+* updated for more parity with planned code
+* updated version check for revert
+* update to use `move_dir()` instead of `$wp_filesystem->move()`
 
 #### 1.1.3 / 2021-09-17
 * update version check
