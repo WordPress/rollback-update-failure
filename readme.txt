@@ -6,8 +6,8 @@ Tags: feature plugin, update, failure
 License: MIT
 Requires PHP: 5.6
 Requires at least: 5.2
-Tested up to: 5.8
-Stable Tag: 1.1.3
+Tested up to: 5.9
+Stable Tag: 1.2.0
 
 Feature plugin for testing automatic rollback of a plugin or theme update failure.
 
@@ -31,7 +31,7 @@ This plugin will automatically deactivate itself once the feature has been commi
 * If the `wp-content/temp-backup` folder is not writable, there should be an error in the site-health screen.
 * If the server has less than 20MB available, there should be an error in the site-health screen that updates may fail.
 * If the server has less than 100MB, it should be a notice that disk space is running low.
-* When updating a plugin, you should be able to see the old plugin in the `wp-content/upgrade/temp-backup/plugins/PLUGINNAME` folder. The same should apply for themes. Since updates sometimes run fast and we may miss the folder creation during testing, you can add `return true;` as the 1st line inside the `WP_Upgrader->delete_temp_backup()` method. This will return early and skip deleting the backup on update-success.
+* When updating a plugin, you should be able to see the old plugin in the `wp-content/upgrade/temp-backup/plugins/PLUGINNAME` folder. The same should apply for themes. Since updates sometimes run fast and we may miss the folder creation during testing, you can simulate an update failure to demonstrate. This will return early and skip deleting the backup on update-success.
 * When a plugin update fails, the previous version should be restored. To test that, change the version of a plugin to a previous number, run the update, and on fail the previous version (the one where you changed the version number) should still be installed on the site. To simulate an update failure and confirm this works, you can use the snippet below:
 
 <pre><code>
@@ -49,6 +49,11 @@ Please submit [issues](https://github.com/afragen/rollback-update-failure/issues
 ## Changelog
 
 Please see the Github repository: [CHANGELOG.md](https://github.com/afragen/rollback-update-failure/blob/main/CHANGELOG.md).
+
+#### 1.2.0 / 2021-12-17
+* updated for more parity with planned code
+* updated version check for revert
+* update to use `move_dir()` instead of `$wp_filesystem->move()`
 
 #### 1.1.3 / 2021-09-17
 * update version check
