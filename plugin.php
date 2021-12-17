@@ -11,7 +11,7 @@
  * Plugin Name: Rollback Update Failure
  * Author: Andy Fragen, Ari Stathopolous
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages.
- * Version: 1.1.3.1
+ * Version: 1.2.0
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
@@ -58,12 +58,15 @@ class Rollback_Update_Failure {
 
 		// Add extra tests for site-health.
 		add_filter( 'site_status_tests', array( $this, 'site_status_tests' ) );
+
+		// Clean up.
+		add_action( 'wp_delete_temp_updater_backups', array( $this, 'wp_delete_all_temp_backups' ) );
 	}
 
 	/**
 	 * Move the plugin/theme being upgraded into a rollback directory.
 	 *
-	 * @since 5.9.0
+	 * @since 6.0.0
 	 * @uses 'upgrader_pre_install' filter.
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
@@ -102,7 +105,7 @@ class Rollback_Update_Failure {
 	/**
 	 * Restore backup to original location if update failed.
 	 *
-	 * @since 5.9.0
+	 * @since 6.0.0
 	 * @uses 'upgrader_install_package_result' filter.
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
@@ -132,7 +135,14 @@ class Rollback_Update_Failure {
 		if ( is_wp_error( $result ) ) {
 			$this->restore_temp_backup( $args );
 		} else {
-			$this->delete_temp_backup( $args );
+			// Clean up the backup kept in the temp-backup directory.
+			// Delete the backup on `shutdown` to avoid a PHP timeout.
+			add_action(
+				'shutdown',
+				function() use ( $args ) {
+					$this->delete_temp_backup( $args );
+				}
+			);
 		}
 
 		return $result;
@@ -141,7 +151,7 @@ class Rollback_Update_Failure {
 	/**
 	 * Move the plugin/theme being upgraded into a temp-backup directory.
 	 *
-	 * @since 5.9.0
+	 * @since 6.0.0
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
@@ -189,7 +199,7 @@ class Rollback_Update_Failure {
 	/**
 	 * Restore the plugin/theme from the temp-backup directory.
 	 *
-	 * @since 5.9.0
+	 * @since 6.0.0
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
@@ -224,7 +234,7 @@ class Rollback_Update_Failure {
 	/**
 	 * Deletes a temp-backup.
 	 *
-	 * @since 5.9.0
+	 * @since 6.0.0
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
@@ -243,57 +253,50 @@ class Rollback_Update_Failure {
 		);
 	}
 
-/**
- * Moves a directory from one location to another via the rename() PHP function.
- * If the renaming failed, falls back to copy_dir().
- *
- * Assumes that WP_Filesystem() has already been called and setup.
- *
- * @since 5.9.0
- *
- * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
- *
- * @param string $from        Source directory.
- * @param string $to          Destination directory.
- * @param string $working_dir Remote file source directory. Optional.
- *
- * @return true|WP_Error True on success, WP_Error on failure.
- */
-function move_dir( $from, $to, $working_dir = '' ) {
-	global $wp_filesystem;
+	/**
+	 * Moves a directory from one location to another via the rename() PHP function.
+	 * If the renaming failed, falls back to copy_dir().
+	 *
+	 * Assumes that WP_Filesystem() has already been called and setup.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+	 *
+	 * @param string $from        Source directory.
+	 * @param string $to          Destination directory.
+	 * @param string $working_dir Remote file source directory. Optional.
+	 *
+	 * @return true|WP_Error True on success, WP_Error on failure.
+	 */
+	public function move_dir( $from, $to, $working_dir = '' ) {
+		global $wp_filesystem;
+		$result = false;
 
-	if ( 'direct' === $wp_filesystem->method ) {
-		$wp_filesystem->rmdir( $to );
-		if ( @rename( $from, $to ) ) {
-			return true;
+		if ( 'direct' === $wp_filesystem->method ) {
+			$wp_filesystem->rmdir( $to );
+			$result = @rename( $from, $to );
 		}
-	}
 
-	if ( ! $wp_filesystem->is_dir( $to ) ) {
-		if ( ! $wp_filesystem->mkdir( $to, FS_CHMOD_DIR ) ) {
-
-			// Clear the working folder?
-			if ( ! empty( $working_dir ) ) {
-				$wp_filesystem->delete( $working_dir, true );
+		if ( ! $result && ! $wp_filesystem->is_dir( $to ) ) {
+			if ( ! $wp_filesystem->mkdir( $to, FS_CHMOD_DIR ) ) {
+				return new WP_Error( 'mkdir_failed_move_dir', __( 'Could not create directory.' ), $to );
 			}
-
-			return new WP_Error( 'mkdir_failed_move_dir', __( 'Could not create directory.' ), $to );
+			$result = copy_dir( $from, $to );
 		}
-	}
-	$result = copy_dir( $from, $to );
 
-	// Clear the working folder?
-	if ( ! empty( $working_dir ) ) {
-		$wp_filesystem->delete( $working_dir, true );
-	}
+		// Clear the working directory?
+		if ( ! empty( $working_dir ) ) {
+			$wp_filesystem->delete( $working_dir, true );
+		}
 
-	return $result;
-}
+		return $result;
+	}
 
 	/**
 	 * Test available disk-space for updates/upgrades.
 	 *
-	 * @since 5.9.0
+	 * @since 6.0.0
 	 *
 	 * @return array The test results.
 	 */
@@ -338,7 +341,7 @@ function move_dir( $from, $to, $working_dir = '' ) {
 	/**
 	 * Test if plugin and theme updates temp-backup folders are writable or can be created.
 	 *
-	 * @since 5.9.0
+	 * @since 6.0.0
 	 *
 	 * @return array The test results.
 	 */
@@ -451,7 +454,7 @@ function move_dir( $from, $to, $working_dir = '' ) {
 	/**
 	 * Additional tests for site-health.
 	 *
-	 * @since 5.9.0
+	 * @since 6.0.0
 	 *
 	 * @param array $tests Available site-health tests.
 	 *
@@ -469,6 +472,52 @@ function move_dir( $from, $to, $working_dir = '' ) {
 		);
 		return $tests;
 	}
+
+	/**
+	 * Deletes all contents of the temp-backup directory.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+	 */
+	public function wp_delete_all_temp_backups() {
+		/*
+		* Check if there's a lock, or if currently performing an Ajax request,
+		* in which case there's a chance we're doing an update.
+		* Reschedule for an hour from now and exit early.
+		*/
+		if ( get_option( 'core_updater.lock' ) || get_option( 'auto_updater.lock' ) || wp_doing_ajax() ) {
+			wp_schedule_single_event( time() + HOUR_IN_SECONDS, 'wp_delete_temp_updater_backups' );
+			return;
+		}
+
+		/*
+		* This action runs on shutdown to make sure there's no plugin updates currently running.
+		* Using a closure in this case is OK since the action can be removed by removing the parent hook.
+		*/
+		add_action(
+			'shutdown',
+			function() {
+				global $wp_filesystem;
+
+				if ( ! $wp_filesystem ) {
+					include_once ABSPATH . '/wp-admin/includes/file.php';
+					WP_Filesystem();
+				}
+
+				$dirlist = $wp_filesystem->dirlist( $wp_filesystem->wp_content_dir() . 'upgrade/temp-backup/' );
+
+				foreach ( array_keys( $dirlist ) as $dir ) {
+					if ( '.' === $dir || '..' === $dir ) {
+						continue;
+					}
+
+					$wp_filesystem->delete( $wp_filesystem->wp_content_dir() . 'upgrade/temp-backup/' . $dir, true );
+				}
+			}
+		);
+	}
+
 }
 
 new Rollback_Update_Failure();
