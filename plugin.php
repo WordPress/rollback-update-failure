@@ -39,7 +39,9 @@ class Rollback_Update_Failure {
 	 */
 	public function __construct() {
 		// Deactivate plugin when committed to core.
-		if ( version_compare( get_bloginfo( 'version' ), '5.9-alpha-51272', '>=' ) ) {
+		if ( version_compare( get_bloginfo( 'version' ), '5.9-alpha-51272', '>=' )
+			&& version_compare( get_bloginfo( 'version' ), '6.0-beta1', '>=' )
+		) {
 			deactivate_plugins( __FILE__ );
 		}
 
