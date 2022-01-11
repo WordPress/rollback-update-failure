@@ -11,7 +11,7 @@
  * Plugin Name: Rollback Update Failure
  * Author: Andy Fragen, Ari Stathopolous
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages.
- * Version: 1.2.0
+ * Version: 1.2.0.1
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
@@ -185,6 +185,7 @@ class Rollback_Update_Failure {
 
 		// Delete temp-backup folder if it already exists.
 		if ( $wp_filesystem->is_dir( $dest ) ) {
+			$this->pre_delete_sleep();
 			$wp_filesystem->delete( $dest, true );
 		}
 
@@ -219,6 +220,7 @@ class Rollback_Update_Failure {
 		if ( $wp_filesystem->is_dir( $src ) ) {
 
 			// Cleanup.
+			$this->pre_delete_sleep();
 			if ( $wp_filesystem->is_dir( $dest ) && ! $wp_filesystem->delete( $dest, true ) ) {
 				return new WP_Error( 'fs_temp_backup_delete', $this->strings['temp_backup_restore_failed'] );
 			}
@@ -247,6 +249,8 @@ class Rollback_Update_Failure {
 		if ( empty( $args['slug'] ) || empty( $args['dir'] ) ) {
 			return false;
 		}
+		$this->pre_delete_sleep();
+
 		return $wp_filesystem->delete(
 			$wp_filesystem->wp_content_dir() . "upgrade/temp-backup/{$args['dir']}/{$args['slug']}",
 			true
@@ -273,7 +277,7 @@ class Rollback_Update_Failure {
 		global $wp_filesystem;
 		$result = false;
 
-		if ( 'direct' === $wp_filesystem->method ) {
+		if ( 'direct' === $wp_filesystem->method && ! in_array( gethostname(), array( 'vvv', 'chassis' ), true ) ) {
 			$wp_filesystem->rmdir( $to );
 			$result = @rename( $from, $to );
 		}
@@ -287,6 +291,7 @@ class Rollback_Update_Failure {
 
 		// Clear the working directory?
 		if ( ! empty( $working_dir ) ) {
+			$this->pre_delete_sleep();
 			$wp_filesystem->delete( $working_dir, true );
 		}
 
@@ -507,17 +512,31 @@ class Rollback_Update_Failure {
 
 				$dirlist = $wp_filesystem->dirlist( $wp_filesystem->wp_content_dir() . 'upgrade/temp-backup/' );
 
-				foreach ( array_keys( $dirlist ) as $dir ) {
+				foreach ( array_keys( (array) $dirlist ) as $dir ) {
 					if ( '.' === $dir || '..' === $dir ) {
 						continue;
 					}
 
+					$this->pre_delete_sleep();
 					$wp_filesystem->delete( $wp_filesystem->wp_content_dir() . 'upgrade/temp-backup/' . $dir, true );
 				}
 			}
 		);
 	}
 
+	/**
+	 * Adds a 300ms sleep to allow some virtual filesystems to finish writing files.
+	 * I'm looking at you VirtualBox.
+	 *
+	 * @link https://github.com/composer/composer/commit/53a974f9c9f56dce6f9f237fb5c20da0cff5066e
+	 *
+	 * @return void
+	 */
+	private function pre_delete_sleep() {
+		if ( defined( 'ENV_VB' ) && ENV_VB ) {
+			usleep( 300000 );
+		}
+	}
 }
 
 new Rollback_Update_Failure();

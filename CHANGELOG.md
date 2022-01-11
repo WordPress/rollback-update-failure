@@ -1,4 +1,5 @@
 [unreleased]
+* introduce `pre_delete_sleep()` to hopefully solve an issue with VirtualBox filesystem needing extra time to write out files, requires `define( 'ENV_VB', true );`
 
 #### 1.2.0 / 2021-12-17
 * updated for more parity with planned code
