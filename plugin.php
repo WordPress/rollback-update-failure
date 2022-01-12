@@ -277,7 +277,7 @@ class Rollback_Update_Failure {
 		global $wp_filesystem;
 		$result = false;
 
-		if ( 'direct' === $wp_filesystem->method ) {
+		if ( 'direct' === $wp_filesystem->method && ( ! defined( 'ENV_VB' ) || ! ENV_VB ) ) {
 			$wp_filesystem->rmdir( $to );
 			$result = @rename( $from, $to );
 		}
