@@ -534,6 +534,7 @@ class Rollback_Update_Failure {
 	 */
 	private function pre_delete_sleep() {
 		if ( defined( 'ENV_VB' ) && ENV_VB ) {
+			error_log( 'VB sleep' );
 			usleep( 300000 );
 		}
 	}
