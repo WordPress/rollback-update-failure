@@ -11,7 +11,7 @@
  * Plugin Name: Rollback Update Failure
  * Author: Andy Fragen, Ari Stathopolous
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages.
- * Version: 1.2.0.3
+ * Version: 1.2.0.4
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
@@ -185,7 +185,6 @@ class Rollback_Update_Failure {
 
 		// Delete temp-backup folder if it already exists.
 		if ( $wp_filesystem->is_dir( $dest ) ) {
-			$this->pre_delete_sleep();
 			$wp_filesystem->delete( $dest, true );
 		}
 
@@ -220,7 +219,6 @@ class Rollback_Update_Failure {
 		if ( $wp_filesystem->is_dir( $src ) ) {
 
 			// Cleanup.
-			$this->pre_delete_sleep();
 			if ( $wp_filesystem->is_dir( $dest ) && ! $wp_filesystem->delete( $dest, true ) ) {
 				return new WP_Error( 'fs_temp_backup_delete', $this->strings['temp_backup_restore_failed'] );
 			}
@@ -249,7 +247,6 @@ class Rollback_Update_Failure {
 		if ( empty( $args['slug'] ) || empty( $args['dir'] ) ) {
 			return false;
 		}
-		$this->pre_delete_sleep();
 
 		return $wp_filesystem->delete(
 			$wp_filesystem->wp_content_dir() . "upgrade/temp-backup/{$args['dir']}/{$args['slug']}",
@@ -277,7 +274,7 @@ class Rollback_Update_Failure {
 		global $wp_filesystem;
 		$result = false;
 
-		if ( 'direct' === $wp_filesystem->method && ! $this->is_VirtualBox() ) {
+		if ( 'direct' === $wp_filesystem->method && ! $this->is_virtual_box() ) {
 			$wp_filesystem->rmdir( $to );
 			$result = @rename( $from, $to );
 		}
@@ -291,7 +288,6 @@ class Rollback_Update_Failure {
 
 		// Clear the working directory?
 		if ( ! empty( $working_dir ) ) {
-			$this->pre_delete_sleep();
 			$wp_filesystem->delete( $working_dir, true );
 		}
 
@@ -517,7 +513,6 @@ class Rollback_Update_Failure {
 						continue;
 					}
 
-					$this->pre_delete_sleep();
 					$wp_filesystem->delete( $wp_filesystem->wp_content_dir() . 'upgrade/temp-backup/' . $dir, true );
 				}
 			}
@@ -525,27 +520,22 @@ class Rollback_Update_Failure {
 	}
 
 	/**
-	 * Adds a 300ms sleep to allow some virtual filesystems to finish writing files.
-	 * I'm looking at you VirtualBox.
-	 *
-	 * @link https://github.com/composer/composer/commit/53a974f9c9f56dce6f9f237fb5c20da0cff5066e
-	 *
-	 * @return void
-	 */
-	private function pre_delete_sleep() {
-		if ( $this->is_VirtualBox() ) {
-			error_log( 'VB sleep' );
-			usleep( 300000 );
-		}
-	}
-
-	/**
-	 * Return constant or environmental variable indicating VirtualBox.
+	 * Return whether constant or environmental variable indicates using VirtualBox.
+	 * This could be added to class WP_Filesystem_Base.
 	 *
 	 * @return bool
 	 */
-	private function is_VirtualBox() {
-		return ( defined( 'ENV_VB' ) && ENV_VB ) || getenv( 'WP_ENV_VB' );
+	public function is_virtual_box() {
+		if ( defined( 'ENV_VB' ) && ENV_VB && 'false' !== ENV_VB ) {
+			return true;
+		}
+
+		$WP_ENV_VB = getenv( 'WP_ENV_VB' );
+		if ( $WP_ENV_VB && 'false' !== $WP_ENV_VB ) {
+			return true;
+		}
+
+		return false;
 	}
 }
 

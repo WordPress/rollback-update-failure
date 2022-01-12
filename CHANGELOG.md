@@ -1,5 +1,6 @@
 [unreleased]
-* introduce `pre_delete_sleep()` to hopefully solve an issue with VirtualBox filesystem needing extra time to write out files, requires `define( 'ENV_VB', true );`
+* introduce `is_virtual_box()` to get whether running in VirtualBox, requires `define( 'ENV_VB', true )` or `genenv( 'WP_ENV_VB' )` evaluating to true
+* skips `rename()` as VirtualBox gets borked when using `rename()`
 
 #### 1.2.0 / 2021-12-17
 * updated for more parity with planned code
