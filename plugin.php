@@ -533,7 +533,7 @@ class Rollback_Update_Failure {
 	 * @return void
 	 */
 	private function pre_delete_sleep() {
-		if ( defined( 'ENV_VB' ) && ENV_VB ) {
+		if ( $this->is_VirtualBox() ) {
 			error_log( 'VB sleep' );
 			usleep( 300000 );
 		}
