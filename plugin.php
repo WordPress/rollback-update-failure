@@ -11,7 +11,7 @@
  * Plugin Name: Rollback Update Failure
  * Author: Andy Fragen, Ari Stathopolous
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages.
- * Version: 1.2.0
+ * Version: 1.3.0
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
@@ -247,6 +247,7 @@ class Rollback_Update_Failure {
 		if ( empty( $args['slug'] ) || empty( $args['dir'] ) ) {
 			return false;
 		}
+
 		return $wp_filesystem->delete(
 			$wp_filesystem->wp_content_dir() . "upgrade/temp-backup/{$args['dir']}/{$args['slug']}",
 			true
@@ -273,7 +274,7 @@ class Rollback_Update_Failure {
 		global $wp_filesystem;
 		$result = false;
 
-		if ( 'direct' === $wp_filesystem->method ) {
+		if ( 'direct' === $wp_filesystem->method && ! $this->is_virtual_box() ) {
 			$wp_filesystem->rmdir( $to );
 			$result = @rename( $from, $to );
 		}
@@ -507,7 +508,7 @@ class Rollback_Update_Failure {
 
 				$dirlist = $wp_filesystem->dirlist( $wp_filesystem->wp_content_dir() . 'upgrade/temp-backup/' );
 
-				foreach ( array_keys( $dirlist ) as $dir ) {
+				foreach ( array_keys( (array) $dirlist ) as $dir ) {
 					if ( '.' === $dir || '..' === $dir ) {
 						continue;
 					}
@@ -518,6 +519,24 @@ class Rollback_Update_Failure {
 		);
 	}
 
+	/**
+	 * Return whether constant or environmental variable indicates using VirtualBox.
+	 * This could be added to class WP_Filesystem_Base.
+	 *
+	 * @return bool
+	 */
+	public function is_virtual_box() {
+		if ( defined( 'ENV_VB' ) && ENV_VB && 'false' !== ENV_VB ) {
+			return true;
+		}
+
+		$WP_ENV_VB = getenv( 'WP_ENV_VB' );
+		if ( $WP_ENV_VB && 'false' !== $WP_ENV_VB ) {
+			return true;
+		}
+
+		return false;
+	}
 }
 
 new Rollback_Update_Failure();
