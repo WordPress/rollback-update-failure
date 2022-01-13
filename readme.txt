@@ -7,7 +7,7 @@ License: MIT
 Requires PHP: 5.6
 Requires at least: 5.2
 Tested up to: 5.9
-Stable Tag: 1.2.0
+Stable Tag: 1.3.0
 
 Feature plugin for testing automatic rollback of a plugin or theme update failure.
 
@@ -49,6 +49,10 @@ Please submit [issues](https://github.com/afragen/rollback-update-failure/issues
 ## Changelog
 
 Please see the Github repository: [CHANGELOG.md](https://github.com/afragen/rollback-update-failure/blob/main/CHANGELOG.md).
+
+#### 1.3.0 / 2021-01-12
+* introduce `is_virtual_box()` to get whether running in VirtualBox, requires `define( 'ENV_VB', true )` or `genenv( 'WP_ENV_VB' )` evaluating to true
+* skips `rename()` as VirtualBox gets borked when using `rename()`
 
 #### 1.2.0 / 2021-12-17
 * updated for more parity with planned code
