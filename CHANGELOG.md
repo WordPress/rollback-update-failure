@@ -1,4 +1,5 @@
 [unreleased]
+* add logo credit, Logo from a meme generator. [Original artwork](http://hyperboleandahalf.blogspot.com/2010/06/this-is-why-ill-never-be-adult.html) by Allie Brosh.
 * remove `(int)` casting for `disk_free_space()`
 
 #### 1.3.0 / 2021-01-12
