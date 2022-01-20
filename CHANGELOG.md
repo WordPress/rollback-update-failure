@@ -1,5 +1,9 @@
 [unreleased]
 
+#### 1.3.1 / 2022-01-19
+* add logo credit, Logo from a meme generator. [Original artwork](http://hyperboleandahalf.blogspot.com/2010/06/this-is-why-ill-never-be-adult.html) by Allie Brosh.
+* remove `(int)` casting for `disk_free_space()`
+
 #### 1.3.0 / 2021-01-12
 * introduce `is_virtual_box()` to get whether running in VirtualBox, requires `define( 'ENV_VB', true )` or `genenv( 'WP_ENV_VB' )` evaluating to true
 * skips `rename()` as VirtualBox gets borked when using `rename()`

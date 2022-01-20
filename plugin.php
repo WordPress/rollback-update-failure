@@ -11,7 +11,7 @@
  * Plugin Name: Rollback Update Failure
  * Author: Andy Fragen, Ari Stathopolous
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages.
- * Version: 1.3.0
+ * Version: 1.3.1
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
@@ -302,7 +302,7 @@ class Rollback_Update_Failure {
 	 * @return array The test results.
 	 */
 	public function get_test_available_updates_disk_space() {
-		$available_space       = function_exists( 'disk_free_space' ) ? (int) @disk_free_space( WP_CONTENT_DIR . '/upgrade/' ) : false;
+		$available_space       = function_exists( 'disk_free_space' ) ? @disk_free_space( WP_CONTENT_DIR . '/upgrade/' ) : false;
 		$available_space_in_mb = $available_space / MB_IN_BYTES;
 
 		$result = array(
