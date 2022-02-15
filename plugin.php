@@ -11,7 +11,7 @@
  * Plugin Name: Rollback Update Failure
  * Author: Andy Fragen, Ari Stathopolous
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages.
- * Version: 1.3.1
+ * Version: 1.3.2
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
@@ -40,7 +40,7 @@ class Rollback_Update_Failure {
 	public function __construct() {
 		// Deactivate plugin when committed to core.
 		if ( version_compare( get_bloginfo( 'version' ), '5.9-alpha-51272', '>=' )
-			&& version_compare( get_bloginfo( 'version' ), '6.0-beta1', '>=' )
+			&& version_compare( get_bloginfo( 'version' ), '6.0-alpha-52726', '>=' )
 		) {
 			deactivate_plugins( __FILE__ );
 		}
@@ -266,12 +266,12 @@ class Rollback_Update_Failure {
 	 *
 	 * @param string $from        Source directory.
 	 * @param string $to          Destination directory.
-	 * @param string $working_dir Remote file source directory. Optional.
 	 *
 	 * @return true|WP_Error True on success, WP_Error on failure.
 	 */
-	public function move_dir( $from, $to, $working_dir = '' ) {
+	public function move_dir( $from, $to ) {
 		global $wp_filesystem;
+
 		$result = false;
 
 		if ( 'direct' === $wp_filesystem->method && ! $this->is_virtual_box() ) {
@@ -279,16 +279,19 @@ class Rollback_Update_Failure {
 			$result = @rename( $from, $to );
 		}
 
-		if ( ! $result && ! $wp_filesystem->is_dir( $to ) ) {
-			if ( ! $wp_filesystem->mkdir( $to, FS_CHMOD_DIR ) ) {
-				return new WP_Error( 'mkdir_failed_move_dir', __( 'Could not create directory.' ), $to );
+		if ( ! $result ) {
+			if ( ! $wp_filesystem->is_dir( $to ) ) {
+				if ( ! $wp_filesystem->mkdir( $to, FS_CHMOD_DIR ) ) {
+					return new WP_Error( 'mkdir_failed_move_dir', __( 'Could not create directory.' ), $to );
+				}
 			}
-			$result = copy_dir( $from, $to );
-		}
 
-		// Clear the working directory?
-		if ( ! empty( $working_dir ) ) {
-			$wp_filesystem->delete( $working_dir, true );
+			$result = copy_dir( $from, $to );
+
+			if ( ! is_wp_error( $result ) ) {
+				// Clear the source directory.
+				$wp_filesystem->delete( $from, true );
+			}
 		}
 
 		return $result;
@@ -302,8 +305,11 @@ class Rollback_Update_Failure {
 	 * @return array The test results.
 	 */
 	public function get_test_available_updates_disk_space() {
-		$available_space       = function_exists( 'disk_free_space' ) ? @disk_free_space( WP_CONTENT_DIR . '/upgrade/' ) : false;
-		$available_space_in_mb = $available_space / MB_IN_BYTES;
+		$available_space = function_exists( 'disk_free_space' ) ? @disk_free_space( WP_CONTENT_DIR . '/upgrade/' ) : false;
+
+ 		if ( false === $available_space ) {
+ 			$available_space = 0;
+ 		}
 
 		$result = array(
 			'label'       => __( 'Disk-space available to safely perform updates', 'rollback-update-failure' ),
@@ -321,12 +327,12 @@ class Rollback_Update_Failure {
 			'test'        => 'available_updates_disk_space',
 		);
 
-		if ( 100 > $available_space_in_mb ) {
+		if ( $available_space < 100 * MB_IN_BYTES  ) {
 			$result['description'] = __( 'Available disk space is low, less than 100MB available.', 'rollback-update-failure' );
 			$result['status']      = 'recommended';
 		}
 
-		if ( 20 > $available_space_in_mb ) {
+		if ( $available_space < 20 * MB_IN_BYTES ) {
 			$result['description'] = __( 'Available disk space is critically low, less than 20MB available. Proceed with caution, updates may fail.', 'rollback-update-failure' );
 			$result['status']      = 'critical';
 		}
