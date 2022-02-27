@@ -1,5 +1,8 @@
 [unreleased]
+
 * add `wp_get_runtime_environment()` to return value of constant `WP_RUNTIME_ENVIRONMENT`
+* allowed values are obviously up for discussion
+* update to most of current PR
 
 #### 1.3.2 / 2022-02-15
 * update to correspond to core patch
