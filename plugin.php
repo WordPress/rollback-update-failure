@@ -285,7 +285,8 @@ class Rollback_Update_Failure {
 		 */
 
 		if ( 'direct' === $wp_filesystem->method
-			&& 'virtualbox' !== $this->wp_get_runtime_environment()
+			&& ( 'virtualbox' !== $this->wp_get_runtime_environment()
+				|| ! $this->is_virtual_box() )
 		) {
 			$wp_filesystem->rmdir( $to );
 			$result = @rename( $from, $to );
