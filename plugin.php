@@ -289,6 +289,7 @@ class Rollback_Update_Failure {
 				|| ! $this->is_virtual_box() )
 		) {
 			$wp_filesystem->rmdir( $to );
+
 			$result = @rename( $from, $to );
 		}
 
