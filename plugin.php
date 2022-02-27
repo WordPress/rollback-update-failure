@@ -557,7 +557,7 @@ class Rollback_Update_Failure {
 	}
 
 	/**
-	 * Retrieves the current environment type.
+	 * Retrieves the current runtime environment type.
 	 *
 	 * The type can be set via the `WP_RUNTIME_ENVIRONMENT` global system variable,
 	 * or a constant of the same name.
@@ -600,7 +600,7 @@ class Rollback_Update_Failure {
 			);
 		}
 
-		// Check if the environment variable has been set, if `getenv` is available on the system.
+		// Check if the runtime environment variable has been set, if `getenv` is available on the system.
 		if ( function_exists( 'getenv' ) ) {
 			$has_runtime_env = getenv( 'WP_RUNTIME_ENVIRONMENT' );
 			if ( false !== $has_runtime_env ) {
@@ -608,12 +608,12 @@ class Rollback_Update_Failure {
 			}
 		}
 
-		// Fetch the environment from a constant, this overrides the global system variable.
+		// Fetch the runtime environment from a constant, this overrides the global system variable.
 		if ( defined( 'WP_RUNTIME_ENVIRONMENT' ) ) {
 			$current_runtime_env = WP_RUNTIME_ENVIRONMENT;
 		}
 
-		// Make sure the environment is an allowed one, and not accidentally set to an invalid value.
+		// Make sure the runtime environment is an allowed one, and not accidentally set to an invalid value.
 		if ( ! in_array( $current_runtime_env, $wp_runtime_environments, true ) ) {
 			$current_runtime_env = 'lamp';
 		}
