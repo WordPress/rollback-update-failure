@@ -11,7 +11,7 @@
  * Plugin Name: Rollback Update Failure
  * Author: Andy Fragen, Ari Stathopolous
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages.
- * Version: 1.3.2
+ * Version: 1.3.2.1
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
@@ -40,7 +40,7 @@ class Rollback_Update_Failure {
 	public function __construct() {
 		// Deactivate plugin when committed to core.
 		if ( version_compare( get_bloginfo( 'version' ), '5.9-alpha-51272', '>=' )
-			&& version_compare( get_bloginfo( 'version' ), '6.0-alpha-52726', '>=' )
+			&& version_compare( get_bloginfo( 'version' ), '6.0-beta1', '>=' )
 		) {
 			deactivate_plugins( __FILE__ );
 		}
@@ -274,7 +274,9 @@ class Rollback_Update_Failure {
 
 		$result = false;
 
-		if ( 'direct' === $wp_filesystem->method && ! $this->is_virtual_box() ) {
+		if ( 'direct' === $wp_filesystem->method
+			&& 'virtualbox' !== $this->wp_get_runtime_environment()
+		) {
 			$wp_filesystem->rmdir( $to );
 			$result = @rename( $from, $to );
 		}
@@ -307,9 +309,9 @@ class Rollback_Update_Failure {
 	public function get_test_available_updates_disk_space() {
 		$available_space = function_exists( 'disk_free_space' ) ? @disk_free_space( WP_CONTENT_DIR . '/upgrade/' ) : false;
 
- 		if ( false === $available_space ) {
- 			$available_space = 0;
- 		}
+		if ( false === $available_space ) {
+			$available_space = 0;
+		}
 
 		$result = array(
 			'label'       => __( 'Disk-space available to safely perform updates', 'rollback-update-failure' ),
@@ -327,7 +329,7 @@ class Rollback_Update_Failure {
 			'test'        => 'available_updates_disk_space',
 		);
 
-		if ( $available_space < 100 * MB_IN_BYTES  ) {
+		if ( $available_space < 100 * MB_IN_BYTES ) {
 			$result['description'] = __( 'Available disk space is low, less than 100MB available.', 'rollback-update-failure' );
 			$result['status']      = 'recommended';
 		}
@@ -543,6 +545,72 @@ class Rollback_Update_Failure {
 
 		return false;
 	}
+
+	/**
+	 * Retrieves the current environment type.
+	 *
+	 * The type can be set via the `WP_RUNTIME_ENVIRONMENT` global system variable,
+	 * or a constant of the same name.
+	 *
+	 * Possible values are 'virtualbox', 'vvv', 'mamp', 'wamp', 'lamp'.
+	 * If not set, the type defaults to 'lamp'.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @return string The current runtime environment type.
+	 */
+	public function wp_get_runtime_environment() {
+		static $current_runtime_env = '';
+
+		if ( ! defined( 'WP_RUN_CORE_TESTS' ) && $current_runtime_env ) {
+			return $current_runtime_env;
+		}
+
+		$wp_runtime_environments = array(
+			'virtualbox',
+			'vvv',
+			'mamp',
+			'wamp',
+			'lamp',
+		);
+
+		// Add a note about the deprecated WP_ENVIRONMENT_TYPES constant.
+		if ( defined( 'WP_ENVIRONMENT_TYPES' ) && function_exists( '_deprecated_argument' ) ) {
+			if ( function_exists( '__' ) ) {
+				/* translators: %s: WP_ENVIRONMENT_TYPES */
+				$message = sprintf( __( 'The %s constant is no longer supported.' ), 'WP_ENVIRONMENT_TYPES' );
+			} else {
+				$message = sprintf( 'The %s constant is no longer supported.', 'WP_ENVIRONMENT_TYPES' );
+			}
+
+			_deprecated_argument(
+				'define()',
+				'5.5.1',
+				$message
+			);
+		}
+
+		// Check if the environment variable has been set, if `getenv` is available on the system.
+		if ( function_exists( 'getenv' ) ) {
+			$has_runtime_env = getenv( 'WP_RUNTIME_ENVIRONMENT' );
+			if ( false !== $has_runtime_env ) {
+				$current_runtime_env = $has_runtime_env;
+			}
+		}
+
+		// Fetch the environment from a constant, this overrides the global system variable.
+		if ( defined( 'WP_RUNTIME_ENVIRONMENT' ) ) {
+			$current_runtime_env = WP_RUNTIME_ENVIRONMENT;
+		}
+
+		// Make sure the environment is an allowed one, and not accidentally set to an invalid value.
+		if ( ! in_array( $current_runtime_env, $wp_runtime_environments, true ) ) {
+			$current_runtime_env = 'lamp';
+		}
+
+		return $current_runtime_env;
+	}
+
 }
 
 new Rollback_Update_Failure();
