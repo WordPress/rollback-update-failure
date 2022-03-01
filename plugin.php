@@ -564,7 +564,7 @@ class Rollback_Update_Failure {
 	 * The type can be set via the `WP_RUNTIME_ENVIRONMENT` global system variable,
 	 * or a constant of the same name.
 	 *
-	 * Possible values are 'virtualbox', 'vvv', 'mamp', 'wamp', 'lamp'.
+	 * Possible values are 'virtualbox', 'docker', 'parallels', 'vmware', 'hyper-v', 'mamp', 'wamp', 'lamp'.
 	 * If not set, the type defaults to 'lamp'.
 	 *
 	 * @since 6.0.0
@@ -580,27 +580,14 @@ class Rollback_Update_Failure {
 
 		$wp_runtime_environments = array(
 			'virtualbox',
-			'vvv',
+			'docker',
+			'parallels',
+			'vmware',
+			'hyper-v',
 			'mamp',
 			'wamp',
 			'lamp',
 		);
-
-		// Add a note about the deprecated WP_ENVIRONMENT_TYPES constant.
-		if ( defined( 'WP_ENVIRONMENT_TYPES' ) && function_exists( '_deprecated_argument' ) ) {
-			if ( function_exists( '__' ) ) {
-				/* translators: %s: WP_ENVIRONMENT_TYPES */
-				$message = sprintf( __( 'The %s constant is no longer supported.' ), 'WP_ENVIRONMENT_TYPES' );
-			} else {
-				$message = sprintf( 'The %s constant is no longer supported.', 'WP_ENVIRONMENT_TYPES' );
-			}
-
-			_deprecated_argument(
-				'define()',
-				'5.5.1',
-				$message
-			);
-		}
 
 		// Check if the runtime environment variable has been set, if `getenv` is available on the system.
 		if ( function_exists( 'getenv' ) ) {
