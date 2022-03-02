@@ -564,8 +564,8 @@ class Rollback_Update_Failure {
 	 * The type can be set via the `WP_RUNTIME_ENVIRONMENT` global system variable,
 	 * or a constant of the same name.
 	 *
-	 * Possible values are 'virtualbox', 'docker', 'parallels', 'vmware', 'hyper-v', 'mamp', 'wamp', 'lamp'.
-	 * If not set, the type defaults to 'lamp'.
+	 * Possible value(s) is 'virtualbox' only at this time.
+	 * If not set, the type defaults to ''.
 	 *
 	 * @since 6.0.0
 	 *
@@ -578,16 +578,7 @@ class Rollback_Update_Failure {
 			return $current_runtime_env;
 		}
 
-		$wp_runtime_environments = array(
-			'virtualbox',
-			'docker',
-			'parallels',
-			'vmware',
-			'hyper-v',
-			'mamp',
-			'wamp',
-			'lamp',
-		);
+		$wp_runtime_environments = array( 'virtualbox' );
 
 		// Check if the runtime environment variable has been set, if `getenv` is available on the system.
 		if ( function_exists( 'getenv' ) ) {
@@ -604,7 +595,7 @@ class Rollback_Update_Failure {
 
 		// Make sure the runtime environment is an allowed one, and not accidentally set to an invalid value.
 		if ( ! in_array( $current_runtime_env, $wp_runtime_environments, true ) ) {
-			$current_runtime_env = 'lamp';
+			$current_runtime_env = '';
 		}
 
 		return $current_runtime_env;
