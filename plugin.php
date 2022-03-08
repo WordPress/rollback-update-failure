@@ -165,23 +165,24 @@ class Rollback_Update_Failure {
 		}
 		global $wp_filesystem;
 
-		$dest_folder = $wp_filesystem->wp_content_dir() . 'upgrade/temp-backup/';
+		$dest_dir = $wp_filesystem->wp_content_dir() . 'upgrade/temp-backup/';
 		// Create the temp-backup dir if it doesn't exist.
 		if (
 			(
-				! $wp_filesystem->is_dir( $dest_folder ) &&
-				! $wp_filesystem->mkdir( $dest_folder )
+				! $wp_filesystem->is_dir( $dest_dir ) &&
+				! $wp_filesystem->mkdir( $dest_dir )
 			) ||
 			(
-				! $wp_filesystem->is_dir( $dest_folder . $args['dir'] . '/' ) &&
-				! $wp_filesystem->mkdir( $dest_folder . $args['dir'] . '/' )
+				! $wp_filesystem->is_dir( $dest_dir . $args['dir'] . '/' ) &&
+				! $wp_filesystem->mkdir( $dest_dir . $args['dir'] . '/' )
 			)
 		) {
 			return new WP_Error( 'fs_temp_backup_mkdir', $this->strings['temp_backup_mkdir_failed'] );
 		}
 
-		$src  = trailingslashit( $args['src'] ) . $args['slug'];
-		$dest = $dest_folder . $args['dir'] . '/' . $args['slug'];
+		$src_dir = $wp_filesystem->find_folder( $args['src'] );
+		$src     = trailingslashit( $src_dir ) . $args['slug'];
+		$dest    = $dest_dir . $args['dir'] . '/' . $args['slug'];
 
 		// Delete temp-backup folder if it already exists.
 		if ( $wp_filesystem->is_dir( $dest ) ) {
@@ -208,13 +209,15 @@ class Rollback_Update_Failure {
 	 * @return bool|WP_Error
 	 */
 	public function restore_temp_backup( $args ) {
+		global $wp_filesystem;
+
 		if ( empty( $args['slug'] ) || empty( $args['src'] ) || empty( $args['dir'] ) ) {
 			return false;
 		}
 
-		global $wp_filesystem;
-		$src  = $wp_filesystem->wp_content_dir() . 'upgrade/temp-backup/' . $args['dir'] . '/' . $args['slug'];
-		$dest = trailingslashit( $args['src'] ) . $args['slug'];
+		$src      = $wp_filesystem->wp_content_dir() . 'upgrade/temp-backup/' . $args['dir'] . '/' . $args['slug'];
+		$dest_dir = $wp_filesystem->find_folder( $args['src'] );
+		$dest     = trailingslashit( $dest_dir ) . $args['slug'];
 
 		if ( $wp_filesystem->is_dir( $src ) ) {
 
@@ -334,7 +337,7 @@ class Rollback_Update_Failure {
 			),
 			'description' => sprintf(
 				/* Translators: %s: Available disk-space in MB or GB. */
-				'<p>' . __( '%s available disk space was detected, update routines can be performed safely.', 'rollback-update-failure' ),
+				'<p>' . __( '%s available disk space was detected, update routines can be performed safely.', 'rollback-update-failure' ) . '</p>',
 				size_format( $available_space )
 			),
 			'actions'     => '',
@@ -376,7 +379,7 @@ class Rollback_Update_Failure {
 			),
 			'description' => sprintf(
 				/* Translators: %s: "wp-content/upgrade/temp-backup". */
-				'<p>' . __( 'The %s folder used to improve the stability of plugin and theme updates is writable.', 'rollback-update-failure' ),
+				'<p>' . __( 'The %s folder used to improve the stability of plugin and theme updates is writable.', 'rollback-update-failure' ) . '</p>',
 				'<code>wp-content/upgrade/temp-backup</code>'
 			),
 			'actions'     => '',
@@ -564,8 +567,8 @@ class Rollback_Update_Failure {
 	 * The type can be set via the `WP_RUNTIME_ENVIRONMENT` global system variable,
 	 * or a constant of the same name.
 	 *
-	 * Possible value(s) is 'virtualbox' only at this time.
-	 * If not set, the type defaults to ''.
+	 * The only value currently supported is 'virtualbox'. If not set, the value
+	 * defaults to an empty string.
 	 *
 	 * @since 6.0.0
 	 *
