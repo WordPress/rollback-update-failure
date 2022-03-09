@@ -155,7 +155,13 @@ class Rollback_Update_Failure {
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
-	 * @param array $args Array of data for the temp_backup. Must include a slug, the source and directory.
+	 * @param array|string $args {
+	 *     Array of data for the temp-backup.
+	 *
+	 *     @type string $slug Plugin slug.
+	 *     @type string $src  File path to directory.
+	 *     @type string $dir  Directory name.
+	 * }
 	 *
 	 * @return bool|WP_Error
 	 */
@@ -204,7 +210,14 @@ class Rollback_Update_Failure {
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
-	 * @param array $args Array of data for the temp_backup. Must include a slug, the source and directory.
+	 * @param array|string $args {
+	 *     Array of data for the temp-backup.
+	 *
+	 *     @type string $slug Plugin slug.
+	 *     @type string $src  File path to directory.
+	 *     @type string $dir  Directory name.
+	 * }
+	 *
 	 *
 	 * @return bool|WP_Error
 	 */
@@ -241,7 +254,14 @@ class Rollback_Update_Failure {
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
-	 * @param array $args Array of data for the temp_backup. Must include a slug, the source and directory.
+	 * @param array|string $args {
+	 *     Array of data for the temp-backup.
+	 *
+	 *     @type string $slug Plugin slug.
+	 *     @type string $src  File path to directory.
+	 *     @type string $dir  Directory name.
+	 * }
+	 *
 	 *
 	 * @return bool
 	 */
@@ -518,6 +538,7 @@ class Rollback_Update_Failure {
 		/*
 		* This action runs on shutdown to make sure there's no plugin updates currently running.
 		* Using a closure in this case is OK since the action can be removed by removing the parent hook.
+		* `remove_action( 'wp_delete_temp_updater_backups', 'wp_delete_all_temp_backups' );`
 		*/
 		add_action(
 			'shutdown',
