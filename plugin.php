@@ -218,7 +218,6 @@ class Rollback_Update_Failure {
 	 *     @type string $dir  Directory name.
 	 * }
 	 *
-	 *
 	 * @return bool|WP_Error
 	 */
 	public function restore_temp_backup( $args ) {
@@ -261,7 +260,6 @@ class Rollback_Update_Failure {
 	 *     @type string $src  File path to directory.
 	 *     @type string $dir  Directory name.
 	 * }
-	 *
 	 *
 	 * @return bool
 	 */
@@ -542,7 +540,7 @@ class Rollback_Update_Failure {
 		*/
 		add_action(
 			'shutdown',
-			function() {
+			static function() {
 				global $wp_filesystem;
 
 				if ( ! $wp_filesystem ) {
@@ -550,14 +548,15 @@ class Rollback_Update_Failure {
 					WP_Filesystem();
 				}
 
-				$dirlist = $wp_filesystem->dirlist( $wp_filesystem->wp_content_dir() . 'upgrade/temp-backup/' );
+				$temp_backup_dir = $wp_filesystem->wp_content_dir() . 'upgrade/temp-backup/';
+				$dirlist         = (array) $wp_filesystem->dirlist( $temp_backup_dir );
 
-				foreach ( array_keys( (array) $dirlist ) as $dir ) {
-					if ( '.' === $dir || '..' === $dir ) {
+				foreach ( array_keys( $dirlist ) as $dir ) {
+					if ( '.' === $dir || '..' === $dir || 0 === $dir ) {
 						continue;
 					}
 
-					$wp_filesystem->delete( $wp_filesystem->wp_content_dir() . 'upgrade/temp-backup/' . $dir, true );
+					$wp_filesystem->delete( $temp_backup_dir . $dir, true );
 				}
 			}
 		);
