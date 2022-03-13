@@ -188,7 +188,7 @@ class Rollback_Update_Failure {
 
 		$src_dir = $wp_filesystem->find_folder( $args['src'] );
 		$src     = trailingslashit( $src_dir ) . $args['slug'];
-		$dest    = $dest_dir . $args['dir'] . '/' . $args['slug'];
+		$dest    = $dest_dir . trailingslashit( $args['dir'] ) . $args['slug'];
 
 		// Delete temp-backup folder if it already exists.
 		if ( $wp_filesystem->is_dir( $dest ) ) {
