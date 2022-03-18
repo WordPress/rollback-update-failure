@@ -11,7 +11,7 @@
  * Plugin Name: Rollback Update Failure
  * Author: Andy Fragen, Ari Stathopolous
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages.
- * Version: 1.3.2
+ * Version: 1.3.3
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
@@ -39,9 +39,7 @@ class Rollback_Update_Failure {
 	 */
 	public function __construct() {
 		// Deactivate plugin when committed to core.
-		if ( version_compare( get_bloginfo( 'version' ), '5.9-alpha-51272', '>=' )
-			&& version_compare( get_bloginfo( 'version' ), '6.0-alpha-52726', '>=' )
-		) {
+		if ( version_compare( get_bloginfo( 'version' ), '6.0-beta1', '>=' ) ) {
 			deactivate_plugins( __FILE__ );
 		}
 
@@ -49,6 +47,7 @@ class Rollback_Update_Failure {
 		$this->strings['temp_backup_mkdir_failed']   = __( 'Could not create temp-backup directory.', 'rollback-update-failure' );
 		$this->strings['temp_backup_move_failed']    = __( 'Could not move old version to the temp-backup directory.', 'rollback-update-failure' );
 		$this->strings['temp_backup_restore_failed'] = __( 'Could not restore original version.', 'rollback-update-failure' );
+		$this->strings['fs_no_content_dir']          = __( 'Unable to locate WordPress content directory (wp-content).' );
 
 		// Move the plugin/theme being updated to rollback directory.
 		add_filter( 'upgrader_pre_install', array( $this, 'upgrader_pre_install' ), 15, 2 );
@@ -155,7 +154,13 @@ class Rollback_Update_Failure {
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
-	 * @param array $args Array of data for the temp_backup. Must include a slug, the source and directory.
+	 * @param array|string $args {
+	 *     Array of data for the temp-backup.
+	 *
+	 *     @type string $slug Plugin slug.
+	 *     @type string $src  File path to directory.
+	 *     @type string $dir  Directory name.
+	 * }
 	 *
 	 * @return bool|WP_Error
 	 */
@@ -165,23 +170,28 @@ class Rollback_Update_Failure {
 		}
 		global $wp_filesystem;
 
-		$dest_folder = $wp_filesystem->wp_content_dir() . 'upgrade/temp-backup/';
+		if ( ! $wp_filesystem->wp_content_dir() ) {
+			return new WP_Error( 'fs_no_content_dir', $this->strings['fs_no_content_dir'] );
+		}
+
+		$dest_dir = $wp_filesystem->wp_content_dir() . 'upgrade/temp-backup/';
 		// Create the temp-backup dir if it doesn't exist.
 		if (
 			(
-				! $wp_filesystem->is_dir( $dest_folder ) &&
-				! $wp_filesystem->mkdir( $dest_folder )
+				! $wp_filesystem->is_dir( $dest_dir ) &&
+				! $wp_filesystem->mkdir( $dest_dir )
 			) ||
 			(
-				! $wp_filesystem->is_dir( $dest_folder . $args['dir'] . '/' ) &&
-				! $wp_filesystem->mkdir( $dest_folder . $args['dir'] . '/' )
+				! $wp_filesystem->is_dir( $dest_dir . $args['dir'] . '/' ) &&
+				! $wp_filesystem->mkdir( $dest_dir . $args['dir'] . '/' )
 			)
 		) {
 			return new WP_Error( 'fs_temp_backup_mkdir', $this->strings['temp_backup_mkdir_failed'] );
 		}
 
-		$src  = trailingslashit( $args['src'] ) . $args['slug'];
-		$dest = $dest_folder . $args['dir'] . '/' . $args['slug'];
+		$src_dir = $wp_filesystem->find_folder( $args['src'] );
+		$src     = trailingslashit( $src_dir ) . $args['slug'];
+		$dest    = $dest_dir . trailingslashit( $args['dir'] ) . $args['slug'];
 
 		// Delete temp-backup folder if it already exists.
 		if ( $wp_filesystem->is_dir( $dest ) ) {
@@ -203,18 +213,30 @@ class Rollback_Update_Failure {
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
-	 * @param array $args Array of data for the temp_backup. Must include a slug, the source and directory.
+	 * @param array|string $args {
+	 *     Array of data for the temp-backup.
+	 *
+	 *     @type string $slug Plugin slug.
+	 *     @type string $src  File path to directory.
+	 *     @type string $dir  Directory name.
+	 * }
 	 *
 	 * @return bool|WP_Error
 	 */
 	public function restore_temp_backup( $args ) {
+		global $wp_filesystem;
+
 		if ( empty( $args['slug'] ) || empty( $args['src'] ) || empty( $args['dir'] ) ) {
 			return false;
 		}
 
-		global $wp_filesystem;
-		$src  = $wp_filesystem->wp_content_dir() . 'upgrade/temp-backup/' . $args['dir'] . '/' . $args['slug'];
-		$dest = trailingslashit( $args['src'] ) . $args['slug'];
+		if ( ! $wp_filesystem->wp_content_dir() ) {
+			return new WP_Error( 'fs_no_content_dir', $this->strings['fs_no_content_dir'] );
+		}
+
+		$src      = $wp_filesystem->wp_content_dir() . 'upgrade/temp-backup/' . $args['dir'] . '/' . $args['slug'];
+		$dest_dir = $wp_filesystem->find_folder( $args['src'] );
+		$dest     = trailingslashit( $dest_dir ) . $args['slug'];
 
 		if ( $wp_filesystem->is_dir( $src ) ) {
 
@@ -238,7 +260,13 @@ class Rollback_Update_Failure {
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
-	 * @param array $args Array of data for the temp_backup. Must include a slug, the source and directory.
+	 * @param array|string $args {
+	 *     Array of data for the temp-backup.
+	 *
+	 *     @type string $slug Plugin slug.
+	 *     @type string $src  File path to directory.
+	 *     @type string $dir  Directory name.
+	 * }
 	 *
 	 * @return bool
 	 */
@@ -246,6 +274,10 @@ class Rollback_Update_Failure {
 		global $wp_filesystem;
 		if ( empty( $args['slug'] ) || empty( $args['dir'] ) ) {
 			return false;
+		}
+
+		if ( ! $wp_filesystem->wp_content_dir() ) {
+			return new WP_Error( 'fs_no_content_dir', $this->strings['fs_no_content_dir'] );
 		}
 
 		return $wp_filesystem->delete(
@@ -274,8 +306,20 @@ class Rollback_Update_Failure {
 
 		$result = false;
 
-		if ( 'direct' === $wp_filesystem->method && ! $this->is_virtual_box() ) {
+		/*
+		 * Skip the rename() call on VirtualBox environments.
+		 * There are some known issues where rename() can fail on shared folders
+		 * without reporting an error properly.
+		 *
+		 * More details:
+		 * https://www.virtualbox.org/ticket/8761#comment:24
+		 * https://www.virtualbox.org/ticket/17971
+		 */
+
+		if ( 'direct' === $wp_filesystem->method
+			&& ( 'virtualbox' !== $this->wp_get_runtime_environment() ) ) {
 			$wp_filesystem->rmdir( $to );
+
 			$result = @rename( $from, $to );
 		}
 
@@ -307,9 +351,9 @@ class Rollback_Update_Failure {
 	public function get_test_available_updates_disk_space() {
 		$available_space = function_exists( 'disk_free_space' ) ? @disk_free_space( WP_CONTENT_DIR . '/upgrade/' ) : false;
 
- 		if ( false === $available_space ) {
- 			$available_space = 0;
- 		}
+		$available_space = false !== $available_space
+			? (int) $available_space
+			: 0;
 
 		$result = array(
 			'label'       => __( 'Disk-space available to safely perform updates', 'rollback-update-failure' ),
@@ -320,14 +364,14 @@ class Rollback_Update_Failure {
 			),
 			'description' => sprintf(
 				/* Translators: %s: Available disk-space in MB or GB. */
-				'<p>' . __( '%s available disk space was detected, update routines can be performed safely.', 'rollback-update-failure' ),
+				'<p>' . __( '%s available disk space was detected, update routines can be performed safely.', 'rollback-update-failure' ) . '</p>',
 				size_format( $available_space )
 			),
 			'actions'     => '',
 			'test'        => 'available_updates_disk_space',
 		);
 
-		if ( $available_space < 100 * MB_IN_BYTES  ) {
+		if ( $available_space < 100 * MB_IN_BYTES ) {
 			$result['description'] = __( 'Available disk space is low, less than 100MB available.', 'rollback-update-failure' );
 			$result['status']      = 'recommended';
 		}
@@ -362,7 +406,7 @@ class Rollback_Update_Failure {
 			),
 			'description' => sprintf(
 				/* Translators: %s: "wp-content/upgrade/temp-backup". */
-				'<p>' . __( 'The %s folder used to improve the stability of plugin and theme updates is writable.', 'rollback-update-failure' ),
+				'<p>' . __( 'The %s folder used to improve the stability of plugin and theme updates is writable.', 'rollback-update-failure' ) . '</p>',
 				'<code>wp-content/upgrade/temp-backup</code>'
 			),
 			'actions'     => '',
@@ -371,11 +415,14 @@ class Rollback_Update_Failure {
 
 		global $wp_filesystem;
 		if ( ! $wp_filesystem ) {
-			if ( ! function_exists( 'WP_Filesystem' ) ) {
-				require_once wp_normalize_path( ABSPATH . '/wp-admin/includes/file.php' );
-			}
+			require_once ABSPATH . '/wp-admin/includes/file.php';
 			WP_Filesystem();
 		}
+
+		if ( ! $wp_filesystem->wp_content_dir() ) {
+			return new WP_Error( 'fs_no_content_dir', $this->strings['fs_no_content_dir'] );
+		}
+
 		$wp_content = $wp_filesystem->wp_content_dir();
 
 		$upgrade_folder_exists      = $wp_filesystem->is_dir( "$wp_content/upgrade" );
@@ -501,10 +548,11 @@ class Rollback_Update_Failure {
 		/*
 		* This action runs on shutdown to make sure there's no plugin updates currently running.
 		* Using a closure in this case is OK since the action can be removed by removing the parent hook.
+		* `remove_action( 'wp_delete_temp_updater_backups', 'wp_delete_all_temp_backups' );`
 		*/
 		add_action(
 			'shutdown',
-			function() {
+			static function() {
 				global $wp_filesystem;
 
 				if ( ! $wp_filesystem ) {
@@ -512,37 +560,62 @@ class Rollback_Update_Failure {
 					WP_Filesystem();
 				}
 
-				$dirlist = $wp_filesystem->dirlist( $wp_filesystem->wp_content_dir() . 'upgrade/temp-backup/' );
+				$temp_backup_dir = $wp_filesystem->wp_content_dir() . 'upgrade/temp-backup/';
+				$dirlist         = $wp_filesystem->dirlist( $temp_backup_dir );
+				$dirlist         = $dirlist ? $dirlist : array();
 
-				foreach ( array_keys( (array) $dirlist ) as $dir ) {
+				foreach ( array_keys( $dirlist ) as $dir ) {
 					if ( '.' === $dir || '..' === $dir ) {
 						continue;
 					}
 
-					$wp_filesystem->delete( $wp_filesystem->wp_content_dir() . 'upgrade/temp-backup/' . $dir, true );
+					$wp_filesystem->delete( $temp_backup_dir . $dir, true );
 				}
 			}
 		);
 	}
 
 	/**
-	 * Return whether constant or environmental variable indicates using VirtualBox.
-	 * This could be added to class WP_Filesystem_Base.
+	 * Retrieves the current runtime environment type.
 	 *
-	 * @return bool
+	 * The type can be set via the `WP_RUNTIME_ENVIRONMENT` global system variable,
+	 * or a constant of the same name.
+	 *
+	 * The only value currently supported is 'virtualbox'. If not set, the value
+	 * defaults to an empty string.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @return string The current runtime environment type.
 	 */
-	public function is_virtual_box() {
-		if ( defined( 'ENV_VB' ) && ENV_VB && 'false' !== ENV_VB ) {
-			return true;
+	public function wp_get_runtime_environment() {
+		static $current_runtime_env = '';
+
+		if ( ! defined( 'WP_RUN_CORE_TESTS' ) && $current_runtime_env ) {
+			return $current_runtime_env;
 		}
 
-		$WP_ENV_VB = getenv( 'WP_ENV_VB' );
-		if ( $WP_ENV_VB && 'false' !== $WP_ENV_VB ) {
-			return true;
+		$wp_runtime_environments = array( 'virtualbox' );
+
+		// Fetch the runtime environment from a constant, this overrides the global system variable.
+		if ( defined( 'WP_RUNTIME_ENVIRONMENT' ) ) {
+			$current_runtime_env = WP_RUNTIME_ENVIRONMENT;
+		} elseif ( function_exists( 'getenv' ) ) {
+			// Check if the runtime environment variable has been set, if `getenv` is available on the system.
+			$has_runtime_env = getenv( 'WP_RUNTIME_ENVIRONMENT' );
+			if ( false !== $has_runtime_env ) {
+				$current_runtime_env = $has_runtime_env;
+			}
 		}
 
-		return false;
+		// Make sure the runtime environment is an allowed one, and not accidentally set to an invalid value.
+		if ( ! in_array( $current_runtime_env, $wp_runtime_environments, true ) ) {
+			$current_runtime_env = '';
+		}
+
+		return $current_runtime_env;
 	}
+
 }
 
 new Rollback_Update_Failure();
