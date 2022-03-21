@@ -52,6 +52,11 @@ Logo from a meme generator. [Original artwork](http://hyperboleandahalf.blogspot
 
 Please see the Github repository: [CHANGELOG.md](https://github.com/afragen/rollback-update-failure/blob/main/CHANGELOG.md).
 
+#### 1.3.3 / 2022-03-18
+* add `wp_get_runtime_environment()` to return value of constant `WP_RUNTIME_ENVIRONMENT`
+* allowed values are obviously up for discussion
+* update to most of current PR
+
 #### 1.3.2 / 2022-02-15
 * update to correspond to core patch
 
