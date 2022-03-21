@@ -7,7 +7,7 @@ License: MIT
 Requires PHP: 5.6
 Requires at least: 5.2
 Tested up to: 5.9
-Stable Tag: 1.3.3
+Stable Tag: 1.3.4
 
 Feature plugin for testing automatic rollback of a plugin or theme update failure.
 
@@ -51,6 +51,9 @@ Logo from a meme generator. [Original artwork](http://hyperboleandahalf.blogspot
 ## Changelog
 
 Please see the Github repository: [CHANGELOG.md](https://github.com/afragen/rollback-update-failure/blob/main/CHANGELOG.md).
+
+#### 1.3.4 / 2022-03-21
+* run `restore_temp_backup()` in `shutdown` hook
 
 #### 1.3.3 / 2022-03-18
 * add `wp_get_runtime_environment()` to return value of constant `WP_RUNTIME_ENVIRONMENT`
