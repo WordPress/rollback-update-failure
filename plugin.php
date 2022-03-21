@@ -132,7 +132,14 @@ class Rollback_Update_Failure {
 			'src'  => isset( $hook_extra['plugin'] ) ? $wp_filesystem->wp_plugins_dir() : get_theme_root( $hook_extra['theme'] ),
 		);
 		if ( is_wp_error( $result ) ) {
-			$this->restore_temp_backup( $args );
+			// Restore the backup kept in the temp-backup directory.
+			// Restore the backup on `shutdown` to avoid a PHP timeout.
+			add_action(
+				'shutdown',
+				function() use ( $args ) {
+					$this->restore_temp_backup( $args );
+				}
+			);
 		} else {
 			// Clean up the backup kept in the temp-backup directory.
 			// Delete the backup on `shutdown` to avoid a PHP timeout.
