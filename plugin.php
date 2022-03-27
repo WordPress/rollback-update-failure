@@ -11,7 +11,7 @@
  * Plugin Name: Rollback Update Failure
  * Author: Andy Fragen, Ari Stathopolous
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages.
- * Version: 1.3.4
+ * Version: 1.3.4.1
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
@@ -57,6 +57,9 @@ class Rollback_Update_Failure {
 
 		// Add extra tests for site-health.
 		add_filter( 'site_status_tests', array( $this, 'site_status_tests' ) );
+
+		// Add extra info for site-health.
+		add_filter( 'debug_information', array( $this, 'debug_information' ) );
 
 		// Clean up.
 		add_action( 'wp_delete_temp_updater_backups', array( $this, 'wp_delete_all_temp_backups' ) );
@@ -532,6 +535,38 @@ class Rollback_Update_Failure {
 			'test'  => array( $this, 'get_test_available_updates_disk_space' ),
 		);
 		return $tests;
+	}
+
+	/**
+	 * Additional site health data.
+	 *
+	 * @param array $info Array of site health info.
+	 *
+	 * @return array
+	 */
+	public function debug_information( $info ) {
+		$runtime_environment = $this->wp_get_runtime_environment();
+
+		// Check WP_RUNTIME_ENVIRONMENT.
+		if ( defined( 'WP_RUNTIME_ENVIRONMENT' ) ) {
+			$wp_runtime_environment = WP_RUNTIME_ENVIRONMENT;
+		} else {
+			$wp_runtime_environment = __( 'Undefined' );
+		}
+
+		$info['wp-core']['fields']['runtime_environment'] = array(
+			'label' => __( 'Runtime Environment' ),
+			'value' => ! empty( $runtime_environment ) ? $runtime_environment : __( 'Undefined' ),
+			'debug' => $runtime_environment,
+		);
+
+		$info['wp-constants']['fields']['WP_RUNTIME_ENVIRONMENT'] = array(
+			'label' => 'WP_RUNTIME_ENVIRONMENT',
+			'value' => $wp_runtime_environment,
+			'debug' => $wp_runtime_environment,
+		);
+
+		return $info;
 	}
 
 	/**

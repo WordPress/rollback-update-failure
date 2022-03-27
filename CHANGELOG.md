@@ -1,4 +1,5 @@
 [unreleased]
+* add more Site Health info for runtime environment
 
 #### 1.3.4 / 2022-03-21
 * run `restore_temp_backup()` in `shutdown` hook
