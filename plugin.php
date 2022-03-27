@@ -647,7 +647,7 @@ class Rollback_Update_Failure {
 
 		$wp_runtime_environments = array( 'virtualbox' );
 
-		// Fetch the runtime environment from a constant, this overrides the global system variable.
+		// Fetch the runtime environment from a constant.
 		if ( defined( 'WP_RUNTIME_ENVIRONMENT' ) ) {
 			$runtime_constant = WP_RUNTIME_ENVIRONMENT;
 		}
@@ -675,6 +675,7 @@ class Rollback_Update_Failure {
 		}
 
 		// If set to something in $wp_runtime_environments use it, default is ''.
+		// Preference to use constant if set.
 		switch ( true ) {
 			case in_array( $runtime_constant, $wp_runtime_environments, true ):
 				$current_runtime_env = $runtime_constant;
