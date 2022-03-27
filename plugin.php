@@ -645,7 +645,6 @@ class Rollback_Update_Failure {
 			return $current_runtime_env;
 		}
 
-		// Array of environments used to bypass using `rename()`.
 		$wp_runtime_environments = array( 'virtualbox' );
 
 		// Fetch the runtime environment from a constant, this overrides the global system variable.
