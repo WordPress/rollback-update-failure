@@ -1,5 +1,6 @@
 [unreleased]
 * add more Site Health info for runtime environment
+* update `wp_get_runtime_environment()` and `move_dir()`
 
 #### 1.3.4 / 2022-03-21
 * run `restore_temp_backup()` in `shutdown` hook
