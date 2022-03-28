@@ -11,7 +11,7 @@
  * Plugin Name: Rollback Update Failure
  * Author: Andy Fragen, Ari Stathopolous
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages.
- * Version: 1.3.4.2
+ * Version: 1.3.4.3
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
@@ -673,13 +673,13 @@ class Rollback_Update_Failure {
 		}
 
 		// If set to something in $wp_runtime_environments use it, default is ''.
-		// Preference to use constant if set.
+		// Preference to use env variable if set.
 		switch ( true ) {
-			case in_array( $runtime_constant, $wp_runtime_environments, true ):
-				$current_runtime_env = $runtime_constant;
-				break;
 			case in_array( $runtime_getenv, $wp_runtime_environments, true ):
 				$current_runtime_env = $runtime_getenv;
+				break;
+			case in_array( $runtime_constant, $wp_runtime_environments, true ):
+				$current_runtime_env = $runtime_constant;
 				break;
 			default:
 				$current_runtime_env = '';
