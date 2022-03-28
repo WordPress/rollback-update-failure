@@ -557,7 +557,7 @@ class Rollback_Update_Failure {
 			$wp_runtime_environment = __( 'Undefined' );
 		}
 
-		$info['wp-core']['fields']['runtime_environment'] = array(
+		$info['wp-server']['fields']['runtime_environment'] = array(
 			'label' => __( 'Runtime Environment' ),
 			'value' => ! empty( $runtime_environment ) ? $runtime_environment : __( 'Undefined' ),
 			'debug' => $runtime_environment,
@@ -664,6 +664,7 @@ class Rollback_Update_Failure {
 		) {
 			_doing_it_wrong(
 				__FUNCTION__,
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				__( 'The WP_RUNTIME_ENVIRONMENT environment variable and constant do not match. Fallbacks will be used, which may negatively impact performance.' ),
 				'6.0.0'
 			);
