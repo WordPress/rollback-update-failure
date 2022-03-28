@@ -316,12 +316,9 @@ class Rollback_Update_Failure {
 
 		$result           = false;
 		$envs_skip_rename = array( false, 'virtualbox' );
-		$skip_rename      = false;
 
-		// Skip if the runtime environment is in the array.
-		if ( ( in_array( $this->wp_get_runtime_environment(), $envs_skip_rename, true ) ) ) {
-			$skip_rename = true;
-		}
+		// Skip if the runtime environment is in the $envs_skip_rename array.
+		$skip_rename = in_array( $this->wp_get_runtime_environment(), $envs_skip_rename, true );
 
 		/*
 		 * Skip the rename() call on VirtualBox environments.
