@@ -658,7 +658,7 @@ class Rollback_Update_Failure {
 			}
 		}
 
-		// If WP_RUNTIME_ENVIRONMENT constant and environmental variable are different.
+		// If WP_RUNTIME_ENVIRONMENT constant and environmental variable are both set and are different.
 		if ( ( ! empty( $runtime_constant ) && ! empty( $runtime_getenv ) )
 			&& $runtime_constant !== $runtime_getenv
 		) {
