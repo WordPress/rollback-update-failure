@@ -557,6 +557,11 @@ class Rollback_Update_Failure {
 			$wp_runtime_environment = __( 'Undefined' );
 		}
 
+		$info['wp-core']['fields']['runtime_environment'] = array(
+			'label' => __( 'Runtime Environment' ),
+			'value' => ! empty( $runtime_environment ) ? $runtime_environment : __( 'Undefined' ),
+			'debug' => $runtime_environment,
+		);
 		$info['wp-server']['fields']['runtime_environment'] = array(
 			'label' => __( 'Runtime Environment' ),
 			'value' => ! empty( $runtime_environment ) ? $runtime_environment : __( 'Undefined' ),
