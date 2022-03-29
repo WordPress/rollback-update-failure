@@ -652,8 +652,7 @@ class Rollback_Update_Failure {
 		}
 
 		// Fetch the runtime environment from global system variable.
-		if ( function_exists( 'getenv' ) ) {
-			// Check if the runtime environment variable has been set, if `getenv` is available on the system.
+		if ( false !== getenv( 'WP_RUNTIME_ENVIRONMENT' ) ) {
 			$has_runtime_env = getenv( 'WP_RUNTIME_ENVIRONMENT' );
 			if ( false !== $has_runtime_env ) {
 				$current_runtime_env = $has_runtime_env;
