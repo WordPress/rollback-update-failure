@@ -317,9 +317,6 @@ class Rollback_Update_Failure {
 		$result           = false;
 		$envs_skip_rename = array( false, 'virtualbox' );
 
-		// Skip if the runtime environment is in the $envs_skip_rename array.
-		$skip_rename = in_array( $this->wp_get_runtime_environment(), $envs_skip_rename, true );
-
 		/*
 		 * Skip the rename() call on VirtualBox environments.
 		 * There are some known issues where rename() can fail on shared folders
@@ -330,7 +327,9 @@ class Rollback_Update_Failure {
 		 * https://www.virtualbox.org/ticket/17971
 		 */
 
-		if ( 'direct' === $wp_filesystem->method && ! $skip_rename ) {
+		if ( 'direct' === $wp_filesystem->method
+			&& ! in_array( wp_get_runtime_environment(), $envs_skip_rename, true )
+		) {
 			$wp_filesystem->rmdir( $to );
 
 			$result = @rename( $from, $to );
