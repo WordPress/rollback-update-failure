@@ -11,7 +11,7 @@
  * Plugin Name: Rollback Update Failure
  * Author: Andy Fragen, Ari Stathopolous
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages.
- * Version: 1.3.4.5
+ * Version: 1.3.4.6
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
@@ -314,8 +314,7 @@ class Rollback_Update_Failure {
 	public function move_dir( $from, $to ) {
 		global $wp_filesystem;
 
-		$result           = false;
-		$envs_skip_rename = array( false, 'virtualbox' );
+		$result = false;
 
 		/*
 		 * Skip the rename() call on VirtualBox environments.
@@ -327,9 +326,7 @@ class Rollback_Update_Failure {
 		 * https://www.virtualbox.org/ticket/17971
 		 */
 
-		if ( 'direct' === $wp_filesystem->method
-			&& ! in_array( $this->wp_get_runtime_environment(), $envs_skip_rename, true )
-		) {
+		if ( 'direct' === $wp_filesystem->method && ! $this->is_virtualbox() ) {
 			$wp_filesystem->rmdir( $to );
 
 			$result = @rename( $from, $to );
@@ -547,30 +544,10 @@ class Rollback_Update_Failure {
 	 * @return array
 	 */
 	public function debug_information( $info ) {
-		$runtime_environment = $this->wp_get_runtime_environment();
-
-		// Check WP_RUNTIME_ENVIRONMENT.
-		if ( defined( 'WP_RUNTIME_ENVIRONMENT' ) ) {
-			$wp_runtime_environment = WP_RUNTIME_ENVIRONMENT;
-		} else {
-			$wp_runtime_environment = __( 'Undefined' );
-		}
-
-		$info['wp-core']['fields']['runtime_environment']   = array(
-			'label' => __( 'Runtime Environment' ),
-			'value' => ! empty( $runtime_environment ) ? $runtime_environment : __( 'Undefined' ),
-			'debug' => $runtime_environment,
-		);
-		$info['wp-server']['fields']['runtime_environment'] = array(
-			'label' => __( 'Runtime Environment' ),
-			'value' => ! empty( $runtime_environment ) ? $runtime_environment : __( 'Undefined' ),
-			'debug' => $runtime_environment,
-		);
-
-		$info['wp-constants']['fields']['WP_RUNTIME_ENVIRONMENT'] = array(
-			'label' => 'WP_RUNTIME_ENVIRONMENT',
-			'value' => $wp_runtime_environment,
-			'debug' => $wp_runtime_environment,
+		$info['wp-server']['fields']['virtualbox_environment'] = array(
+			'label' => __( 'VirtualBox Environment' ),
+			'value' => $this->is_virtualbox() ? 'true' : 'false',
+			'debug' => $this->is_virtualbox(),
 		);
 
 		return $info;
@@ -625,48 +602,70 @@ class Rollback_Update_Failure {
 	}
 
 	/**
-	 * Retrieves the current runtime environment type.
+	 * Attempt to detect a VirtualBox environment.
 	 *
-	 * The type can be set via the `WP_RUNTIME_ENVIRONMENT` global system variable,
-	 * or a constant of the same name.
+	 * This attempts all known methods of detecting VirtualBox.
 	 *
-	 * The only value currently supported is 'virtualbox'. If not set, the value
-	 * defaults to an empty string.
+	 * @global $wp_filesystem The filesystem.
 	 *
-	 * @since 6.0.0
+	 * @since 6.1.0
 	 *
-	 * @return string|false The current runtime environment type, default is ''
+	 * @return bool Whether or not VirtualBox was detected.
 	 */
-	public function wp_get_runtime_environment() {
-		static $current_runtime_env = '';
+	public function is_virtualbox() {
+		global $wp_filesystem;
 
-		if ( ! defined( 'WP_RUN_CORE_TESTS' ) && $current_runtime_env ) {
-			return $current_runtime_env;
+		// Detection via filter.
+		if ( apply_filters( 'is_virtualbox', false ) ) {
+			return true;
 		}
 
-		$wp_runtime_environments = array( 'virtualbox' );
-
-		// Fetch the runtime environment from a constant.
-		if ( defined( 'WP_RUNTIME_ENVIRONMENT' ) ) {
-			$current_runtime_env = WP_RUNTIME_ENVIRONMENT;
+		// Detection via Composer.
+		if ( function_exists( 'getenv' ) && 'virtualbox' === getenv( 'COMPOSER_RUNTIME_ENV' ) ) {
+			return true;
 		}
 
-		// Fetch the runtime environment from global system variable.
-		if ( false !== getenv( 'WP_RUNTIME_ENVIRONMENT' ) ) {
-			$has_runtime_env = getenv( 'WP_RUNTIME_ENVIRONMENT' );
-			if ( false !== $has_runtime_env ) {
-				$current_runtime_env = $has_runtime_env;
+		$virtualbox_unames = array( 'vvv' );
+
+		// Detection via `php_uname()`.
+		if ( function_exists( 'php_uname' ) && in_array( php_uname( 'n' ), $virtualbox_unames, true ) ) {
+			return true;
+		}
+
+		/*
+		 * Vagrant can use alternative providers.
+		 * This isn't reliable without some additional check(s).
+		 */
+		$virtualbox_usernames = array( 'vagrant' );
+
+		// Detection via user name with POSIX.
+		if ( function_exists( 'posix_getpwuid' ) && function_exists( 'posix_geteuid' ) ) {
+			$user = posix_getpwuid( posix_geteuid() );
+
+			if ( $user && in_array( $user['name'], $virtualbox_usernames, true ) ) {
+				return true;
 			}
 		}
 
-		// If set to something in $wp_runtime_environments use it, default is ''.
-		if ( ! in_array( $current_runtime_env, $wp_runtime_environments, true ) ) {
-			$current_runtime_env = '';
+		// Initialize the filesystem if not set.
+		if ( ! $wp_filesystem ) {
+			require_once ABSPATH . '/wp-admin/includes/file.php';
+			WP_Filesystem();
 		}
 
-		return $current_runtime_env;
-	}
+		// Detection via file owner.
+		if ( in_array( $wp_filesystem->owner( __FILE__ ), $virtualbox_usernames, true ) ) {
+			return true;
+		}
 
+		// Detection via file group.
+		if ( in_array( $wp_filesystem->group( __FILE__ ), $virtualbox_usernames, true ) ) {
+			return true;
+		}
+
+		// Give up.
+		return false;
+	}
 }
 
 new Rollback_Update_Failure();
