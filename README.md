@@ -3,7 +3,7 @@
 # Rollback Update Failure
 
 * Plugin Name: Rollback Update Failure
-* Contributors: afragen, aristath
+* Contributors: afragen, aristath, costdev, pbiron
 * Tags: feature plugin, update, failure, auto-update
 * License: MIT
 * Requires PHP: 5.6
@@ -23,11 +23,17 @@ This is a feature plugin based on the [PR](https://github.com/WordPress/wordpres
   * Check to make sure that the rollbacks folder is writable.
   * Check there is enough disk-space available to safely perform updates.
 
-To avoid confusion: The "temp-backup" folder will NOT be used to "roll-back" a plugin to a previous version after an update. This folder will simply contain a **transient backup** of the previous version of a plugins/themes getting updated, and as soon as the update process finishes, the folder will be empty.
+To avoid confusion: The "temp-backup" folder will NOT be used to "rollback" a plugin to a previous version after an update. This folder will simply contain a **transient backup** of the previous version of a plugins/themes getting updated, and as soon as the update process finishes, the folder will be empty.
 
 This plugin will automatically deactivate itself once the feature has been committed to core.
 
 There is a change to `WP_Upgrader::install_package()` that can't be implemented in the plugin. :sad:
+
+If you are running a virtualized server and using VirtualBox we have a function that tries to identify VirtualBox with code. If you are running a VirtualBox environment the Site Health > Info > Server section will display whether the code picks that up correctly. If it doesn't you will need to add the following filter.
+
+```php
+add_filter( 'is_virtualbox', '__return_true' );
+```
 
 ## Testing
 
