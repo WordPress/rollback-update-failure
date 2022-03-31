@@ -59,6 +59,12 @@ Logo from a meme generator. [Original artwork](http://hyperboleandahalf.blogspot
 
 Please see the Github repository: [CHANGELOG.md](https://github.com/afragen/rollback-update-failure/blob/main/CHANGELOG.md).
 
+#### 1.3.5 / 2022-03-31
+* add more Site Health info for runtime environment
+* update `move_dir()`
+* add `is_virtualbox()`
+* remove `WP_RUNTIME_ENVIRONMENT` and `wp_get_runtime_environment()`
+
 #### 1.3.4 / 2022-03-21
 * run `restore_temp_backup()` in `shutdown` hook
 
