@@ -614,22 +614,30 @@ class Rollback_Update_Failure {
 	 */
 	public function is_virtualbox() {
 		global $wp_filesystem;
+		static $is_virtualbox;
+
+		if ( $is_virtualbox ) {
+			return $is_virtualbox;
+		}
 
 		// Detection via filter.
 		if ( apply_filters( 'is_virtualbox', false ) ) {
-			return true;
+			$is_virtualbox = true;
+			return $is_virtualbox;
 		}
 
 		// Detection via Composer.
 		if ( function_exists( 'getenv' ) && 'virtualbox' === getenv( 'COMPOSER_RUNTIME_ENV' ) ) {
-			return true;
+			$is_virtualbox = true;
+			return $is_virtualbox;
 		}
 
 		$virtualbox_unames = array( 'vvv' );
 
 		// Detection via `php_uname()`.
 		if ( function_exists( 'php_uname' ) && in_array( php_uname( 'n' ), $virtualbox_unames, true ) ) {
-			return true;
+			$is_virtualbox = true;
+			return $is_virtualbox;
 		}
 
 		/*
@@ -643,7 +651,8 @@ class Rollback_Update_Failure {
 			$user = posix_getpwuid( posix_geteuid() );
 
 			if ( $user && in_array( $user['name'], $virtualbox_usernames, true ) ) {
-				return true;
+				$is_virtualbox = true;
+				return $is_virtualbox;
 			}
 		}
 
@@ -655,12 +664,14 @@ class Rollback_Update_Failure {
 
 		// Detection via file owner.
 		if ( in_array( $wp_filesystem->owner( __FILE__ ), $virtualbox_usernames, true ) ) {
-			return true;
+			$is_virtualbox = true;
+			return $is_virtualbox;
 		}
 
 		// Detection via file group.
 		if ( in_array( $wp_filesystem->group( __FILE__ ), $virtualbox_usernames, true ) ) {
-			return true;
+			$is_virtualbox = true;
+			return $is_virtualbox;
 		}
 
 		// Give up.
