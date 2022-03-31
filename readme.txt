@@ -30,7 +30,7 @@ If you are running a virtualized server and using VirtualBox we have a function 
 
 <pre><code>
   add_filter( 'is_virtualbox', '__return_true' );
-</pre></code>
+</code></pre>
 
 
 ## Testing
