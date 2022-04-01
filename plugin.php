@@ -11,7 +11,7 @@
  * Plugin Name: Rollback Update Failure
  * Author: Andy Fragen, Ari Stathopolous, Colin Stewart, Paul Biron
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages.
- * Version: 1.3.6.1
+ * Version: 1.3.6.2
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
@@ -325,11 +325,16 @@ class Rollback_Update_Failure {
 		 * https://www.virtualbox.org/ticket/8761#comment:24
 		 * https://www.virtualbox.org/ticket/17971
 		 */
-
 		if ( 'direct' === $wp_filesystem->method && ! $this->is_virtualbox() ) {
 			$wp_filesystem->rmdir( $to );
 
 			$result = @rename( $from, $to );
+		}
+
+		// For non-direct filesystems attempt $wp_filesystem->move() as these
+		// are primarily rename variants.
+		if ( 'direct' !== $wp_filesystem->method ) {
+			$result = $wp_filesystem->move( $from, $to );
 		}
 
 		if ( ! $result ) {
