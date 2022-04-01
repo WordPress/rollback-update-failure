@@ -331,8 +331,7 @@ class Rollback_Update_Failure {
 			$result = @rename( $from, $to );
 		}
 
-		// For non-direct filesystems attempt $wp_filesystem->move() as these
-		// are primarily rename variants.
+		// Non-direct filesystems use some version of rename without a fallback.
 		if ( 'direct' !== $wp_filesystem->method ) {
 			$result = $wp_filesystem->move( $from, $to );
 		}
