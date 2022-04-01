@@ -1,4 +1,5 @@
 [unreleased]
+* move kill switch to WP6.1-beta1
 
 #### 1.3.6 / 2022-03-31
 * update credit
