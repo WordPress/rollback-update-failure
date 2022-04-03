@@ -68,7 +68,7 @@ class Rollback_Update_Failure {
 	/**
 	 * Move the plugin/theme being upgraded into a rollback directory.
 	 *
-	 * @since 6.0.0
+	 * @since 6.1.0
 	 * @uses 'upgrader_pre_install' filter.
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
@@ -107,7 +107,7 @@ class Rollback_Update_Failure {
 	/**
 	 * Restore backup to original location if update failed.
 	 *
-	 * @since 6.0.0
+	 * @since 6.1.0
 	 * @uses 'upgrader_install_package_result' filter.
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
@@ -160,7 +160,7 @@ class Rollback_Update_Failure {
 	/**
 	 * Move the plugin/theme being upgraded into a temp-backup directory.
 	 *
-	 * @since 6.0.0
+	 * @since 6.1.0
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
@@ -219,7 +219,7 @@ class Rollback_Update_Failure {
 	/**
 	 * Restore the plugin/theme from the temp-backup directory.
 	 *
-	 * @since 6.0.0
+	 * @since 6.1.0
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
@@ -266,7 +266,7 @@ class Rollback_Update_Failure {
 	/**
 	 * Deletes a temp-backup.
 	 *
-	 * @since 6.0.0
+	 * @since 6.1.0
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
@@ -302,7 +302,7 @@ class Rollback_Update_Failure {
 	 *
 	 * Assumes that WP_Filesystem() has already been called and setup.
 	 *
-	 * @since 6.0.0
+	 * @since 6.1.0
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
@@ -357,7 +357,7 @@ class Rollback_Update_Failure {
 	/**
 	 * Test available disk-space for updates/upgrades.
 	 *
-	 * @since 6.0.0
+	 * @since 6.1.0
 	 *
 	 * @return array The test results.
 	 */
@@ -405,7 +405,7 @@ class Rollback_Update_Failure {
 	/**
 	 * Test if plugin and theme updates temp-backup folders are writable or can be created.
 	 *
-	 * @since 6.0.0
+	 * @since 6.1.0
 	 *
 	 * @return array The test results.
 	 */
@@ -521,7 +521,7 @@ class Rollback_Update_Failure {
 	/**
 	 * Additional tests for site-health.
 	 *
-	 * @since 6.0.0
+	 * @since 6.1.0
 	 *
 	 * @param array $tests Available site-health tests.
 	 *
@@ -560,7 +560,7 @@ class Rollback_Update_Failure {
 	/**
 	 * Deletes all contents of the temp-backup directory.
 	 *
-	 * @since 6.0.0
+	 * @since 6.1.0
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 */
