@@ -1,6 +1,7 @@
 [unreleased]
 * move kill switch to WP6.1-beta1
 * add non-direct filesystem rename variants to `move_dir()`
+* bring into alignment with PR
 
 #### 1.3.6 / 2022-03-31
 * update credit

@@ -11,7 +11,7 @@
  * Plugin Name: Rollback Update Failure
  * Author: Andy Fragen, Ari Stathopolous, Colin Stewart, Paul Biron
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages.
- * Version: 1.3.6.2
+ * Version: 1.3.6.3
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
@@ -175,25 +175,35 @@ class Rollback_Update_Failure {
 	 * @return bool|WP_Error
 	 */
 	public function move_to_temp_backup_dir( $args ) {
+		global $wp_filesystem;
+
 		if ( empty( $args['slug'] ) || empty( $args['src'] ) || empty( $args['dir'] ) ) {
 			return false;
 		}
-		global $wp_filesystem;
+
+		/*
+		 * Skip any plugin that has "." as its slug.
+		 * A slug of "." will result in a `$src` value ending in a period.
+		 *
+		 * On Windows, this will cause the 'plugins' folder to be moved,
+		 * and will cause a failure when attempting to call `mkdir()`.
+		 */
+		if ( '.' === $args['slug'] ) {
+			return false;
+		}
 
 		if ( ! $wp_filesystem->wp_content_dir() ) {
 			return new WP_Error( 'fs_no_content_dir', $this->strings['fs_no_content_dir'] );
 		}
 
 		$dest_dir = $wp_filesystem->wp_content_dir() . 'upgrade/temp-backup/';
-		// Create the temp-backup dir if it doesn't exist.
-		if (
-			(
-				! $wp_filesystem->is_dir( $dest_dir ) &&
-				! $wp_filesystem->mkdir( $dest_dir )
-			) ||
-			(
-				! $wp_filesystem->is_dir( $dest_dir . $args['dir'] . '/' ) &&
-				! $wp_filesystem->mkdir( $dest_dir . $args['dir'] . '/' )
+		// Create the temp-backup directory if it does not exist.
+		if ( (
+				! $wp_filesystem->is_dir( $dest_dir )
+				&& ! $wp_filesystem->mkdir( $dest_dir )
+			) || (
+				! $wp_filesystem->is_dir( $dest_dir . $args['dir'] . '/' )
+				&& ! $wp_filesystem->mkdir( $dest_dir . $args['dir'] . '/' )
 			)
 		) {
 			return new WP_Error( 'fs_temp_backup_mkdir', $this->strings['temp_backup_mkdir_failed'] );
@@ -203,12 +213,12 @@ class Rollback_Update_Failure {
 		$src     = trailingslashit( $src_dir ) . $args['slug'];
 		$dest    = $dest_dir . trailingslashit( $args['dir'] ) . $args['slug'];
 
-		// Delete temp-backup folder if it already exists.
+		// Delete the temp-backup directory if it already exists.
 		if ( $wp_filesystem->is_dir( $dest ) ) {
 			$wp_filesystem->delete( $dest, true );
 		}
 
-		// Move to the temp-backup folder.
+		// Move to the temp-backup directory.
 		if ( ! $this->move_dir( $src, $dest ) ) {
 			return new WP_Error( 'fs_temp_backup_move', $this->strings['temp_backup_move_failed'] );
 		}
@@ -575,34 +585,44 @@ class Rollback_Update_Failure {
 			return;
 		}
 
-		/*
-		* This action runs on shutdown to make sure there's no plugin updates currently running.
-		* Using a closure in this case is OK since the action can be removed by removing the parent hook.
-		* `remove_action( 'wp_delete_temp_updater_backups', 'wp_delete_all_temp_backups' );`
-		*/
-		add_action(
-			'shutdown',
-			static function() {
-				global $wp_filesystem;
+		// This action runs on shutdown to make sure there is no plugin updates currently running.
+		add_action( 'shutdown', array( $this, '_wp_delete_all_temp_backups' ) );
+	}
 
-				if ( ! $wp_filesystem ) {
-					include_once ABSPATH . '/wp-admin/includes/file.php';
-					WP_Filesystem();
-				}
+	/**
+	 * Remove `temp-backup` directory.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @access private
+	 *
+	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+	 *
+	 * @return void|WP_Error
+	 */
+	public function _wp_delete_all_temp_backups() {
+		global $wp_filesystem;
 
-				$temp_backup_dir = $wp_filesystem->wp_content_dir() . 'upgrade/temp-backup/';
-				$dirlist         = $wp_filesystem->dirlist( $temp_backup_dir );
-				$dirlist         = $dirlist ? $dirlist : array();
+		if ( ! $wp_filesystem ) {
+			require_once ABSPATH . '/wp-admin/includes/file.php';
+			WP_Filesystem();
+		}
 
-				foreach ( array_keys( $dirlist ) as $dir ) {
-					if ( '.' === $dir || '..' === $dir ) {
-						continue;
-					}
+		if ( ! $wp_filesystem->wp_content_dir() ) {
+			return new WP_Error( 'fs_no_content_dir', __( 'Unable to locate WordPress content directory (wp-content).' ) );
+		}
 
-					$wp_filesystem->delete( $temp_backup_dir . $dir, true );
-				}
+		$temp_backup_dir = $wp_filesystem->wp_content_dir() . 'upgrade/temp-backup/';
+		$dirlist         = $wp_filesystem->dirlist( $temp_backup_dir );
+		$dirlist         = $dirlist ? $dirlist : array();
+
+		foreach ( array_keys( $dirlist ) as $dir ) {
+			if ( '.' === $dir || '..' === $dir ) {
+				continue;
 			}
-		);
+
+			$wp_filesystem->delete( $temp_backup_dir . $dir, true );
+		}
 	}
 
 	/**
