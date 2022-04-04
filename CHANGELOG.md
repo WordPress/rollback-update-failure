@@ -1,5 +1,11 @@
 [unreleased]
 
+#### 1.5.0 / 2022-04-04
+* remove anonymous callbacks
+* add class `$options` for callback functions
+* update `is_virtualbox()` for testing
+* add testing scaffold
+
 #### 1.4.0 / 2022-04-03
 * move kill switch to WP6.1-beta1
 * add non-direct filesystem rename variants to `move_dir()`

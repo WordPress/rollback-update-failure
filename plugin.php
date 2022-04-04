@@ -11,7 +11,7 @@
  * Plugin Name: Rollback Update Failure
  * Author: Andy Fragen, Ari Stathopolous, Colin Stewart, Paul Biron
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages.
- * Version: 1.4.0
+ * Version: 1.5.0
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
@@ -35,6 +35,16 @@ class Rollback_Update_Failure {
 	public $strings = array();
 
 	/**
+	 * Store options passed to callback functions.
+	 *
+	 * Used by rollback functions.
+	 *
+	 * @since 6.1.0
+	 * @var array
+	 */
+	private $options = array();
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -48,6 +58,9 @@ class Rollback_Update_Failure {
 		$this->strings['temp_backup_move_failed']    = __( 'Could not move old version to the temp-backup directory.', 'rollback-update-failure' );
 		$this->strings['temp_backup_restore_failed'] = __( 'Could not restore original version.', 'rollback-update-failure' );
 		$this->strings['fs_no_content_dir']          = __( 'Unable to locate WordPress content directory (wp-content).' );
+
+		// Set $this->options for callback functions.
+		add_filter( 'upgrader_pre_install', array( $this, 'set_callback_options' ), 10, 2 );
 
 		// Move the plugin/theme being updated to rollback directory.
 		add_filter( 'upgrader_pre_install', array( $this, 'upgrader_pre_install' ), 15, 2 );
@@ -66,6 +79,34 @@ class Rollback_Update_Failure {
 	}
 
 	/**
+	 * Set class $options variable with data for callbacks.
+	 *
+	 * Not necessary in PR as this set in WP_Upgrader::run().
+	 *
+	 * @since 6.1.0
+	 * @uses 'upgrader_pre_install' filter.
+	 *
+	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+	 * @param bool  $response   Boolean response to 'upgrader_pre_install' filter.
+	 *                          Default is true.
+	 * @param array $hook_extra Array of data for plugin/theme being updated.
+	 *
+	 * @return bool|WP_Error
+	 */
+	public function set_callback_options( $response, $hook_extra ) {
+		global $wp_filesystem;
+
+		if ( isset( $hook_extra['plugin'] ) || isset( $hook_extra['theme'] ) ) {
+			$this->options['hook_extra']['temp_backup'] = array(
+				'dir'  => isset( $hook_extra['plugin'] ) ? 'plugins' : 'themes',
+				'slug' => isset( $hook_extra['plugin'] ) ? dirname( $hook_extra['plugin'] ) : $hook_extra['theme'],
+				'src'  => isset( $hook_extra['plugin'] ) ? $wp_filesystem->wp_plugins_dir() : get_theme_root( $hook_extra['theme'] ),
+			);
+		}
+		return $response;
+	}
+
+	/**
 	 * Move the plugin/theme being upgraded into a rollback directory.
 	 *
 	 * @since 6.1.0
@@ -79,28 +120,21 @@ class Rollback_Update_Failure {
 	 * @return bool|WP_Error
 	 */
 	public function upgrader_pre_install( $response, $hook_extra ) {
-		global $wp_filesystem;
-
 		// Early exit if $hook_extra is empty,
 		// or if this is an installation and not update.
 		if ( empty( $hook_extra ) || ( isset( $hook_extra['action'] ) && 'install' === $hook_extra['action'] ) ) {
 			return $response;
 		}
 
-		$args = array();
+		$args = $this->options['hook_extra']['temp_backup'];
 
 		if ( isset( $hook_extra['plugin'] ) || isset( $hook_extra['theme'] ) ) {
-			$args = array(
-				'dir'  => isset( $hook_extra['plugin'] ) ? 'plugins' : 'themes',
-				'slug' => isset( $hook_extra['plugin'] ) ? dirname( $hook_extra['plugin'] ) : $hook_extra['theme'],
-				'src'  => isset( $hook_extra['plugin'] ) ? $wp_filesystem->wp_plugins_dir() : get_theme_root( $hook_extra['theme'] ),
-			);
-
 			$temp_backup = $this->move_to_temp_backup_dir( $args );
 			if ( is_wp_error( $temp_backup ) ) {
 				return $temp_backup;
 			}
 		}
+
 		return $response;
 	}
 
@@ -117,8 +151,6 @@ class Rollback_Update_Failure {
 	 * @return bool|WP_Error
 	 */
 	public function upgrader_install_package_result( $result, $hook_extra ) {
-		global $wp_filesystem;
-
 		// Early exit if $hook_extra is empty,
 		// or if this is an installation and not update.
 		if ( empty( $hook_extra ) || ( isset( $hook_extra['action'] ) && 'install' === $hook_extra['action'] ) ) {
@@ -129,29 +161,22 @@ class Rollback_Update_Failure {
 			return $result;
 		}
 
-		$args = array(
-			'dir'  => isset( $hook_extra['plugin'] ) ? 'plugins' : 'themes',
-			'slug' => isset( $hook_extra['plugin'] ) ? dirname( $hook_extra['plugin'] ) : $hook_extra['theme'],
-			'src'  => isset( $hook_extra['plugin'] ) ? $wp_filesystem->wp_plugins_dir() : get_theme_root( $hook_extra['theme'] ),
-		);
 		if ( is_wp_error( $result ) ) {
-			// Restore the backup kept in the temp-backup directory.
-			// Restore the backup on `shutdown` to avoid a PHP timeout.
-			add_action(
-				'shutdown',
-				function() use ( $args ) {
-					$this->restore_temp_backup( $args );
-				}
-			);
-		} else {
-			// Clean up the backup kept in the temp-backup directory.
+			if ( ! empty( $this->options['hook_extra']['temp_backup'] ) ) {
+				/*
+				 * Restore the backup on shutdown.
+				 * Actions running on `shutdown` are immune to PHP timeouts,
+				 * so in case the failure was due to a PHP timeout,
+				 * it will still be able to properly restore the previous version.
+				 */
+				add_action( 'shutdown', array( $this, 'restore_temp_backup' ) );
+			}
+		}
+
+		// Clean up the backup kept in the temp-backup directory.
+		if ( ! empty( $this->options['hook_extra']['temp_backup'] ) ) {
 			// Delete the backup on `shutdown` to avoid a PHP timeout.
-			add_action(
-				'shutdown',
-				function() use ( $args ) {
-					$this->delete_temp_backup( $args );
-				}
-			);
+			add_action( 'shutdown', array( $this, 'delete_temp_backup' ) );
 		}
 
 		return $result;
@@ -233,18 +258,12 @@ class Rollback_Update_Failure {
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
-	 * @param array|string $args {
-	 *     Array of data for the temp-backup.
-	 *
-	 *     @type string $slug Plugin slug.
-	 *     @type string $src  File path to directory.
-	 *     @type string $dir  Directory name.
-	 * }
-	 *
 	 * @return bool|WP_Error
 	 */
-	public function restore_temp_backup( $args ) {
+	public function restore_temp_backup() {
 		global $wp_filesystem;
+
+		$args = $this->options['hook_extra']['temp_backup'];
 
 		if ( empty( $args['slug'] ) || empty( $args['src'] ) || empty( $args['dir'] ) ) {
 			return false;
@@ -280,18 +299,13 @@ class Rollback_Update_Failure {
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
-	 * @param array|string $args {
-	 *     Array of data for the temp-backup.
-	 *
-	 *     @type string $slug Plugin slug.
-	 *     @type string $src  File path to directory.
-	 *     @type string $dir  Directory name.
-	 * }
-	 *
 	 * @return bool
 	 */
-	public function delete_temp_backup( $args ) {
+	public function delete_temp_backup() {
 		global $wp_filesystem;
+
+		$args = $this->options['hook_extra']['temp_backup'];
+
 		if ( empty( $args['slug'] ) || empty( $args['dir'] ) ) {
 			return false;
 		}
@@ -592,7 +606,7 @@ class Rollback_Update_Failure {
 	/**
 	 * Remove `temp-backup` directory.
 	 *
-	 * @since 6.0.0
+	 * @since 6.1.0
 	 *
 	 * @access private
 	 *
@@ -640,11 +654,18 @@ class Rollback_Update_Failure {
 		global $wp_filesystem;
 		static $is_virtualbox;
 
-		if ( null !== $is_virtualbox ) {
+		if ( ! defined( 'WP_RUN_CORE_TESTS' ) && null !== $is_virtualbox ) {
 			return $is_virtualbox;
 		}
 
-		// Detection via filter.
+		/*
+		 * Filters whether the current environment uses VirtualBox.
+		 *
+		 * @since 6.1.0
+		 *
+		 * @param bool $is_virtualbox Whether the current environment uses VirtualBox.
+		 *                            Default: false.
+		 */
 		if ( apply_filters( 'is_virtualbox', false ) ) {
 			$is_virtualbox = true;
 			return $is_virtualbox;
