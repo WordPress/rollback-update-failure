@@ -1,4 +1,5 @@
 [unreleased]
+* update `is_virtualbox()` for testing
 
 #### 1.4.0 / 2022-04-03
 * move kill switch to WP6.1-beta1

@@ -640,7 +640,7 @@ class Rollback_Update_Failure {
 		global $wp_filesystem;
 		static $is_virtualbox;
 
-		if ( null !== $is_virtualbox ) {
+		if ( ! defined( 'WP_RUN_CORE_TESTS' ) && null !== $is_virtualbox ) {
 			return $is_virtualbox;
 		}
 
