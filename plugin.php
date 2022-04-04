@@ -103,6 +103,7 @@ class Rollback_Update_Failure {
 				'src'  => isset( $hook_extra['plugin'] ) ? $wp_filesystem->wp_plugins_dir() : get_theme_root( $hook_extra['theme'] ),
 			);
 		}
+
 		return $response;
 	}
 
@@ -289,6 +290,7 @@ class Rollback_Update_Failure {
 				return new WP_Error( 'fs_temp_backup_delete', $this->strings['temp_backup_restore_failed'] );
 			}
 		}
+
 		return true;
 	}
 
@@ -480,6 +482,7 @@ class Rollback_Update_Failure {
 				'<code>wp-content/upgrade/temp-backup/plugins</code>',
 				'<code>wp-content/upgrade/temp-backup/themes</code>'
 			);
+
 			return $result;
 		}
 
@@ -491,6 +494,7 @@ class Rollback_Update_Failure {
 				'<p>' . __( 'The %s folder exists but is not writable. This folder is used to improve the stability of plugin updates. Please make sure the server has write permissions to this folder.', 'rollback-update-failure' ) . '</p>',
 				'<code>wp-content/upgrade/temp-backup/plugins</code>'
 			);
+
 			return $result;
 		}
 
@@ -502,6 +506,7 @@ class Rollback_Update_Failure {
 				'<p>' . __( 'The %s folder exists but is not writable. This folder is used to improve the stability of theme updates. Please make sure the server has write permissions to this folder.', 'rollback-update-failure' ) . '</p>',
 				'<code>wp-content/upgrade/temp-backup/themes</code>'
 			);
+
 			return $result;
 		}
 
@@ -513,6 +518,7 @@ class Rollback_Update_Failure {
 				'<p>' . __( 'The %s folder exists but is not writable. This folder is used to improve the stability of plugin and theme updates. Please make sure the server has write permissions to this folder.', 'rollback-update-failure' ) . '</p>',
 				'<code>wp-content/upgrade/temp-backup</code>'
 			);
+
 			return $result;
 		}
 
@@ -524,6 +530,7 @@ class Rollback_Update_Failure {
 				'<p>' . __( 'The %s folder exists but is not writable. This folder is used to for plugin and theme updates. Please make sure the server has write permissions to this folder.', 'rollback-update-failure' ) . '</p>',
 				'<code>wp-content/upgrade</code>'
 			);
+
 			return $result;
 		}
 
@@ -536,6 +543,7 @@ class Rollback_Update_Failure {
 				'<code>wp-content/upgrade</code>',
 				'<code>wp-content</code>'
 			);
+
 			return $result;
 		}
 
@@ -561,6 +569,7 @@ class Rollback_Update_Failure {
 			'label' => __( 'Available disk space' ),
 			'test'  => array( $this, 'get_test_available_updates_disk_space' ),
 		);
+
 		return $tests;
 	}
 
