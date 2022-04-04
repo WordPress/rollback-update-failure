@@ -35,6 +35,16 @@ class Rollback_Update_Failure {
 	public $strings = array();
 
 	/**
+	 * Store options passed to callback functions.
+	 *
+	 * Used by rollback functions.
+	 *
+	 * @since 6.1.0
+	 * @var array
+	 */
+	private $options = array();
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -48,6 +58,9 @@ class Rollback_Update_Failure {
 		$this->strings['temp_backup_move_failed']    = __( 'Could not move old version to the temp-backup directory.', 'rollback-update-failure' );
 		$this->strings['temp_backup_restore_failed'] = __( 'Could not restore original version.', 'rollback-update-failure' );
 		$this->strings['fs_no_content_dir']          = __( 'Unable to locate WordPress content directory (wp-content).' );
+
+		// Set $this->options for callback functions.
+		add_filter( 'upgrader_pre_install', array( $this, 'set_callback_options' ), 10, 2 );
 
 		// Move the plugin/theme being updated to rollback directory.
 		add_filter( 'upgrader_pre_install', array( $this, 'upgrader_pre_install' ), 15, 2 );
@@ -66,7 +79,9 @@ class Rollback_Update_Failure {
 	}
 
 	/**
-	 * Move the plugin/theme being upgraded into a rollback directory.
+	 * Set class $options variable with data for callbacks.
+	 *
+	 * Not necessary in PR as this set in WP_Upgrader::run().
 	 *
 	 * @since 6.1.0
 	 * @uses 'upgrader_pre_install' filter.
@@ -78,8 +93,18 @@ class Rollback_Update_Failure {
 	 *
 	 * @return bool|WP_Error
 	 */
-	public function upgrader_pre_install( $response, $hook_extra ) {
+	public function set_callback_options( $response, $hook_extra ) {
 		global $wp_filesystem;
+
+		if ( isset( $hook_extra['plugin'] ) || isset( $hook_extra['theme'] ) ) {
+			$this->options['hook_extra']['temp_backup'] = array(
+				'dir'  => isset( $hook_extra['plugin'] ) ? 'plugins' : 'themes',
+				'slug' => isset( $hook_extra['plugin'] ) ? dirname( $hook_extra['plugin'] ) : $hook_extra['theme'],
+				'src'  => isset( $hook_extra['plugin'] ) ? $wp_filesystem->wp_plugins_dir() : get_theme_root( $hook_extra['theme'] ),
+			);
+		}
+		return $response;
+	}
 
 		// Early exit if $hook_extra is empty,
 		// or if this is an installation and not update.
@@ -87,15 +112,9 @@ class Rollback_Update_Failure {
 			return $response;
 		}
 
-		$args = array();
+		$args = $this->options['hook_extra']['temp_backup'];
 
 		if ( isset( $hook_extra['plugin'] ) || isset( $hook_extra['theme'] ) ) {
-			$args = array(
-				'dir'  => isset( $hook_extra['plugin'] ) ? 'plugins' : 'themes',
-				'slug' => isset( $hook_extra['plugin'] ) ? dirname( $hook_extra['plugin'] ) : $hook_extra['theme'],
-				'src'  => isset( $hook_extra['plugin'] ) ? $wp_filesystem->wp_plugins_dir() : get_theme_root( $hook_extra['theme'] ),
-			);
-
 			$temp_backup = $this->move_to_temp_backup_dir( $args );
 			if ( is_wp_error( $temp_backup ) ) {
 				return $temp_backup;
@@ -117,8 +136,6 @@ class Rollback_Update_Failure {
 	 * @return bool|WP_Error
 	 */
 	public function upgrader_install_package_result( $result, $hook_extra ) {
-		global $wp_filesystem;
-
 		// Early exit if $hook_extra is empty,
 		// or if this is an installation and not update.
 		if ( empty( $hook_extra ) || ( isset( $hook_extra['action'] ) && 'install' === $hook_extra['action'] ) ) {
@@ -129,11 +146,6 @@ class Rollback_Update_Failure {
 			return $result;
 		}
 
-		$args = array(
-			'dir'  => isset( $hook_extra['plugin'] ) ? 'plugins' : 'themes',
-			'slug' => isset( $hook_extra['plugin'] ) ? dirname( $hook_extra['plugin'] ) : $hook_extra['theme'],
-			'src'  => isset( $hook_extra['plugin'] ) ? $wp_filesystem->wp_plugins_dir() : get_theme_root( $hook_extra['theme'] ),
-		);
 		if ( is_wp_error( $result ) ) {
 			// Restore the backup kept in the temp-backup directory.
 			// Restore the backup on `shutdown` to avoid a PHP timeout.

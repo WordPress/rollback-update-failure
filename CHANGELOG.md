@@ -1,4 +1,5 @@
 [unreleased]
+* add class `$options` for callback functions
 * update `is_virtualbox()` for testing
 
 #### 1.4.0 / 2022-04-03
