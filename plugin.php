@@ -658,7 +658,14 @@ class Rollback_Update_Failure {
 			return $is_virtualbox;
 		}
 
-		// Detection via filter.
+		/*
+		 * Filters whether the current environment uses VirtualBox.
+		 *
+		 * @since 6.1.0
+		 *
+		 * @param bool $is_virtualbox Whether the current environment uses VirtualBox.
+		 *                            Default: false.
+		 */
 		if ( apply_filters( 'is_virtualbox', false ) ) {
 			$is_virtualbox = true;
 			return $is_virtualbox;
