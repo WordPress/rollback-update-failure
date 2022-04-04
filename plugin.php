@@ -11,7 +11,7 @@
  * Plugin Name: Rollback Update Failure
  * Author: Andy Fragen, Ari Stathopolous, Colin Stewart, Paul Biron
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages.
- * Version: 1.4.0
+ * Version: 1.4.0.1
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
@@ -106,6 +106,20 @@ class Rollback_Update_Failure {
 		return $response;
 	}
 
+	/**
+	 * Move the plugin/theme being upgraded into a rollback directory.
+	 *
+	 * @since 6.1.0
+	 * @uses 'upgrader_pre_install' filter.
+	 *
+	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+	 * @param bool  $response   Boolean response to 'upgrader_pre_install' filter.
+	 *                          Default is true.
+	 * @param array $hook_extra Array of data for plugin/theme being updated.
+	 *
+	 * @return bool|WP_Error
+	 */
+	public function upgrader_pre_install( $response, $hook_extra ) {
 		// Early exit if $hook_extra is empty,
 		// or if this is an installation and not update.
 		if ( empty( $hook_extra ) || ( isset( $hook_extra['action'] ) && 'install' === $hook_extra['action'] ) ) {
@@ -120,6 +134,7 @@ class Rollback_Update_Failure {
 				return $temp_backup;
 			}
 		}
+
 		return $response;
 	}
 
@@ -147,23 +162,21 @@ class Rollback_Update_Failure {
 		}
 
 		if ( is_wp_error( $result ) ) {
-			// Restore the backup kept in the temp-backup directory.
-			// Restore the backup on `shutdown` to avoid a PHP timeout.
-			add_action(
-				'shutdown',
-				function() use ( $args ) {
-					$this->restore_temp_backup( $args );
-				}
-			);
-		} else {
-			// Clean up the backup kept in the temp-backup directory.
+			if ( ! empty( $this->options['hook_extra']['temp_backup'] ) ) {
+				/*
+				 * Restore the backup on shutdown.
+				 * Actions running on `shutdown` are immune to PHP timeouts,
+				 * so in case the failure was due to a PHP timeout,
+				 * it will still be able to properly restore the previous version.
+				 */
+				add_action( 'shutdown', array( $this, 'restore_temp_backup' ) );
+			}
+		}
+
+		// Clean up the backup kept in the temp-backup directory.
+		if ( ! empty( $this->options['hook_extra']['temp_backup'] ) ) {
 			// Delete the backup on `shutdown` to avoid a PHP timeout.
-			add_action(
-				'shutdown',
-				function() use ( $args ) {
-					$this->delete_temp_backup( $args );
-				}
-			);
+			add_action( 'shutdown', array( $this, 'delete_temp_backup' ) );
 		}
 
 		return $result;
@@ -245,18 +258,12 @@ class Rollback_Update_Failure {
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
-	 * @param array|string $args {
-	 *     Array of data for the temp-backup.
-	 *
-	 *     @type string $slug Plugin slug.
-	 *     @type string $src  File path to directory.
-	 *     @type string $dir  Directory name.
-	 * }
-	 *
 	 * @return bool|WP_Error
 	 */
-	public function restore_temp_backup( $args ) {
+	public function restore_temp_backup() {
 		global $wp_filesystem;
+
+		$args = $this->options['hook_extra']['temp_backup'];
 
 		if ( empty( $args['slug'] ) || empty( $args['src'] ) || empty( $args['dir'] ) ) {
 			return false;
@@ -292,18 +299,13 @@ class Rollback_Update_Failure {
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
-	 * @param array|string $args {
-	 *     Array of data for the temp-backup.
-	 *
-	 *     @type string $slug Plugin slug.
-	 *     @type string $src  File path to directory.
-	 *     @type string $dir  Directory name.
-	 * }
-	 *
 	 * @return bool
 	 */
-	public function delete_temp_backup( $args ) {
+	public function delete_temp_backup() {
 		global $wp_filesystem;
+
+		$args = $this->options['hook_extra']['temp_backup'];
+
 		if ( empty( $args['slug'] ) || empty( $args['dir'] ) ) {
 			return false;
 		}
@@ -604,7 +606,7 @@ class Rollback_Update_Failure {
 	/**
 	 * Remove `temp-backup` directory.
 	 *
-	 * @since 6.0.0
+	 * @since 6.1.0
 	 *
 	 * @access private
 	 *

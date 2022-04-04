@@ -1,4 +1,5 @@
 [unreleased]
+* remove anonymous callbacks
 * add class `$options` for callback functions
 * update `is_virtualbox()` for testing
 
