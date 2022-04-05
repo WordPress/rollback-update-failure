@@ -47,43 +47,11 @@ class WP_Upgrader {
 		$this->strings['temp_backup_restore_failed'] = __( 'Could not restore original version.', 'rollback-update-failure' );
 		$this->strings['fs_no_content_dir']          = __( 'Unable to locate WordPress content directory (wp-content).' );
 
-		// Set $this->options for callback functions.
-		add_filter( 'upgrader_pre_install', array( $this, 'set_callback_options' ), 10, 2 );
-
 		// Move the plugin/theme being updated to rollback directory.
 		add_filter( 'upgrader_pre_install', array( $this, 'upgrader_pre_install' ), 15, 2 );
 
 		// Restore backup if install_package returns WP_Error.
 		add_filter( 'upgrader_install_package_result', array( $this, 'upgrader_install_package_result' ), 15, 2 );
-	}
-
-	/**
-	 * Set class $options variable with data for callbacks.
-	 *
-	 * Not necessary in PR as this set in WP_Upgrader::run().
-	 *
-	 * @since 6.1.0
-	 * @uses 'upgrader_pre_install' filter.
-	 *
-	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
-	 * @param bool  $response   Boolean response to 'upgrader_pre_install' filter.
-	 *                          Default is true.
-	 * @param array $hook_extra Array of data for plugin/theme being updated.
-	 *
-	 * @return bool|WP_Error
-	 */
-	public function set_callback_options( $response, $hook_extra ) {
-		global $wp_filesystem;
-
-		if ( isset( $hook_extra['plugin'] ) || isset( $hook_extra['theme'] ) ) {
-			$this->options['hook_extra']['temp_backup'] = array(
-				'dir'  => isset( $hook_extra['plugin'] ) ? 'plugins' : 'themes',
-				'slug' => isset( $hook_extra['plugin'] ) ? dirname( $hook_extra['plugin'] ) : $hook_extra['theme'],
-				'src'  => isset( $hook_extra['plugin'] ) ? $wp_filesystem->wp_plugins_dir() : get_theme_root( $hook_extra['theme'] ),
-			);
-		}
-
-		return $response;
 	}
 
 	/**
@@ -100,6 +68,8 @@ class WP_Upgrader {
 	 * @return bool|WP_Error
 	 */
 	public function upgrader_pre_install( $response, $hook_extra ) {
+		$this->options = ( new WP_Plugin_Theme_Upgrader() )->set_callback_options( $hook_extra );
+
 		// Early exit if $hook_extra is empty,
 		// or if this is an installation and not update.
 		if ( empty( $hook_extra ) || ( isset( $hook_extra['action'] ) && 'install' === $hook_extra['action'] ) ) {
