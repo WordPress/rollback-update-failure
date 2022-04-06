@@ -36,6 +36,7 @@ class WP_Plugin_Theme_Upgrader {
 	public function set_callback_options( $hook_extra ) {
 		global $wp_filesystem;
 
+		$options = array();
 		if ( isset( $hook_extra['plugin'] ) || isset( $hook_extra['theme'] ) ) {
 			$options['hook_extra']['temp_backup'] = array(
 				'dir'  => isset( $hook_extra['plugin'] ) ? 'plugins' : 'themes',
