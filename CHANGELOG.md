@@ -1,4 +1,6 @@
 [unreleased]
+
+#### 2.0.0 / 2022-05-06
 * refactor to ease PR back into core by separating out changes into respective files/classes
 
 #### 1.5.0 / 2022-04-04
