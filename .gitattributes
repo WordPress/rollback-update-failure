@@ -2,8 +2,13 @@
 
 .gitattributes export-ignore
 .gitignore export-ignore
+composer.lock export-ignore
 .phpcs.xml export-ignore
-/.wordpress-org export-ignore
+.phpcs.xml.dist export-ignore
+phpunit.xml export-ignore
+/tests export-ignore
+/bin export-ignore
 /.github export-ignore
-.svnignore export-ignore
+/vendor export-ignore
+
 make-post.md export-ignore

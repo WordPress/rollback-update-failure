@@ -6,14 +6,16 @@ Tags: feature plugin, update, failure
 License: MIT
 Requires PHP: 5.6
 Requires at least: 5.2
-Tested up to: 5.9
-Stable Tag: 1.4.0
+Tested up to: 6.0
+Stable Tag: 2.0.0
 
-Feature plugin for testing automatic rollback of a plugin or theme update failure.
+This is a feature plugin for testing automatic rollback of a plugin or theme update failure.
 
 ## Description
 
-This is a feature plugin based on the [PR](https://github.com/WordPress/wordpress-develop/pull/1492) for [#51857](https://core.trac.wordpress.org/ticket/51857).  Current [PR #2225](https://github.com/WordPress/wordpress-develop/pull/2225/) for inclusion to core.
+This is a feature plugin for testing automatic rollback of a plugin or theme update failure.
+
+It is based on the [PR](https://github.com/WordPress/wordpress-develop/pull/1492) for [#51857](https://core.trac.wordpress.org/ticket/51857). Current [PR #2225](https://github.com/WordPress/wordpress-develop/pull/2225/) for inclusion to core.
 
 * When updating a plugin/theme, the old version of the plugin/theme gets moved to a `wp-content/upgrade/temp-backup/plugins/PLUGINNAME` or `wp-content/upgrade/temp-backup/themes/THEMENAME` folder. The reason we chose to **move** instead of **zip**, is because zipping/unzipping are very resources-intensive processes, and would increase the risk on low-end, shared hosts. Moving on the other hand is performed instantly and won't be a bottleneck.
 * If the update fails, then the "backup" we kept in the `upgrade/temp-backup` folder gets restored to its original location
