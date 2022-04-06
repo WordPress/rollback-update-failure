@@ -9,6 +9,7 @@ phpunit.xml export-ignore
 /tests export-ignore
 /bin export-ignore
 /.github export-ignore
+/.wordpress-org export-ignore
 /vendor export-ignore
 
 make-post.md export-ignore
