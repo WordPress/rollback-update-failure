@@ -27,7 +27,6 @@ if ( ! defined( 'WPINC' ) ) {
  *
  * @param string $from        Source directory.
  * @param string $to          Destination directory.
- *
  * @return true|WP_Error True on success, WP_Error on failure.
  */
 function move_dir( $from, $to ) {
@@ -58,7 +57,7 @@ function move_dir( $from, $to ) {
 	if ( ! $result ) {
 		if ( ! $wp_filesystem->is_dir( $to ) ) {
 			if ( ! $wp_filesystem->mkdir( $to, FS_CHMOD_DIR ) ) {
-				return new WP_Error( 'mkdir_failed_move_dir', __( 'Could not create directory.' ), $to );
+				return new \WP_Error( 'mkdir_failed_move_dir', __( 'Could not create directory.' ), $to );
 			}
 		}
 
