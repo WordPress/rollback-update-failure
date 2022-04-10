@@ -1,4 +1,5 @@
 [unreleased]
+* add `move_dir_fallback()` and use instead of `copy_dir()`
 
 #### 2.0.0 / 2022-05-06
 * refactor to ease PR back into core by separating out changes into respective files/classes
