@@ -1,6 +1,9 @@
 [unreleased]
 
-#### 2.0.0 / 2022-05-06
+#### 2.1.0 / 2202-04-12
+* pass basename of destination to `copy_dir( $skip_list )` to avoid potential endless looping.
+
+#### 2.0.0 / 2022-04-06
 * refactor to ease PR back into core by separating out changes into respective files/classes
 
 #### 1.5.0 / 2022-04-04
