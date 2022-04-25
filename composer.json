@@ -1,0 +1,22 @@
+{
+  "name": "wordpress/rollback-update-failure",
+  "description": "This is a feature plugin for testing automatic rollback of a plugin or theme update failure.",
+  "type": "wordpress-plugin",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Andy Fragen",
+      "email": "andy@thefragens.com",
+      "homepage": "https://thefragens.com",
+      "role": "Developer"
+    }
+  ],
+  "support": {
+    "issues": "https://github.com/WordPress/rollback-update-failure/issues",
+    "source": "https://github.com/WordPress/rollback-update-failure"
+  },
+  "prefer-stable": true,
+  "require": {
+    "php": ">=5.6"
+  }
+}
