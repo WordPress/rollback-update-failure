@@ -7,7 +7,7 @@ License: MIT
 Requires PHP: 5.6
 Requires at least: 5.2
 Tested up to: 6.0
-Stable Tag: 2.1.0
+Stable Tag: 2.1.1
 
 This is a feature plugin for testing automatic rollback of a plugin or theme update failure.
 
@@ -60,6 +60,10 @@ Logo from a meme generator. [Original artwork](http://hyperboleandahalf.blogspot
 ## Changelog
 
 Please see the Github repository: [CHANGELOG.md](https://github.com/afragen/rollback-update-failure/blob/main/CHANGELOG.md).
+
+#### 2.1.1 / 2022-05-11
+* update testing workflows
+* fix action hook `wp_delete_temp_updater_backups` for plugin namespace, not for PR
 
 #### 2.1.0 / 2202-04-12
 * pass basename of destination to `copy_dir( $skip_list )` to avoid potential endless looping.
