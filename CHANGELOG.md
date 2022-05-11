@@ -1,5 +1,8 @@
 [unreleased]
 
+#### 2.1.2 / 2022-05-11
+* fix `shutdown` hook in `wp_delete_all_temp_backups()` for plugin namespace, not for PR
+
 #### 2.1.1 / 2022-05-11
 * update testing workflows
 * fix action hook `wp_delete_temp_updater_backups` for plugin namespace, not for PR

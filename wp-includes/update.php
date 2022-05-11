@@ -34,7 +34,8 @@ function wp_delete_all_temp_backups() {
 	}
 
 	// This action runs on shutdown to make sure there is no plugin updates currently running.
-	add_action( 'shutdown', '_wp_delete_all_temp_backups' );
+	// TODO: Remove namespacing for PR.
+	add_action( 'shutdown', __NAMESPACE__ . '\\_wp_delete_all_temp_backups' );
 }
 
 /**
@@ -75,4 +76,4 @@ function _wp_delete_all_temp_backups() {
 
 // Clean up.
 // TODO: Remove namespacing for PR.
-add_action( 'wp_delete_temp_updater_backups', __NAMESPACE__ . '\\'. 'wp_delete_all_temp_backups' );
+add_action( 'wp_delete_temp_updater_backups', __NAMESPACE__ . '\\wp_delete_all_temp_backups' );
