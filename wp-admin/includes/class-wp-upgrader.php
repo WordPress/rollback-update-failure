@@ -52,6 +52,11 @@ class WP_Upgrader {
 
 		// Restore backup if install_package returns WP_Error.
 		add_filter( 'upgrader_install_package_result', array( $this, 'upgrader_install_package_result' ), 15, 2 );
+
+		// WP_Upgrader::init.
+		if ( ! wp_installing() ) {
+			$this->schedule_temp_backup_cleanup();
+		}
 	}
 
 	/**
@@ -130,6 +135,17 @@ class WP_Upgrader {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Schedule cleanup of the temp-backup directory.
+	 *
+	 * @since 6.1.0
+	 */
+	protected function schedule_temp_backup_cleanup() {
+		if ( false === wp_next_scheduled( 'wp_delete_temp_updater_backups' ) ) {
+			wp_schedule_event( time(), 'weekly', 'wp_delete_temp_updater_backups' );
+		}
 	}
 
 	/**
