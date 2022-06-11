@@ -62,7 +62,19 @@ function move_dir( $from, $to ) {
 		}
 
 		$result = copy_dir( $from, $to, array( basename( $to ) ) );
+
+		// Clear the source directory.
+		if ( ! is_wp_error( $result ) ) {
+			$wp_filesystem->delete( $from, true );
+		}
 	}
+
+	/**
+	 * Fires after move_dir().
+	 *
+	 * @since 6.1.0
+	 */
+	do_action( 'post_move_dir' );
 
 	return $result;
 }
