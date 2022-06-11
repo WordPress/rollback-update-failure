@@ -92,11 +92,11 @@ class WP_Upgrader {
 		$args = $this->options['hook_extra']['temp_backup'];
 
 		if ( isset( $hook_extra['plugin'] ) || isset( $hook_extra['theme'] ) ) {
-			$this->temp_backups[] = $this->options['hook_extra']['temp_backup'];
-			$temp_backup          = $this->move_to_temp_backup_dir( $args );
+			$temp_backup = $this->move_to_temp_backup_dir( $args );
 			if ( is_wp_error( $temp_backup ) ) {
 				return $temp_backup;
 			}
+			$this->temp_backups[] = $this->options['hook_extra']['temp_backup'];
 		}
 
 		return $response;
