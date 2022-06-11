@@ -55,6 +55,9 @@ class WP_Upgrader {
 		$this->strings['temp_backup_restore_failed'] = __( 'Could not restore original version.', 'rollback-update-failure' );
 		$this->strings['fs_no_content_dir']          = __( 'Unable to locate WordPress content directory (wp-content).' );
 
+		/* translators: %s: The theme/plugin slug. */
+		$this->strings['temp_backup_delete_failed'] = __( 'Could not delete the temporary backup directory for %s.' );
+
 		// Move the plugin/theme being updated to rollback directory.
 		add_filter( 'upgrader_pre_install', array( $this, 'upgrader_pre_install' ), 15, 2 );
 
@@ -280,20 +283,31 @@ class WP_Upgrader {
 	public function delete_temp_backup() {
 		global $wp_filesystem;
 
+		$errors = new WP_Error();
+
 		foreach ( $this->temp_backups as $args ) {
 			if ( empty( $args['slug'] ) || empty( $args['dir'] ) ) {
 				return false;
 			}
 
 			if ( ! $wp_filesystem->wp_content_dir() ) {
-				return new WP_Error( 'fs_no_content_dir', $this->strings['fs_no_content_dir'] );
+				$errors->add( 'fs_no_content_dir', $this->strings['fs_no_content_dir'] );
+				continue;
 			}
 
-			$wp_filesystem->delete(
-				$wp_filesystem->wp_content_dir() . "upgrade/temp-backup/{$args['dir']}/{$args['slug']}",
-				true
-			);
+			$temp_backup_dir = $wp_filesystem->wp_content_dir() . "upgrade/temp-backup/{$args['dir']}/{$args['slug']}";
+
+			if ( ! $wp_filesystem->delete( $temp_backup_dir, true ) ) {
+				$errors->add(
+					'temp_backup_delete_failed',
+					sprintf( $this->strings['temp_backup_delete_failed'] ),
+					$args['slug']
+				);
+				continue; // This isn't necessary at this time, but would be needed if future updates added something below this conditional.
+			}
 		}
+
+		return $errors->has_errors() ? $errors : true;
 	}
 
 }
