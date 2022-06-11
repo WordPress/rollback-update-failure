@@ -31,11 +31,14 @@ This plugin will automatically deactivate itself once the feature has been commi
 
 There is a change to `WP_Upgrader::install_package()` that can't be implemented in the plugin. :sad:
 
-If you are running a virtualized server and using VirtualBox we have a function that tries to identify VirtualBox with code. If you are running a VirtualBox environment the Site Health > Info > Server section will display whether the code picks that up correctly. If it doesn't you will need to add the following filter.
+### VirtualBox
 
-```php
-add_filter( 'is_virtualbox', '__return_true' );
-```
+If you are running a virtualized server and using VirtualBox your hosting environment will need to add a [mu-plugin and watcher script](https://gist.github.com/costdev/502a2ca52a440e5775e2db970227b9b3) to overcome VirtualBox's rename() issues. There are some known issues where rename() in VirtualBox can fail on shared folders
+without reporting an error properly.
+
+More details:
+https://www.virtualbox.org/ticket/8761#comment:24
+https://www.virtualbox.org/ticket/17971
 
 ## Testing
 
