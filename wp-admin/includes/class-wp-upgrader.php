@@ -50,9 +50,10 @@ class WP_Upgrader {
 	 */
 	public function __construct() {
 		// Add generic strings to Rollback_Update_Failure::$strings.
-		$this->strings['temp_backup_mkdir_failed']   = __( 'Could not create temp-backup directory.', 'rollback-update-failure' );
-		$this->strings['temp_backup_move_failed']    = __( 'Could not move old version to the temp-backup directory.', 'rollback-update-failure' );
-		$this->strings['temp_backup_restore_failed'] = __( 'Could not restore original version.', 'rollback-update-failure' );
+		$this->strings['temp_backup_mkdir_failed'] = __( 'Could not create temp-backup directory.', 'rollback-update-failure' );
+		$this->strings['temp_backup_move_failed']  = __( 'Could not move old version to the temp-backup directory.', 'rollback-update-failure' );
+		/* translators: %s: The theme/plugin slug. */
+		$this->strings['temp_backup_restore_failed'] = __( 'Could not restore original version of %s.', 'rollback-update-failure' );
 		$this->strings['fs_no_content_dir']          = __( 'Unable to locate WordPress content directory (wp-content).' );
 
 		/* translators: %s: The theme/plugin slug. */
@@ -196,7 +197,7 @@ class WP_Upgrader {
 		}
 
 		if ( ! $wp_filesystem->wp_content_dir() ) {
-			return new WP_Error( 'fs_no_content_dir', $this->strings['fs_no_content_dir'] );
+			return new \WP_Error( 'fs_no_content_dir', $this->strings['fs_no_content_dir'] );
 		}
 
 		$dest_dir = $wp_filesystem->wp_content_dir() . 'upgrade/temp-backup/';
@@ -209,7 +210,7 @@ class WP_Upgrader {
 				&& ! $wp_filesystem->mkdir( $dest_dir . $args['dir'] . '/' )
 			)
 		) {
-			return new WP_Error( 'fs_temp_backup_mkdir', $this->strings['temp_backup_mkdir_failed'] );
+			return new \WP_Error( 'fs_temp_backup_mkdir', $this->strings['temp_backup_mkdir_failed'] );
 		}
 
 		$src_dir = $wp_filesystem->find_folder( $args['src'] );
@@ -223,7 +224,7 @@ class WP_Upgrader {
 
 		// Move to the temp-backup directory.
 		if ( ! move_dir( $src, $dest ) ) {
-			return new WP_Error( 'fs_temp_backup_move', $this->strings['temp_backup_move_failed'] );
+			return new \WP_Error( 'fs_temp_backup_move', $this->strings['temp_backup_move_failed'] );
 		}
 
 		return true;
@@ -241,13 +242,16 @@ class WP_Upgrader {
 	public function restore_temp_backup() {
 		global $wp_filesystem;
 
+		$errors = new \WP_Error();
+
 		foreach ( $this->temp_backups as $args ) {
 			if ( empty( $args['slug'] ) || empty( $args['src'] ) || empty( $args['dir'] ) ) {
 				return false;
 			}
 
 			if ( ! $wp_filesystem->wp_content_dir() ) {
-				return new WP_Error( 'fs_no_content_dir', $this->strings['fs_no_content_dir'] );
+				$errors->add( 'fs_no_content_dir', $this->strings['fs_no_content_dir'] );
+				return $errors;
 			}
 
 			$src      = $wp_filesystem->wp_content_dir() . 'upgrade/temp-backup/' . $args['dir'] . '/' . $args['slug'];
@@ -255,20 +259,27 @@ class WP_Upgrader {
 			$dest     = trailingslashit( $dest_dir ) . $args['slug'];
 
 			if ( $wp_filesystem->is_dir( $src ) ) {
-
 				// Cleanup.
 				if ( $wp_filesystem->is_dir( $dest ) && ! $wp_filesystem->delete( $dest, true ) ) {
-					return new WP_Error( 'fs_temp_backup_delete', $this->strings['temp_backup_restore_failed'] );
+					$errors->add(
+						'fs_temp_backup_delete',
+						sprintf( $this->strings['temp_backup_restore_failed'], $args['slug'] )
+					);
+					continue;
 				}
 
 				// Move it.
 				if ( ! move_dir( $src, $dest ) ) {
-					return new WP_Error( 'fs_temp_backup_delete', $this->strings['temp_backup_restore_failed'] );
+					$errors->add(
+						'fs_temp_backup_delete',
+						sprintf( $this->strings['temp_backup_restore_failed'], $args['slug'] )
+					);
+					continue;
 				}
 			}
 		}
 
-		return true;
+		return $errors->has_errors() ? $errors : true;
 	}
 
 	/**
@@ -283,7 +294,7 @@ class WP_Upgrader {
 	public function delete_temp_backup() {
 		global $wp_filesystem;
 
-		$errors = new WP_Error();
+		$errors = new \WP_Error();
 
 		foreach ( $this->temp_backups as $args ) {
 			if ( empty( $args['slug'] ) || empty( $args['dir'] ) ) {
@@ -292,7 +303,7 @@ class WP_Upgrader {
 
 			if ( ! $wp_filesystem->wp_content_dir() ) {
 				$errors->add( 'fs_no_content_dir', $this->strings['fs_no_content_dir'] );
-				continue;
+				return $errors;
 			}
 
 			$temp_backup_dir = $wp_filesystem->wp_content_dir() . "upgrade/temp-backup/{$args['dir']}/{$args['slug']}";
