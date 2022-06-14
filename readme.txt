@@ -7,7 +7,7 @@ License: MIT
 Requires PHP: 5.6
 Requires at least: 5.2
 Tested up to: 6.0
-Stable Tag: 2.2.0
+Stable Tag: 3.0.0
 
 This is a feature plugin for testing automatic rollback of a plugin or theme update failure.
 
@@ -28,12 +28,14 @@ To avoid confusion: The "temp-backup" folder will NOT be used to "roll-back" a p
 
 This plugin will automatically deactivate itself once the feature has been committed to core.
 
-If you are running a virtualized server and using VirtualBox we have a function that tries to identify VirtualBox with code. If you are running a VirtualBox environment the Site Health > Info > Server section will display whether the code picks that up correctly. If it doesn't you will need to add the following filter.
+### VirtualBox
 
-<pre><code>
-  add_filter( 'is_virtualbox', '__return_true' );
-</code></pre>
+If you are running a virtualized server and using VirtualBox your hosting environment will need to add a [mu-plugin and watcher script](https://gist.github.com/costdev/502a2ca52a440e5775e2db970227b9b3) to overcome VirtualBox's rename() issues. There are some known issues where rename() in VirtualBox can fail on shared folders
+without reporting an error properly.
 
+More details:
+https://www.virtualbox.org/ticket/8761#comment:24
+https://www.virtualbox.org/ticket/17971
 
 ## Testing
 
@@ -60,6 +62,12 @@ Logo from a meme generator. [Original artwork](http://hyperboleandahalf.blogspot
 ## Changelog
 
 Please see the Github repository: [CHANGELOG.md](https://github.com/afragen/rollback-update-failure/blob/main/CHANGELOG.md).
+
+#### 3.0.0 / 2022-06-14
+* remove references to VirtualBox
+* add `pre_move_dir` and `post_move_dir` hooks
+* use with VirtualBox environment will require a [mu-plugin and a watcher script](https://gist.github.com/costdev/502a2ca52a440e5775e2db970227b9b3) or similar for VirtualBox based environments
+* update error messaging in `delete_temp_backup()`
 
 #### 2.2.0 / 2022-05-11
 * add initial setup of weekly `wp_delete_temp_updater_backups` cron task, oops

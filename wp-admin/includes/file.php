@@ -34,16 +34,14 @@ function move_dir( $from, $to ) {
 
 	$result = false;
 
-	/*
-	 * Skip the rename() call on VirtualBox environments.
-	 * There are some known issues where rename() can fail on shared folders
-	 * without reporting an error properly.
+	/**
+	 * Fires before move_dir().
 	 *
-	 * More details:
-	 * https://www.virtualbox.org/ticket/8761#comment:24
-	 * https://www.virtualbox.org/ticket/17971
+	 * @since 6.1.0
 	 */
-	if ( 'direct' === $wp_filesystem->method && ! is_virtualbox() ) {
+	do_action( 'pre_move_dir' );
+
+	if ( 'direct' === $wp_filesystem->method ) {
 		$wp_filesystem->rmdir( $to );
 
 		$result = @rename( $from, $to );
@@ -62,7 +60,19 @@ function move_dir( $from, $to ) {
 		}
 
 		$result = copy_dir( $from, $to, array( basename( $to ) ) );
+
+		// Clear the source directory.
+		if ( ! is_wp_error( $result ) ) {
+			$wp_filesystem->delete( $from, true );
+		}
 	}
+
+	/**
+	 * Fires after move_dir().
+	 *
+	 * @since 6.1.0
+	 */
+	do_action( 'post_move_dir' );
 
 	return $result;
 }

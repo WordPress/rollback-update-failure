@@ -1,5 +1,11 @@
 [unreleased]
 
+#### 3.0.0 / 2022-06-14
+* remove references to VirtualBox
+* add `pre_move_dir` and `post_move_dir` hooks
+* use with VirtualBox environment will require a [mu-plugin and a watcher script](https://gist.github.com/costdev/502a2ca52a440e5775e2db970227b9b3) or similar for VirtualBox based environments
+* update error messaging in `delete_temp_backup()`
+
 #### 2.2.0 / 2022-05-11
 * add initial setup of weekly `wp_delete_temp_updater_backups` cron task, oops
 
