@@ -1,4 +1,6 @@
 [unreleased]
+
+#### 3.1.0 / 2022-06-27
 * fix to ensure restore functions correctly during bulk update
 
 #### 3.0.0 / 2022-06-14
