@@ -1,5 +1,8 @@
 [unreleased]
 
+#### 3.1.0 / 2022-06-27
+* fix to ensure restore functions correctly during bulk update
+
 #### 3.0.0 / 2022-06-14
 * remove references to VirtualBox
 * add `pre_move_dir` and `post_move_dir` hooks
