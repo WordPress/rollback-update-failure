@@ -46,6 +46,16 @@ class WP_Upgrader {
 	private $temp_backups = array();
 
 	/**
+	 * Store list of plugins/themes needing to be restored from temp-backup directory.
+	 *
+	 * Used by rollback functions.
+	 *
+	 * @since 6.1.0
+	 * @var array
+	 */
+	private $temp_restores = array();
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -131,6 +141,8 @@ class WP_Upgrader {
 
 		if ( is_wp_error( $result ) ) {
 			if ( ! empty( $this->options['hook_extra']['temp_backup'] ) ) {
+				$this->temp_restores[] = $this->options['hook_extra']['temp_backup'];
+
 				/*
 				 * Restore the backup on shutdown.
 				 * Actions running on `shutdown` are immune to PHP timeouts,
@@ -144,7 +156,7 @@ class WP_Upgrader {
 		// Clean up the backup kept in the temp-backup directory.
 		if ( ! empty( $this->options['hook_extra']['temp_backup'] ) ) {
 			// Delete the backup on `shutdown` to avoid a PHP timeout.
-			add_action( 'shutdown', array( $this, 'delete_temp_backup' ) );
+			add_action( 'shutdown', array( $this, 'delete_temp_backup' ), 100, 0 );
 		}
 
 		return $result;
@@ -244,7 +256,7 @@ class WP_Upgrader {
 
 		$errors = new \WP_Error();
 
-		foreach ( $this->temp_backups as $args ) {
+		foreach ( $this->temp_restores as $args ) {
 			if ( empty( $args['slug'] ) || empty( $args['src'] ) || empty( $args['dir'] ) ) {
 				return false;
 			}

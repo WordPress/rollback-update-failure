@@ -1,4 +1,5 @@
 [unreleased]
+* fix to ensure restore functions correctly during bulk update
 
 #### 3.0.0 / 2022-06-14
 * remove references to VirtualBox
