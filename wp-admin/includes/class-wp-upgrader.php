@@ -106,7 +106,7 @@ class WP_Upgrader {
 		$args = $this->options['hook_extra']['temp_backup'];
 
 		if ( isset( $hook_extra['plugin'] ) || isset( $hook_extra['theme'] ) ) {
-			$temp_backup = $this->move_to_temp_backup_dir( $args );
+			$temp_backup = $this->move_to_temp_backup_dir();
 			if ( is_wp_error( $temp_backup ) ) {
 				return $temp_backup;
 			}
@@ -180,18 +180,12 @@ class WP_Upgrader {
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
-	 * @param array|string $args {
-	 *     Array of data for the temp-backup.
-	 *
-	 *     @type string $slug Plugin slug.
-	 *     @type string $src  File path to directory.
-	 *     @type string $dir  Directory name.
-	 * }
-	 *
 	 * @return bool|WP_Error
 	 */
-	public function move_to_temp_backup_dir( $args ) {
+	public function move_to_temp_backup_dir() {
 		global $wp_filesystem;
+
+		$args = $this->options['hook_extra']['temp_backup'];
 
 		if ( empty( $args['slug'] ) || empty( $args['src'] ) || empty( $args['dir'] ) ) {
 			return false;
