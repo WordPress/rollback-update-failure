@@ -1,5 +1,4 @@
 [unreleased]
-* don't pass parameter to `move_to_temp_backup_dir()`, helps down the line for Rollback incorporation in auto-update successful update with PHP errors in update #56318
 
 #### 3.1.1 / 2022-07-31
 * update VirtualBox testing URL in readme(s)
