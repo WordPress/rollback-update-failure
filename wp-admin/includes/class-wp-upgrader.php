@@ -103,8 +103,6 @@ class WP_Upgrader {
 			return $response;
 		}
 
-		$args = $this->options['hook_extra']['temp_backup'];
-
 		if ( isset( $hook_extra['plugin'] ) || isset( $hook_extra['theme'] ) ) {
 			$temp_backup = $this->move_to_temp_backup_dir();
 			if ( is_wp_error( $temp_backup ) ) {
