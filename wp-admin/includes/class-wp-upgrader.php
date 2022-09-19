@@ -70,7 +70,8 @@ class WP_Upgrader {
 		$this->strings['temp_backup_delete_failed'] = __( 'Could not delete the temporary backup directory for %s.' );
 
 		// Move the plugin/theme being updated to rollback directory.
-		add_filter( 'upgrader_pre_install', array( $this, 'upgrader_pre_install' ), 15, 2 );
+		// add_filter( 'upgrader_pre_install', array( $this, 'upgrader_pre_install' ), 15, 2 );
+		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 9999, 4 );
 
 		// Restore backup if install_package returns WP_Error.
 		add_filter( 'upgrader_install_package_result', array( $this, 'upgrader_install_package_result' ), 15, 2 );
@@ -79,6 +80,41 @@ class WP_Upgrader {
 		if ( ! wp_installing() ) {
 			$this->schedule_temp_backup_cleanup();
 		}
+	}
+
+	/**
+	 * Move the plugin/theme being upgraded into a rollback directory.
+	 *
+	 * @since 6.1.0
+	 * @uses 'upgrader_source_selection' filter.
+	 *
+	 * @param string      $source        File source location.
+	 * @param string      $remote_source Remote file source location.
+	 * @param WP_Upgrader $upgrader      WP_Upgrader instance.
+	 * @param array       $hook_extra    Array of data for plugin/theme being updated.
+	 *
+	 * @return string|WP_Error
+	 */
+	public function upgrader_source_selection( $source, $remote_source, $upgrader, $hook_extra ) {
+		$this->options = ( new WP_Plugin_Theme_Upgrader() )->set_callback_options( $hook_extra );
+
+		// Early exit if $hook_extra is empty,
+		// or if this is an installation and not update.
+		if ( empty( $hook_extra ) || ( isset( $hook_extra['action'] ) && 'install' === $hook_extra['action'] ) ) {
+			return $source;
+		}
+
+		$args = $this->options['hook_extra']['temp_backup'];
+
+		if ( isset( $hook_extra['plugin'] ) || isset( $hook_extra['theme'] ) ) {
+			$temp_backup = $this->move_to_temp_backup_dir( $args );
+			if ( is_wp_error( $temp_backup ) ) {
+				return $temp_backup;
+			}
+			$this->temp_backups[] = $this->options['hook_extra']['temp_backup'];
+		}
+
+		return $source;
 	}
 
 	/**

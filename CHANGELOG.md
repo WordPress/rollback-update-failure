@@ -1,4 +1,5 @@
 [unreleased]
+* backup runs on `upgrader_source_selection` from `upgrader_pre_install` to resolve an edge case
 
 #### 3.1.1 / 2022-07-31
 * update VirtualBox testing URL in readme(s)
