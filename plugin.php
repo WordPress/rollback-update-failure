@@ -11,12 +11,12 @@
  * Plugin Name: Rollback Update Failure
  * Author: Andy Fragen, Ari Stathopolous, Colin Stewart, Paul Biron
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages.
- * Version: 3.1.1
+ * Version: 3.2.0
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
  * Requires PHP: 5.6
- * Requires at least: 5.2
+ * Requires at least: 6.0
  * GitHub Plugin URI: https://github.com/WordPress/rollback-update-failure
  * Primary Branch: main
  */
