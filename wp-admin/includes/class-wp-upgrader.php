@@ -117,41 +117,6 @@ class WP_Upgrader {
 	}
 
 	/**
-	 * Move the plugin/theme being upgraded into a rollback directory.
-	 *
-	 * @since 6.1.0
-	 * @uses 'upgrader_pre_install' filter.
-	 *
-	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
-	 * @param bool  $response   Boolean response to 'upgrader_pre_install' filter.
-	 *                          Default is true.
-	 * @param array $hook_extra Array of data for plugin/theme being updated.
-	 *
-	 * @return bool|WP_Error
-	 */
-	public function upgrader_pre_install( $response, $hook_extra ) {
-		$this->options = ( new WP_Plugin_Theme_Upgrader() )->set_callback_options( $hook_extra );
-
-		// Early exit if $hook_extra is empty,
-		// or if this is an installation and not update.
-		if ( empty( $hook_extra ) || ( isset( $hook_extra['action'] ) && 'install' === $hook_extra['action'] ) ) {
-			return $response;
-		}
-
-		$args = $this->options['hook_extra']['temp_backup'];
-
-		if ( isset( $hook_extra['plugin'] ) || isset( $hook_extra['theme'] ) ) {
-			$temp_backup = $this->move_to_temp_backup_dir( $args );
-			if ( is_wp_error( $temp_backup ) ) {
-				return $temp_backup;
-			}
-			$this->temp_backups[] = $this->options['hook_extra']['temp_backup'];
-		}
-
-		return $response;
-	}
-
-	/**
 	 * Restore backup to original location if update failed.
 	 *
 	 * @since 6.1.0
