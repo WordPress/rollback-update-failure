@@ -1,4 +1,6 @@
 [unreleased]
+
+#### 3.2.0 / 2022-09-19
 * backup runs on `upgrader_source_selection` from `upgrader_pre_install` to resolve an edge case
 * rename functions for action not hook
 
