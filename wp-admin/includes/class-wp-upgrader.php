@@ -70,11 +70,10 @@ class WP_Upgrader {
 		$this->strings['temp_backup_delete_failed'] = __( 'Could not delete the temporary backup directory for %s.' );
 
 		// Move the plugin/theme being updated to rollback directory.
-		// add_filter( 'upgrader_pre_install', array( $this, 'upgrader_pre_install' ), 15, 2 );
-		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 9999, 4 );
+		add_filter( 'upgrader_source_selection', array( $this, 'create_backup' ), 9999, 4 );
 
 		// Restore backup if install_package returns WP_Error.
-		add_filter( 'upgrader_install_package_result', array( $this, 'upgrader_install_package_result' ), 15, 2 );
+		add_filter( 'upgrader_install_package_result', array( $this, 'restore_backup' ), 15, 2 );
 
 		// WP_Upgrader::init.
 		if ( ! wp_installing() ) {
@@ -95,7 +94,7 @@ class WP_Upgrader {
 	 *
 	 * @return string|WP_Error
 	 */
-	public function upgrader_source_selection( $source, $remote_source, $upgrader, $hook_extra ) {
+	public function create_backup( $source, $remote_source, $upgrader, $hook_extra ) {
 		$this->options = ( new WP_Plugin_Theme_Upgrader() )->set_callback_options( $hook_extra );
 
 		// Early exit if $hook_extra is empty,
@@ -164,7 +163,7 @@ class WP_Upgrader {
 	 *
 	 * @return bool|WP_Error
 	 */
-	public function upgrader_install_package_result( $result, $hook_extra ) {
+	public function restore_backup( $result, $hook_extra ) {
 		// Early exit if $hook_extra is empty,
 		// or if this is an installation and not update.
 		if ( empty( $hook_extra ) || ( isset( $hook_extra['action'] ) && 'install' === $hook_extra['action'] ) ) {
