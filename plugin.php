@@ -11,7 +11,7 @@
  * Plugin Name: Rollback Update Failure
  * Author: Andy Fragen, Ari Stathopolous, Colin Stewart, Paul Biron
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages.
- * Version: 3.2.0
+ * Version: 3.2.1
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
@@ -32,7 +32,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Deactivate plugin when committed to core.
-if ( version_compare( get_bloginfo( 'version' ), '6.1-beta1', '>=' ) ) {
+if ( version_compare( get_bloginfo( 'version' ), '6.2-beta1', '>=' ) ) {
 	deactivate_plugins( __FILE__ );
 }
 
