@@ -158,7 +158,7 @@ if ( ! class_exists( '\Rollback_Update_Failure\Testing\Failure_Simulator' ) ) {
 			if ( 'do_not_simulate_failure' === $action ) {
 				$found = array_search( $plugin, $simulate_failure_plugins, true );
 
-				if ( $found ) {
+				if ( false !== $found ) {
 					unset( $simulate_failure_plugins[ $found ] );
 				}
 			}
