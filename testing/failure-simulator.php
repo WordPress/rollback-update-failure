@@ -163,7 +163,7 @@ if ( ! class_exists( '\Rollback_Update_Failure\Testing\Failure_Simulator' ) ) {
 				}
 			}
 
-			update_option( 'rollback_simulate_failure_plugins', $simulate_failure_plugins );
+			update_option( 'rollback_simulate_failure_plugins', array_unique( $simulate_failure_plugins ) );
 		}
 
 		/**
