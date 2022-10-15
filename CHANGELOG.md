@@ -1,5 +1,9 @@
 [unreleased]
 
+#### 3.3.0 / 2022-10-14
+* use `wp-content/temp-backup` and not `wp-content/upgrade/temp-backup` as `WP_Upgrader::unpack_package` deletes contents of `wp-content-upgrade` at each update
+* add simulated failure into plugin
+
 #### 3.2.1 / 2022-09-23
 * bump auto-deactivation check for WP version
 
