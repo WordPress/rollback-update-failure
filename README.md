@@ -18,8 +18,8 @@ This is a feature plugin for testing automatic rollback of a plugin or theme upd
 
 It is based on the [PR](https://github.com/WordPress/wordpress-develop/pull/1492) for [#51857](https://core.trac.wordpress.org/ticket/51857). Current [PR #2225](https://github.com/WordPress/wordpress-develop/pull/2225/) for inclusion to core.
 
-* When updating a plugin/theme, the old version of the plugin/theme gets moved to a `wp-content/upgrade/temp-backup/plugins/PLUGINNAME` or `wp-content/upgrade/temp-backup/themes/THEMENAME` folder. The reason we chose to **move** instead of **zip**, is because zipping/unzipping are very resources-intensive processes, and would increase the risk on low-end, shared hosts. Moving on the other hand is performed instantly and won't be a bottleneck.
-* If the update fails, then the "backup" we kept in the `upgrade/temp-backup` folder gets restored to its original location
+* When updating a plugin/theme, the old version of the plugin/theme gets moved to a `wp-content/temp-backup/plugins/PLUGINNAME` or `wp-content/temp-backup/themes/THEMENAME` folder. The reason we chose to **move** instead of **zip**, is because zipping/unzipping are very resources-intensive processes, and would increase the risk on low-end, shared hosts. Moving on the other hand is performed instantly and won't be a bottleneck.
+* If the update fails, then the "backup" we kept in the `temp-backup` folder gets restored to its original location
 * If the update succeeds, then the "backup" is deleted
 * 2 new checks were added in the site-health screen:
   * Check to make sure that the rollbacks folder is writable.
@@ -45,7 +45,7 @@ https://www.virtualbox.org/ticket/17971
 * If the `wp-content/temp-backup` folder is not writable, there should be an error in the site-health screen.
 * If the server has less than 20MB available, there should be an error in the site-health screen that updates may fail.
 * If the server has less than 100MB, it should be a notice that disk space is running low.
-* When updating a plugin, you should be able to see the old plugin in the `wp-content/upgrade/temp-backup/plugins/PLUGINNAME` folder. The same should apply for themes. Since updates sometimes run fast and we may miss the folder creation during testing, you can simulate an update failure to demonstrate. This will return early and skip deleting the backup on update-success.
+* When updating a plugin, you should be able to see the old plugin in the `wp-content/temp-backup/plugins/PLUGINNAME` folder. The same should apply for themes. Since updates sometimes run fast and we may miss the folder creation during testing, you can simulate an update failure to demonstrate. This will return early and skip deleting the backup on update-success.
 * When a plugin update fails, the previous version should be restored. To test that, change the version of a plugin to a previous number, run the update, and on fail the previous version (the one where you changed the version number) should still be installed on the site. To simulate an update failure and confirm this works, you can use the snippet below:
 
 ```php
