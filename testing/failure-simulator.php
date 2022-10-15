@@ -29,12 +29,12 @@ if ( ! class_exists( '\Rollback_Update_Failure\Testing\Failure_Simulator' ) ) {
 		protected static $updates = array();
 
 		/**
-		 * Adds hooks to the 'admin_init' action hook.
+		 * Adds hooks to the 'init' action hook for wp-cli.
 		 *
 		 * @return void
 		 */
 		public function __construct() {
-			add_action( 'admin_init', array( $this, 'hooks' ) );
+			add_action( 'init', array( $this, 'hooks' ) );
 		}
 
 		/**
