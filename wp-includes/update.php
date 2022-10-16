@@ -18,7 +18,7 @@ if ( ! defined( 'WPINC' ) ) {
 /**
  * Deletes all contents of the temp-backup directory.
  *
- * @since 6.1.0
+ * @since 6.2.0
  *
  * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
  */
@@ -41,7 +41,7 @@ function wp_delete_all_temp_backups() {
 /**
  * Remove `temp-backup` directory.
  *
- * @since 6.1.0
+ * @since 6.2.0
  *
  * @access private
  *
