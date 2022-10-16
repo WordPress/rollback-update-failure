@@ -1,6 +1,7 @@
 [unreleased]
 * use `array_unique` when saving simulated failure options
 * load failure simulator in `init` hook for WP-CLI
+* use check for `move_dir` to deactivate plugin instead of guessing version number
 
 #### 3.3.0 / 2022-10-14
 * use `wp-content/temp-backup` and not `wp-content/upgrade/temp-backup` as `WP_Upgrader::unpack_package` deletes contents of `wp-content-upgrade` at each update
