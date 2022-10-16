@@ -11,7 +11,7 @@
  * Plugin Name: Rollback Update Failure
  * Author: Andy Fragen, Ari Stathopolous, Colin Stewart, Paul Biron
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages.
- * Version: 3.3.0.2
+ * Version: 3.3.0.1
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
@@ -32,12 +32,9 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Deactivate plugin when committed to core.
-require_once ABSPATH . '/wp-admin/includes/plugin.php';
-require_once ABSPATH . 'wp-admin/includes/file.php';
-if ( function_exists( 'move_dir' ) ) {
+if ( version_compare( get_bloginfo( 'version' ), '6.2-beta1', '>=' ) ) {
 	deactivate_plugins( __FILE__ );
 }
-
 
 // Load files.
 require_once __DIR__ . '/wp-admin/includes/class-wp-site-health.php';
