@@ -29,12 +29,12 @@ if ( ! class_exists( '\Rollback_Update_Failure\Testing\Failure_Simulator' ) ) {
 		protected static $updates = array();
 
 		/**
-		 * Adds hooks to the 'admin_init' action hook.
+		 * Adds hooks to the 'init' action hook for wp-cli.
 		 *
 		 * @return void
 		 */
 		public function __construct() {
-			add_action( 'admin_init', array( $this, 'hooks' ) );
+			add_action( 'init', array( $this, 'hooks' ) );
 		}
 
 		/**
@@ -69,7 +69,7 @@ if ( ! class_exists( '\Rollback_Update_Failure\Testing\Failure_Simulator' ) ) {
 			$simulate_failure_plugins = get_option( 'rollback_simulate_failure_plugins' );
 			if ( empty( static::$updates ) ) {
 				$current         = get_site_transient( 'update_plugins' );
-				static::$updates = array_keys( $current->response );
+				static::$updates = property_exists( $current, 'response' ) ? array_keys( $current->response ) : array();
 			}
 
 			if ( ! \in_array( $plugin_file_decoded, static::$updates, true ) ) {
@@ -163,7 +163,7 @@ if ( ! class_exists( '\Rollback_Update_Failure\Testing\Failure_Simulator' ) ) {
 				}
 			}
 
-			update_option( 'rollback_simulate_failure_plugins', $simulate_failure_plugins );
+			update_option( 'rollback_simulate_failure_plugins', array_unique( $simulate_failure_plugins ) );
 		}
 
 		/**

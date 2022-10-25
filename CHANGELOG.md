@@ -1,5 +1,9 @@
 [unreleased]
 
+#### 3.3.1 / 2022-10-25
+* use `array_unique` when saving simulated failure options
+* load failure simulator in `init` hook for WP-CLI
+
 #### 3.3.0 / 2022-10-14
 * use `wp-content/temp-backup` and not `wp-content/upgrade/temp-backup` as `WP_Upgrader::unpack_package` deletes contents of `wp-content-upgrade` at each update
 * add simulated failure into plugin

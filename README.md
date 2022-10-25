@@ -56,6 +56,8 @@ add_filter( 'upgrader_install_package_result', function() {
 
 Alternatively you can install the [Rollback Update Testing](https://gist.github.com/afragen/80b68a6c8826ab37025b05d4519bb4bf) plugin, activating it as needed.
 
+Or use the built-in simulate failure feature. Just activate/deactivate from the `plugins.php` page action link.
+
 ## Reporting
 
 Please submit [issues](https://github.com/afragen/rollback-update-failure/issues) and [PRs](https://github.com/afragen/rollback-update-failure/pulls) to GitHub.
