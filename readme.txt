@@ -7,7 +7,7 @@ License: MIT
 Requires PHP: 5.6
 Requires at least: 6.0
 Tested up to: 6.0
-Stable Tag: 3.3.0
+Stable Tag: 3.3.1
 
 This is a feature plugin for testing automatic rollback of a plugin or theme update failure.
 
@@ -53,6 +53,8 @@ https://www.virtualbox.org/ticket/17971
 
 Alternatively you can install the [Rollback Update Testing](https://gist.github.com/afragen/80b68a6c8826ab37025b05d4519bb4bf) plugin, activating it as needed.
 
+Or use the built-in simulate failure feature. Just activate/deactivate from the `plugins.php` page action link.
+
 ## Reporting
 
 Please submit [issues](https://github.com/afragen/rollback-update-failure/issues) and [PRs](https://github.com/afragen/rollback-update-failure/pulls) to GitHub.
@@ -63,8 +65,13 @@ Logo from a meme generator. [Original artwork](http://hyperboleandahalf.blogspot
 
 Please see the Github repository: [CHANGELOG.md](https://github.com/afragen/rollback-update-failure/blob/main/CHANGELOG.md).
 
+#### 3.3.1 / 2022-10-25
+* use `array_unique` when saving simulated failure options
+* load failure simulator in `init` hook for WP-CLI
+
 #### 3.3.0 / 2022-10-14
 * use `wp-content/temp-backup` and not `wp-content/upgrade/temp-backup` as `WP_Upgrader::unpack_package` deletes contents of `wp-content-upgrade` at each update
+* add simulated failure into plugin
 
 #### 3.2.1 / 2022-09-23
 * bump auto-deactivation check for WP version

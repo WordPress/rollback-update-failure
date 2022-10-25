@@ -1,4 +1,6 @@
 [unreleased]
+
+#### 3.3.1 / 2022-10-25
 * use `array_unique` when saving simulated failure options
 * load failure simulator in `init` hook for WP-CLI
 
