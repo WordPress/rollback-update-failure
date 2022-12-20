@@ -138,7 +138,12 @@ if ( ! class_exists( '\Rollback_Update_Failure\Testing\Failure_Simulator' ) ) {
 		 * @return void
 		 */
 		public function handle_simulated_failure() {
-			if ( ! isset( $_GET['plugin'] ) || ! isset( $_GET['action'] ) ) {
+			if ( ! isset( $_GET['_wpnonce'], $_GET['plugin'], $_GET['action'] )
+				&& (
+					! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'simulate_failure_' . sanitize_key( wp_unslash( $_GET['plugin'] ) ) )
+					|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'do_not_simulate_failure_' . sanitize_key( wp_unslash( $_GET['plugin'] ) ) )
+				)
+			) {
 				return;
 			}
 
