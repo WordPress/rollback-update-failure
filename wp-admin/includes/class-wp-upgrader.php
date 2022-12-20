@@ -75,6 +75,9 @@ class WP_Upgrader {
 		// Restore backup if install_package returns WP_Error.
 		add_filter( 'upgrader_install_package_result', array( $this, 'restore_backup' ), 15, 2 );
 
+		// Use move_dir() instead of copy_dir().
+		add_filter( 'upgrader_copy_directory', array( $this, 'replace_copy_dir' ), 10, 3 );
+
 		// WP_Upgrader::init.
 		if ( ! wp_installing() ) {
 			$this->schedule_temp_backup_cleanup();
@@ -160,6 +163,28 @@ class WP_Upgrader {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Replace copy_dir() with move_dir() using WP_Upgrader::install_package() filter.
+	 *
+	 * @uses hook `upgrader_copy_directory`.
+	 *
+	 *  $result = apply_filters( 'upgrader_copy_directory', false, $source, $remote_destination );
+	 *  if ( false === $result ) {
+	 *      $result = copy_dir( $source, $remote_destination );
+	 *  }
+	 *
+	 * @param bool   $false              false.
+	 * @param string $source             Source directory.
+	 * @param string $remote_destination Destination directory.
+	 *
+	 * @return bool|\WP_Error
+	 */
+	public function replace_copy_dir( $false, $source, $remote_destination ) {
+		$false = \Rollback_Update_Failure\move_dir( $source, $remote_destination );
+
+		return $false;
 	}
 
 	/**

@@ -1,4 +1,5 @@
 [unreleased]
+* update for [new filter hook in WP_Upgrader::install_package](https://github.com/WordPress/wordpress-develop/pull/3791)
 
 #### 3.3.1 / 2022-10-25
 * use `array_unique` when saving simulated failure options
