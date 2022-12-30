@@ -1,4 +1,6 @@
 [unreleased]
+
+#### 3.3.2 / 2022-12-30
 * update for [new filter hook in WP_Upgrader::install_package](https://github.com/WordPress/wordpress-develop/pull/3791)
 * update nonce verification for failure simulator
 
