@@ -6,7 +6,7 @@ Tags: feature plugin, update, failure
 License: MIT
 Requires PHP: 5.6
 Requires at least: 6.0
-Tested up to: 6.0
+Tested up to: 6.2
 Stable Tag: 3.3.1
 
 This is a feature plugin for testing automatic rollback of a plugin or theme update failure.
@@ -64,6 +64,10 @@ Logo from a meme generator. [Original artwork](http://hyperboleandahalf.blogspot
 ## Changelog
 
 Please see the Github repository: [CHANGELOG.md](https://github.com/afragen/rollback-update-failure/blob/main/CHANGELOG.md).
+
+#### 3.3.2 / 2022-12-30
+* update for [new filter hook in WP_Upgrader::install_package](https://github.com/WordPress/wordpress-develop/pull/3791)
+* update nonce verification for failure simulator
 
 #### 3.3.1 / 2022-10-25
 * use `array_unique` when saving simulated failure options

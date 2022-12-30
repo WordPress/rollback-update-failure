@@ -1,5 +1,9 @@
 [unreleased]
 
+#### 3.3.2 / 2022-12-30
+* update for [new filter hook in WP_Upgrader::install_package](https://github.com/WordPress/wordpress-develop/pull/3791)
+* update nonce verification for failure simulator
+
 #### 3.3.1 / 2022-10-25
 * use `array_unique` when saving simulated failure options
 * load failure simulator in `init` hook for WP-CLI
