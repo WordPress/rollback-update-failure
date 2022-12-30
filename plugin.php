@@ -29,11 +29,11 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-// Deactivate plugin when committed to core.
-if ( version_compare( get_bloginfo( 'version' ), '6.3-beta1', '>=' ) ) {
-	require_once ABSPATH . 'wp-admin/includes/plugin.php';
-	deactivate_plugins( __FILE__ );
-}
+// TODO: Deactivate plugin when committed to core.
+// if ( version_compare( get_bloginfo( 'version' ), '6.3-beta1', '>=' ) ) {
+// require_once ABSPATH . 'wp-admin/includes/plugin.php';
+// deactivate_plugins( __FILE__ );
+// }
 
 // Load files.
 require_once __DIR__ . '/wp-admin/includes/class-wp-site-health.php';
