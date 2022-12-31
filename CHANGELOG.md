@@ -1,4 +1,5 @@
 [unreleased]
+* cast `upgrade_plugins` transient to object, overkill but someone reported an error
 
 #### 3.3.2 / 2022-12-30
 * update for [new filter hook in WP_Upgrader::install_package](https://github.com/WordPress/wordpress-develop/pull/3791)
