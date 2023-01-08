@@ -307,6 +307,12 @@ class WP_Rollback_Auto_Update {
 		$skin     = new \Automatic_Upgrader_Skin();
 		$upgrader = new \Plugin_Upgrader( $skin );
 		$upgrader->bulk_upgrade( $remaining_auto_updates );
+
+		$core_update = find_core_auto_update();
+		if ( $core_update ) {
+			$core_updater = new WP_Automatic_Updater();
+			$core_updater->update( 'core', $core_update );
+		}
 	}
 
 	/**
