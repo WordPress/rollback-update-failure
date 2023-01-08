@@ -220,6 +220,7 @@ class WP_Rollback_Auto_Update {
 		sleep( 2 );
 
 		$this->restart_updates();
+		$this->restart_core_updates();
 		$this->send_update_result_email();
 	}
 
@@ -295,7 +296,6 @@ class WP_Rollback_Auto_Update {
 
 	/**
 	 * Restart update process for plugins that remain after a fatal.
-	 * TODO: restart core updates if present.
 	 */
 	private function restart_updates() {
 		$remaining_auto_updates = $this->get_remaining_auto_updates();
@@ -307,7 +307,12 @@ class WP_Rollback_Auto_Update {
 		$skin     = new \Automatic_Upgrader_Skin();
 		$upgrader = new \Plugin_Upgrader( $skin );
 		$upgrader->bulk_upgrade( $remaining_auto_updates );
+	}
 
+	/**
+	 * Restart update process for core.
+	 */
+	private function restart_core_updates(){
 		$core_update = find_core_auto_update();
 		if ( $core_update ) {
 			$core_updater = new WP_Automatic_Updater();
