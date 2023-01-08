@@ -295,6 +295,7 @@ class WP_Rollback_Auto_Update {
 
 	/**
 	 * Restart update process for plugins that remain after a fatal.
+	 * TODO: restart core updates if present.
 	 */
 	private function restart_updates() {
 		$remaining_auto_updates = $this->get_remaining_auto_updates();
