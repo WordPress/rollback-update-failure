@@ -18,6 +18,7 @@
  * Requires at least: 6.0
  * GitHub Plugin URI: https://github.com/WordPress/rollback-update-failure
  * Primary Branch: main
+ * Requires Plugins: faster-updates
  */
 
 namespace Rollback_Update_Failure;
