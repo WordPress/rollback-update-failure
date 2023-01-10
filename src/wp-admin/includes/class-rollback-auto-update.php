@@ -312,7 +312,7 @@ class WP_Rollback_Auto_Update {
 	/**
 	 * Restart update process for core.
 	 */
-	private function restart_core_updates(){
+	private function restart_core_updates() {
 		$core_update = find_core_auto_update();
 		if ( $core_update ) {
 			$core_updater = new \WP_Automatic_Updater();
