@@ -10,7 +10,6 @@ namespace Rollback_Update_Failure;
 
 /*
  * Exit if called directly.
- * PHP version check and exit.
  */
 if ( ! defined( 'WPINC' ) ) {
 	die;

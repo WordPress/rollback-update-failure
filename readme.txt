@@ -7,7 +7,7 @@ License: MIT
 Requires PHP: 5.6
 Requires at least: 6.0
 Tested up to: 6.2
-Stable Tag: 3.3.1
+Stable Tag: 4.0.0
 
 This is a feature plugin for testing automatic rollback of a plugin or theme update failure.
 
@@ -64,6 +64,13 @@ Logo from a meme generator. [Original artwork](http://hyperboleandahalf.blogspot
 ## Changelog
 
 Please see the Github repository: [CHANGELOG.md](https://github.com/afragen/rollback-update-failure/blob/main/CHANGELOG.md).
+
+#### 4.0.0 / 2023-01-10
+* cast `upgrade_plugins` transient to object, overkill but someone reported an error
+* merge Rollback Auto Update
+* require [Faster Updates](https://github.com/afragen/faster-updates) for `move_dir()`, auto-install/activate
+* no longer requires special filter in `WP_Upgrader::install_package`
+* testing only on `update-core.php`
 
 #### 3.3.2 / 2022-12-30
 * update for [new filter hook in WP_Upgrader::install_package](https://github.com/WordPress/wordpress-develop/pull/3791)

@@ -1,5 +1,12 @@
 [unreleased]
 
+#### 4.0.0 / 2023-01-10
+* cast `upgrade_plugins` transient to object, overkill but someone reported an error
+* merge Rollback Auto Update
+* require [Faster Updates](https://github.com/afragen/faster-updates) for `move_dir()`, auto-install/activate
+* no longer requires special filter in `WP_Upgrader::install_package`
+* testing only on `update-core.php`
+
 #### 3.3.2 / 2022-12-30
 * update for [new filter hook in WP_Upgrader::install_package](https://github.com/WordPress/wordpress-develop/pull/3791)
 * update nonce verification for failure simulator

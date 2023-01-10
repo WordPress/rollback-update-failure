@@ -69,7 +69,7 @@ if ( ! class_exists( '\Rollback_Update_Failure\Testing\Failure_Simulator' ) ) {
 			$simulate_failure_plugins = get_option( 'rollback_simulate_failure_plugins' );
 			if ( empty( static::$updates ) ) {
 				$current         = get_site_transient( 'update_plugins' );
-				static::$updates = property_exists( $current, 'response' ) ? array_keys( $current->response ) : array();
+				static::$updates = property_exists( (object) $current, 'response' ) ? array_keys( $current->response ) : array();
 			}
 
 			if ( ! \in_array( $plugin_file_decoded, static::$updates, true ) ) {
