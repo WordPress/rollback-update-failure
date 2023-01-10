@@ -3,15 +3,14 @@
  * Rollback Update Failure
  *
  * @package rollback-update-failure
- * @author Andy Fragen <andy@thefragens.com>, Ari Stathopolous <aristath@gmail.com>
  * @license MIT
  */
 
 /**
- * Plugin Name: Rollback Update Failure
- * Author: Andy Fragen, Ari Stathopolous, Colin Stewart, Paul Biron
+ * Plugin Name: Rollbackenberg (neé Rollback Update Failure)
+ * Author: WP Core Contributors
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages.
- * Version: 3.3.2.1
+ * Version: 4.0.0-beta1
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
@@ -19,30 +18,33 @@
  * Requires at least: 6.0
  * GitHub Plugin URI: https://github.com/WordPress/rollback-update-failure
  * Primary Branch: main
+ * Requires Plugins: faster-updates
  */
 
 namespace Rollback_Update_Failure;
 
 /*
  * Exit if called directly.
- * PHP version check and exit.
  */
 if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-// Deactivate plugin when committed to core.
-if ( version_compare( get_bloginfo( 'version' ), '6.2-beta1', '>=' ) ) {
-	require_once ABSPATH . 'wp-admin/includes/plugin.php';
-	deactivate_plugins( __FILE__ );
-}
+// Load the Composer autoloader.
+require __DIR__ . '/vendor/autoload.php';
 
-// Load files.
-require_once __DIR__ . '/wp-admin/includes/class-wp-site-health.php';
-require_once __DIR__ . '/wp-admin/includes/class-plugin-theme-upgrader.php';
-require_once __DIR__ . '/wp-admin/includes/class-wp-upgrader.php';
-require_once __DIR__ . '/wp-admin/includes/file.php';
-require_once __DIR__ . '/wp-includes/update.php';
+add_action(
+	'plugins_loaded',
+	function() {
+		\WP_Dependency_Installer::instance( __DIR__ )->run();
+	}
+);
 
-// For testing.
-require_once __DIR__ . '/testing/failure-simulator.php';
+// TODO: Deactivate plugin when/if committed to core.
+// if ( version_compare( get_bloginfo( 'version' ), '6.3-beta1', '>=' ) ) {
+// require_once ABSPATH . 'wp-admin/includes/plugin.php';
+// deactivate_plugins( __FILE__ );
+// }
+
+// Add to wp-admin/includes/admin-filters.php.
+add_action( 'init', array( 'WP_Rollback_Auto_Update', 'init' ) );

@@ -1,0 +1,10 @@
+[
+  {
+    "name": "Faster Updates",
+    "host": "github",
+    "slug": "faster-updates/faster-updates.php",
+    "uri": "https://github.com/afragen/faster-updates/",
+    "branch": "main",
+    "required": true
+  }
+]

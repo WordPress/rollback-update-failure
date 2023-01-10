@@ -7,9 +7,10 @@
 
 namespace Rollback_Update_Failure;
 
+use function \Faster_Updates\Functions\move_dir;
+
 /*
  * Exit if called directly.
- * PHP version check and exit.
  */
 if ( ! defined( 'WPINC' ) ) {
 	die;
@@ -74,9 +75,6 @@ class WP_Upgrader {
 
 		// Restore backup if install_package returns WP_Error.
 		add_filter( 'upgrader_install_package_result', array( $this, 'restore_backup' ), 15, 2 );
-
-		// Use move_dir() instead of copy_dir().
-		add_filter( 'upgrader_copy_directory', array( $this, 'replace_copy_dir' ), 10, 1 );
 
 		// WP_Upgrader::init.
 		if ( ! wp_installing() ) {
@@ -163,22 +161,6 @@ class WP_Upgrader {
 		}
 
 		return $result;
-	}
-
-	/**
-	 * Replace copy_dir() with move_dir() using WP_Upgrader::install_package() filter.
-	 *
-	 * @uses hook `upgrader_copy_directory`.
-	 *
-	 * $callback = apply_filters( 'upgrader_copy_directory', 'copy_dir' );
-	 * $result = call_user_func( $callback, $source, $remote_destination );
-	 *
-	 * @param string $callback Callback function.
-	 *
-	 * @return bool|\WP_Error
-	 */
-	public function replace_copy_dir( $callback ) {
-		return '\Rollback_Update_Failure\move_dir';
 	}
 
 	/**
