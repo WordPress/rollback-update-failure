@@ -7,10 +7,10 @@
  */
 
 /**
- * Plugin Name: Rollbackenberg (neé Rollback Update Failure)
+ * Plugin Name: Rollback Update Failure
  * Author: WP Core Contributors
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages.
- * Version: 4.0.0-beta1
+ * Version: 4.0.0
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure

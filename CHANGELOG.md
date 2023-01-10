@@ -1,4 +1,6 @@
 [unreleased]
+
+#### 4.0.0 / 2023-01-10
 * cast `upgrade_plugins` transient to object, overkill but someone reported an error
 * merge Rollback Auto Update
 * require [Faster Updates](https://github.com/afragen/faster-updates) for `move_dir()`, auto-install/activate
