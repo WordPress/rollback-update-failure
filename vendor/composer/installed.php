@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'wordpress/rollback-update-failure',
-        'pretty_version' => 'dev-develop',
-        'version' => 'dev-develop',
-        'reference' => '899fa9b80e7df5d6d0c7561f7a5516c9b3b4ed91',
+        'pretty_version' => 'dev-main',
+        'version' => 'dev-main',
+        'reference' => '75d1a17ddc3b5bf42f0e6b2b9cc6c7b64a43e201',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -29,9 +29,9 @@
             'dev_requirement' => false,
         ),
         'wordpress/rollback-update-failure' => array(
-            'pretty_version' => 'dev-develop',
-            'version' => 'dev-develop',
-            'reference' => '899fa9b80e7df5d6d0c7561f7a5516c9b3b4ed91',
+            'pretty_version' => 'dev-main',
+            'version' => 'dev-main',
+            'reference' => '75d1a17ddc3b5bf42f0e6b2b9cc6c7b64a43e201',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
