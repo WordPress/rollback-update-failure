@@ -3,7 +3,7 @@
         'name' => 'wordpress/rollback-update-failure',
         'pretty_version' => 'dev-develop',
         'version' => 'dev-develop',
-        'reference' => '899fa9b80e7df5d6d0c7561f7a5516c9b3b4ed91',
+        'reference' => '732badca8d8068f740d854fa23f74fa8ae1c2f95',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -11,9 +11,9 @@
     ),
     'versions' => array(
         'afragen/wp-dependency-installer' => array(
-            'pretty_version' => '4.3.5',
-            'version' => '4.3.5.0',
-            'reference' => 'aee91336474390c60f66398e1d730ea289a36a1f',
+            'pretty_version' => '4.3.6',
+            'version' => '4.3.6.0',
+            'reference' => '9e681ea57e040fec5e18f1b91648d14e56f07ea4',
             'type' => 'library',
             'install_path' => __DIR__ . '/../afragen/wp-dependency-installer',
             'aliases' => array(),
@@ -31,7 +31,7 @@
         'wordpress/rollback-update-failure' => array(
             'pretty_version' => 'dev-develop',
             'version' => 'dev-develop',
-            'reference' => '899fa9b80e7df5d6d0c7561f7a5516c9b3b4ed91',
+            'reference' => '732badca8d8068f740d854fa23f74fa8ae1c2f95',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
