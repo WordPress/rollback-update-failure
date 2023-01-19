@@ -1,5 +1,7 @@
 [unreleased]
 * change directory name of rollback to mitigate VirtualBox bug.
+* update for `move_dir()` possibly returning `WP_Error`
+* fix `sprintf` error
 
 #### 4.0.0 / 2023-01-10
 * cast `upgrade_plugins` transient to object, overkill but someone reported an error
