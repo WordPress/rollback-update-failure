@@ -1,5 +1,7 @@
 [unreleased]
-* change directory name of rollback to mitigate VirtualBox bug.
+
+#### 4.1.0 / 2023-01-19
+* change directory name of rollback to distinguish from update.
 * update for `move_dir()` possibly returning `WP_Error`
 * fix `sprintf` error
 

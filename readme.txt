@@ -7,7 +7,7 @@ License: MIT
 Requires PHP: 5.6
 Requires at least: 6.0
 Tested up to: 6.2
-Stable Tag: 4.0.0
+Stable Tag: 4.1.0
 
 This is a feature plugin for testing automatic rollback of a plugin or theme update failure.
 
@@ -25,17 +25,6 @@ It is based on the [PR](https://github.com/WordPress/wordpress-develop/pull/1492
   * Check there is enough disk-space available to safely perform updates.
 
 To avoid confusion: The "temp-backup" folder will NOT be used to "roll-back" a plugin to a previous version after an update. This folder will simply contain a **transient backup** of the previous version of a plugins/themes getting updated, and as soon as the update process finishes, the folder will be empty.
-
-This plugin will automatically deactivate itself once the feature has been committed to core.
-
-### VirtualBox
-
-If you are running a virtualized server and using VirtualBox your hosting environment will need to add a [mu-plugin and watcher script](https://github.com/costdev/wp-virtualbox-testing) to overcome VirtualBox's rename() issues. There are some known issues where rename() in VirtualBox can fail on shared folders
-without reporting an error properly.
-
-More details:
-https://www.virtualbox.org/ticket/8761#comment:24
-https://www.virtualbox.org/ticket/17971
 
 ## Testing
 
@@ -64,6 +53,11 @@ Logo from a meme generator. [Original artwork](http://hyperboleandahalf.blogspot
 ## Changelog
 
 Please see the Github repository: [CHANGELOG.md](https://github.com/afragen/rollback-update-failure/blob/main/CHANGELOG.md).
+
+#### 4.1.0 / 2023-01-19
+* change directory name of rollback to distinguish from update.
+* update for `move_dir()` possibly returning `WP_Error`
+* fix `sprintf` error
 
 #### 4.0.0 / 2023-01-10
 * cast `upgrade_plugins` transient to object, overkill but someone reported an error
