@@ -228,7 +228,7 @@ class WP_Upgrader {
 
 		$src_dir = $wp_filesystem->find_folder( $args['src'] );
 		$src     = trailingslashit( $src_dir ) . $args['slug'];
-		$dest    = $dest_dir . trailingslashit( $args['dir'] ) . $args['slug'];
+		$dest    = $dest_dir . trailingslashit( $args['dir'] ) . $args['slug'] . '-rollback';
 
 		// Delete the temp-backup directory if it already exists.
 		if ( $wp_filesystem->is_dir( $dest ) ) {
@@ -267,7 +267,7 @@ class WP_Upgrader {
 				return $errors;
 			}
 
-			$src      = $wp_filesystem->wp_content_dir() . 'temp-backup/' . $args['dir'] . '/' . $args['slug'];
+			$src      = $wp_filesystem->wp_content_dir() . 'temp-backup/' . $args['dir'] . '/' . $args['slug'] . '-rollback';
 			$dest_dir = $wp_filesystem->find_folder( $args['src'] );
 			$dest     = trailingslashit( $dest_dir ) . $args['slug'];
 
@@ -319,7 +319,7 @@ class WP_Upgrader {
 				return $errors;
 			}
 
-			$temp_backup_dir = $wp_filesystem->wp_content_dir() . "temp-backup/{$args['dir']}/{$args['slug']}";
+			$temp_backup_dir = $wp_filesystem->wp_content_dir() . "temp-backup/{$args['dir']}/{$args['slug']}-rollback";
 
 			if ( ! $wp_filesystem->delete( $temp_backup_dir, true ) ) {
 				$errors->add(
