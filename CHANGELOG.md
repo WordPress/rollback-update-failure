@@ -4,6 +4,7 @@
 * change directory name of rollback to distinguish from update.
 * update for `move_dir()` possibly returning `WP_Error`
 * fix `sprintf` error
+* remove auto-install/activate of Faster Updates
 
 #### 4.0.0 / 2023-01-10
 * cast `upgrade_plugins` transient to object, overkill but someone reported an error
