@@ -1,6 +1,6 @@
 [unreleased]
 
-#### 4.1.0 / 2023-01-19
+#### 4.1.0 / 2023-01-20
 * change directory name of rollback to distinguish from update.
 * update for `move_dir()` possibly returning `WP_Error`
 * fix `sprintf` error
