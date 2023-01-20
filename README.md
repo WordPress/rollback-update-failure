@@ -29,18 +29,7 @@ It is based on the [PR](https://github.com/WordPress/wordpress-develop/pull/1492
 
 To avoid confusion: The "temp-backup" folder will NOT be used to "rollback" a plugin to a previous version after an update. This folder will simply contain a **transient backup** of the previous version of a plugins/themes getting updated, and as soon as the update process finishes, the folder will be empty.
 
-This plugin will automatically deactivate itself once the feature has been committed to core.
-
-There is a change to `WP_Upgrader::install_package()` that can't be implemented in the plugin. :sad:
-
-### VirtualBox
-
-If you are running a virtualized server and using VirtualBox your hosting environment will need to add a [mu-plugin and watcher script](https://github.com/costdev/wp-virtualbox-testing) to overcome VirtualBox's rename() issues. There are some known issues where rename() in VirtualBox can fail on shared folders
-without reporting an error properly.
-
-More details:
-https://www.virtualbox.org/ticket/8761#comment:24
-https://www.virtualbox.org/ticket/17971
+There is a change to `WP_Upgrader::install_package()` that can't be implemented in the plugin. :sad: So it requires the [Faster Updates](https://github.com/afragen/faster-updates) plugin to be installed and active.
 
 ## Testing
 

@@ -228,7 +228,7 @@ class WP_Upgrader {
 
 		$src_dir = $wp_filesystem->find_folder( $args['src'] );
 		$src     = trailingslashit( $src_dir ) . $args['slug'];
-		$dest    = $dest_dir . trailingslashit( $args['dir'] ) . $args['slug'];
+		$dest    = $dest_dir . trailingslashit( $args['dir'] ) . $args['slug'] . '-backup';
 
 		// Delete the temp-backup directory if it already exists.
 		if ( $wp_filesystem->is_dir( $dest ) ) {
@@ -236,7 +236,8 @@ class WP_Upgrader {
 		}
 
 		// Move to the temp-backup directory.
-		if ( ! move_dir( $src, $dest ) ) {
+		$result = move_dir( $src, $dest );
+		if ( is_wp_error( $result ) ) {
 			return new \WP_Error( 'fs_temp_backup_move', $this->strings['temp_backup_move_failed'] );
 		}
 
@@ -267,7 +268,7 @@ class WP_Upgrader {
 				return $errors;
 			}
 
-			$src      = $wp_filesystem->wp_content_dir() . 'temp-backup/' . $args['dir'] . '/' . $args['slug'];
+			$src      = $wp_filesystem->wp_content_dir() . 'temp-backup/' . $args['dir'] . '/' . $args['slug'] . '-backup';
 			$dest_dir = $wp_filesystem->find_folder( $args['src'] );
 			$dest     = trailingslashit( $dest_dir ) . $args['slug'];
 
@@ -282,7 +283,8 @@ class WP_Upgrader {
 				}
 
 				// Move it.
-				if ( ! move_dir( $src, $dest ) ) {
+				$result = move_dir( $src, $dest );
+				if ( is_wp_error( $result ) ) {
 					$errors->add(
 						'fs_temp_backup_delete',
 						sprintf( $this->strings['temp_backup_restore_failed'], $args['slug'] )
@@ -319,13 +321,12 @@ class WP_Upgrader {
 				return $errors;
 			}
 
-			$temp_backup_dir = $wp_filesystem->wp_content_dir() . "temp-backup/{$args['dir']}/{$args['slug']}";
+			$temp_backup_dir = $wp_filesystem->wp_content_dir() . "temp-backup/{$args['dir']}/{$args['slug']}-backup";
 
 			if ( ! $wp_filesystem->delete( $temp_backup_dir, true ) ) {
 				$errors->add(
 					'temp_backup_delete_failed',
-					sprintf( $this->strings['temp_backup_delete_failed'] ),
-					$args['slug']
+					sprintf( $this->strings['temp_backup_delete_failed'], $args['slug'] )
 				);
 				continue;
 			}
