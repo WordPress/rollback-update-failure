@@ -1,4 +1,5 @@
 [unreleased]
+* update to remove static init hook and load `class-rollback-auto-update.php` in `class-wp-upgrader.php`
 
 #### 4.1.2 / 2023-01-25
 * update `move_dir()` for new parameter
