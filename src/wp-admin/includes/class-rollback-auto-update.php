@@ -59,7 +59,6 @@ class WP_Rollback_Auto_Update {
 	 *
 	 * @param array|WP_Error $result     Result from WP_Upgrader::install_package().
 	 * @param array          $hook_extra Extra arguments passed to hooked filters.
-	 *
 	 * @return array|WP_Error
 	 */
 	public function auto_update_check( $result, $hook_extra ) {
@@ -146,12 +145,12 @@ class WP_Rollback_Auto_Update {
 		$this->no_error = 200 === $code;
 
 		if ( str_contains( $body, 'wp-die-message' ) || 200 !== $code ) {
-			$error = new \WP_Error(
+			$error = new WP_Error(
 				'new_version_error',
 				sprintf(
 					/* translators: %s: The name of the plugin. */
 					__( 'The new version of %s contains an error' ),
-					\get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin )['Name']
+					get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin )['Name']
 				)
 			);
 			throw new \Exception( $error->get_error_message() );
@@ -186,7 +185,8 @@ class WP_Rollback_Auto_Update {
 	/**
 	 * Handles errors by running Rollback.
 	 *
-	 * @param bool $skip If false, assume fatal and process, default false.
+	 * @param bool $skip If false, assume fatal and process.
+	 *                   Default false.
 	 */
 	private function handler( $skip = false ) {
 		if ( $skip ) {
@@ -195,15 +195,12 @@ class WP_Rollback_Auto_Update {
 		$this->fatals[] = $this->handler_args['hook_extra']['plugin'];
 
 		$this->cron_rollback();
-		// $this->log_error_msg( error_get_last() );
 
 		// Let's sleep for a couple of seconds here.
 		// After the error handler and before restarting updates.
 		sleep( 2 );
 
 		$this->restart_updates();
-		//$this->restart_core_updates();
-		//$this->send_update_result_email();
 	}
 
 	/**
@@ -237,7 +234,7 @@ class WP_Rollback_Auto_Update {
 		);
 
 		include_once $wp_filesystem->wp_plugins_dir() . 'rollback-update-failure/wp-admin/includes/class-wp-upgrader.php';
-		$rollback_updater = new \Rollback_Update_Failure\WP_Upgrader();
+		$rollback_updater = new \Rollback_Update_Failure\WP_Upgrader(); //TODO: change for core.
 
 		// Set private $temp_restores variable.
 		$ref_temp_restores = new \ReflectionProperty( $rollback_updater, 'temp_restores' );
@@ -261,22 +258,6 @@ class WP_Rollback_Auto_Update {
 	}
 
 	/**
-	 * Outputs the handler error to the log file.
-	 *
-	 * @param array $e Last error.
-	 */
-	private function log_error_msg( $e ) {
-		$error_msg = sprintf(
-			'Rollback Auto-Update: %1$s in %2$s, error %3$s',
-			$this->handler_args['handler_error'],
-			$this->handler_args['hook_extra']['plugin'],
-			empty( $e ) ? '?ParseError?' : var_export( $e, true )
-		);
-		//phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-		error_log( $error_msg );
-	}
-
-	/**
 	 * Restart update process for plugins that remain after a fatal.
 	 */
 	private function restart_updates() {
@@ -286,8 +267,8 @@ class WP_Rollback_Auto_Update {
 			return;
 		}
 
-		$skin     = new \Automatic_Upgrader_Skin();
-		$upgrader = new \Plugin_Upgrader( $skin );
+		$skin     = new Automatic_Upgrader_Skin();
+		$upgrader = new Plugin_Upgrader( $skin );
 		$upgrader->bulk_upgrade( $remaining_auto_updates );
 		$this->restart_core_updates();
 		$this->send_update_result_email();
@@ -299,7 +280,7 @@ class WP_Rollback_Auto_Update {
 	private function restart_core_updates() {
 		$core_update = find_core_auto_update();
 		if ( $core_update ) {
-			$core_updater = new \WP_Automatic_Updater();
+			$core_updater = new WP_Automatic_Updater();
 			$core_updater->update( 'core', $core_update );
 		}
 	}
@@ -326,10 +307,6 @@ class WP_Rollback_Auto_Update {
 
 		$this->processed = array_unique( array_merge( $this->processed, $remaining_auto_updates ) );
 
-		// error_log( 'fatals ' . var_export( array_unique( $this->fatals ), true ) );
-		// error_log( 'current auto updates: ' . var_export( $current_auto_updates, true ) );
-		// error_log( 'remaining auto updates ' . var_export( $remaining_auto_updates, true ) );
-		// error_log( 'processed ' . var_export( $this->processed, true ) );
 		return $remaining_auto_updates;
 	}
 
@@ -384,7 +361,7 @@ class WP_Rollback_Auto_Update {
 			}
 		}
 
-		$automatic_upgrader      = new \WP_Automatic_Updater();
+		$automatic_upgrader      = new WP_Automatic_Updater();
 		$send_plugin_theme_email = new \ReflectionMethod( $automatic_upgrader, 'send_plugin_theme_email' );
 		$send_plugin_theme_email->setAccessible( true );
 		$send_plugin_theme_email->invoke( $automatic_upgrader, 'mixed', $successful, $failed );
