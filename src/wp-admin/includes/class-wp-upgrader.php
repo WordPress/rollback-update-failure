@@ -99,8 +99,7 @@ class WP_Upgrader {
 	public function create_backup( $source, $remote_source, $upgrader, $hook_extra ) {
 		$this->options = ( new WP_Plugin_Theme_Upgrader() )->set_callback_options( $hook_extra );
 
-		// Early exit if $hook_extra is empty,
-		// or if this is an installation and not update.
+		// Early exit if $hook_extra is empty, or if this is an installation and not update.
 		if ( empty( $hook_extra ) || ( isset( $hook_extra['action'] ) && 'install' === $hook_extra['action'] ) ) {
 			return $source;
 		}
@@ -139,8 +138,7 @@ class WP_Upgrader {
 	 * @return bool|WP_Error The result from `WP_Upgrader::install_package()`, or WP_Error on failure.
 	 */
 	public function restore_backup( $result, $hook_extra ) {
-		// Early exit if $hook_extra is empty,
-		// or if this is an installation and not update.
+		// Early exit if $hook_extra is empty, or if this is an installation and not update.
 		if ( empty( $hook_extra ) || ( isset( $hook_extra['action'] ) && 'install' === $hook_extra['action'] ) ) {
 			return $result;
 		}
