@@ -114,6 +114,7 @@ class WP_Upgrader {
 			}
 			$this->temp_backups[] = $this->options['hook_extra']['temp_backup'];
 		}
+		remove_filter( 'upgrader_source_selection', array( $this, 'create_backup' ), 9999 );
 
 		return $source;
 	}

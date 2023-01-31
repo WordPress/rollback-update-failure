@@ -1,6 +1,6 @@
 [unreleased]
-* update to remove static init hook and load `class-rollback-auto-update.php` in `class-wp-upgrader.php`
-* try to avoid sending update email twice
+* remove hook calling `WP_Upgrader::create_backup` at end of function
+* during `WP_Rollback_Auto_Update::restart_updates` remove shutdown hook for `WP_Upgrader::delete_temp_backup`
 
 #### 4.1.2 / 2023-01-25
 * update `move_dir()` for new parameter
