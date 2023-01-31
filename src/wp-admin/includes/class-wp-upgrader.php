@@ -107,6 +107,12 @@ class WP_Upgrader {
 
 		$args = $this->options['hook_extra']['temp_backup'];
 
+		// Exit as rollback updates will call create_backup() twice per cycle.
+		foreach ( array_keys( $this->temp_backups ) as $arr ) {
+			if ( 'temp_backup' === $arr ) {
+				return $source;
+			}
+		}
 		if ( isset( $hook_extra['plugin'] ) || isset( $hook_extra['theme'] ) ) {
 			$temp_backup = $this->move_to_temp_backup_dir( $args );
 			if ( is_wp_error( $temp_backup ) ) {
@@ -114,7 +120,6 @@ class WP_Upgrader {
 			}
 			$this->temp_backups[] = $this->options['hook_extra']['temp_backup'];
 		}
-		remove_filter( 'upgrader_source_selection', array( $this, 'create_backup' ), 9999 );
 
 		return $source;
 	}
