@@ -236,7 +236,7 @@ class WP_Rollback_Auto_Update {
 		);
 
 		include_once $wp_filesystem->wp_plugins_dir() . 'rollback-update-failure/wp-admin/includes/class-wp-upgrader.php';
-		$rollback_updater = new \Rollback_Update_Failure\WP_Upgrader(); //TODO: change for core.
+		$rollback_updater = new \Rollback_Update_Failure\WP_Upgrader(); // TODO: change for core.
 
 		// Set private $temp_restores variable.
 		$ref_temp_restores = new \ReflectionProperty( $rollback_updater, 'temp_restores' );
