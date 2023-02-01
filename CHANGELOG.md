@@ -1,5 +1,4 @@
 [unreleased]
-* remove hook calling `WP_Upgrader::create_backup` at end of function
 * during `WP_Rollback_Auto_Update::restart_updates` remove shutdown hook for `WP_Upgrader::delete_temp_backup`
 
 #### 4.1.2 / 2023-01-25

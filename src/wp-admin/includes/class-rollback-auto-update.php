@@ -306,8 +306,6 @@ class WP_Rollback_Auto_Update {
 		// Get array of non-fatal auto-updates remaining.
 		$remaining_auto_updates = array_diff( $current_auto_updates, $this->processed, $this->fatals );
 
-		$this->processed = array_unique( array_merge( $this->processed, $remaining_auto_updates ) );
-
 		return $remaining_auto_updates;
 	}
 
