@@ -4,7 +4,7 @@
  *
  * @package WordPress
  * @subpackage Administration
- * @since 6.2.0
+ * @since 6.3.0
  */
 
 /**
@@ -196,8 +196,11 @@ class WP_Rollback_Auto_Update {
 
 		$this->cron_rollback();
 
-		// Let's sleep for a couple of seconds here.
-		// After the error handler and before restarting updates.
+		/**
+		 * This possibly helps to avoid a potential race condition on servers that may start to
+		 * process the next plugin for auto-updating before the handler can pick up an error from
+		 * the previously processed plugin.
+		 */
 		sleep( 2 );
 
 		$this->restart_updates();
