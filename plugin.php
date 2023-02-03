@@ -15,7 +15,7 @@
  * License: MIT
  * Text Domain: rollback-update-failure
  * Requires PHP: 5.6
- * Requires at least: 6.0
+ * Requires at least: 6.2
  * GitHub Plugin URI: https://github.com/WordPress/rollback-update-failure
  * Primary Branch: main
  */

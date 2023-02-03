@@ -5,7 +5,7 @@ Contributors: afragen, aristath, costdev, pbiron
 Tags: feature plugin, update, failure
 License: MIT
 Requires PHP: 5.6
-Requires at least: 6.0
+Requires at least: 6.2
 Tested up to: 6.2
 Stable Tag: 4.1.2
 

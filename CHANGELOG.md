@@ -1,6 +1,7 @@
 [unreleased]
 * during `WP_Rollback_Auto_Update::restart_updates` remove shutdown hook for `WP_Upgrader::delete_temp_backup`
 * skip second sequential call to `create_backup`
+* now require at least WP 6.2-beta1
 
 #### 4.1.2 / 2023-01-25
 * update `move_dir()` for new parameter
