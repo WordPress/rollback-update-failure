@@ -29,12 +29,12 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-// Load the Composer autoloader.
-require __DIR__ . '/vendor/autoload.php';
-
 // Hooray move_dir() has been committed.
 if ( version_compare( get_bloginfo( 'version' ), '6.2-beta1', '<=' ) ) {
 	require_once ABSPATH . 'wp-admin/includes/plugin.php';
 	deactivate_plugins( __FILE__ );
 	return;
 }
+
+// Load the Composer autoloader.
+require __DIR__ . '/vendor/autoload.php';
