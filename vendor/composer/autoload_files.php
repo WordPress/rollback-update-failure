@@ -10,6 +10,5 @@ return array(
     'e9b5c5dc9b3d7813fdda4df144a4ed64' => $baseDir . '/src/wp-admin/includes/class-plugin-theme-upgrader.php',
     '40e7095e110333db19e8c24c3c016c98' => $baseDir . '/src/wp-admin/includes/class-wp-upgrader.php',
     '4d27640b7b314f6885d24d133d099499' => $baseDir . '/src/wp-includes/update.php',
-    '6992a819889413f942f23d1e01d8b095' => $baseDir . '/src/wp-admin/includes/class-rollback-auto-update.php',
     '5c681423340f9bde556e5e4b95d0f1a6' => $baseDir . '/src/testing/failure-simulator.php',
 );

@@ -4,7 +4,7 @@
  *
  * @package WordPress
  * @subpackage Administration
- * @since 6.2.0
+ * @since 6.3.0
  */
 
 /**
@@ -55,29 +55,10 @@ class WP_Rollback_Auto_Update {
 	public $error_types = E_ERROR | E_PARSE | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR;
 
 	/**
-	 * Static function to get started from hook.
-	 *
-	 * @return void
-	 */
-	public static function init() {
-		( new WP_Rollback_Auto_Update() )->load_hooks();
-	}
-
-	/**
-	 * Load hook to start.
-	 *
-	 * @return void
-	 */
-	public function load_hooks() {
-		add_filter( 'upgrader_install_package_result', array( $this, 'auto_update_check' ), 15, 2 );
-	}
-
-	/**
 	 * Checks the validity of the updated plugin.
 	 *
 	 * @param array|WP_Error $result     Result from WP_Upgrader::install_package().
 	 * @param array          $hook_extra Extra arguments passed to hooked filters.
-	 *
 	 * @return array|WP_Error
 	 */
 	public function auto_update_check( $result, $hook_extra ) {
@@ -86,7 +67,7 @@ class WP_Rollback_Auto_Update {
 		}
 
 		// Checking our own plugin will cause a PHP Fatal redeclaration error.
-		if ( 'rollback-auto-update/plugin.php' === $hook_extra['plugin'] ) {
+		if ( 'rollback-update-failure/plugin.php' === $hook_extra['plugin'] ) {
 			return $result;
 		}
 		error_log( $hook_extra['plugin'] . ' processing...' );
@@ -169,7 +150,7 @@ class WP_Rollback_Auto_Update {
 				sprintf(
 					/* translators: %s: The name of the plugin. */
 					__( 'The new version of %s contains an error' ),
-					\get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin )['Name']
+					get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin )['Name']
 				)
 			);
 			throw new \Exception( $error->get_error_message() );
@@ -204,7 +185,8 @@ class WP_Rollback_Auto_Update {
 	/**
 	 * Handles errors by running Rollback.
 	 *
-	 * @param bool $skip If false, assume fatal and process, default false.
+	 * @param bool $skip If false, assume fatal and process.
+	 *                   Default false.
 	 */
 	private function handler( $skip = false ) {
 		if ( $skip ) {
@@ -213,10 +195,12 @@ class WP_Rollback_Auto_Update {
 		$this->fatals[] = $this->handler_args['hook_extra']['plugin'];
 
 		$this->cron_rollback();
-		// $this->log_error_msg( error_get_last() );
 
-		// Let's sleep for a couple of seconds here.
-		// After the error handler and before restarting updates.
+		/**
+		 * This possibly helps to avoid a potential race condition on servers that may start to
+		 * process the next plugin for auto-updating before the handler can pick up an error from
+		 * the previously processed plugin.
+		 */
 		sleep( 2 );
 
 		$this->restart_updates();
@@ -255,7 +239,7 @@ class WP_Rollback_Auto_Update {
 		);
 
 		include_once $wp_filesystem->wp_plugins_dir() . 'rollback-update-failure/wp-admin/includes/class-wp-upgrader.php';
-		$rollback_updater = new \Rollback_Update_Failure\WP_Upgrader();
+		$rollback_updater = new \Rollback_Update_Failure\WP_Upgrader(); // TODO: change for core.
 
 		// Set private $temp_restores variable.
 		$ref_temp_restores = new \ReflectionProperty( $rollback_updater, 'temp_restores' );
@@ -279,22 +263,6 @@ class WP_Rollback_Auto_Update {
 	}
 
 	/**
-	 * Outputs the handler error to the log file.
-	 *
-	 * @param array $e Last error.
-	 */
-	private function log_error_msg( $e ) {
-		$error_msg = sprintf(
-			'Rollback Auto-Update: %1$s in %2$s, error %3$s',
-			$this->handler_args['handler_error'],
-			$this->handler_args['hook_extra']['plugin'],
-			empty( $e ) ? '?ParseError?' : var_export( $e, true )
-		);
-		//phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-		error_log( $error_msg );
-	}
-
-	/**
 	 * Restart update process for plugins that remain after a fatal.
 	 */
 	private function restart_updates() {
@@ -307,6 +275,7 @@ class WP_Rollback_Auto_Update {
 		$skin     = new \Automatic_Upgrader_Skin();
 		$upgrader = new \Plugin_Upgrader( $skin );
 		$upgrader->bulk_upgrade( $remaining_auto_updates );
+		remove_action( 'shutdown', array( new \Rollback_Update_Failure\WP_Upgrader(), 'delete_temp_backup' ), 100 );
 	}
 
 	/**
@@ -340,12 +309,6 @@ class WP_Rollback_Auto_Update {
 		// Get array of non-fatal auto-updates remaining.
 		$remaining_auto_updates = array_diff( $current_auto_updates, $this->processed, $this->fatals );
 
-		$this->processed = array_unique( array_merge( $this->processed, $remaining_auto_updates ) );
-
-		// error_log( 'fatals ' . var_export( array_unique( $this->fatals ), true ) );
-		// error_log( 'current auto updates: ' . var_export( $current_auto_updates, true ) );
-		// error_log( 'remaining auto updates ' . var_export( $remaining_auto_updates, true ) );
-		// error_log( 'processed ' . var_export( $this->processed, true ) );
 		return $remaining_auto_updates;
 	}
 

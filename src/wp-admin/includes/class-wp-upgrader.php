@@ -7,8 +7,6 @@
 
 namespace Rollback_Update_Failure;
 
-use function \Faster_Updates\Functions\move_dir;
-
 /*
  * Exit if called directly.
  */
@@ -21,7 +19,7 @@ if ( ! defined( 'WPINC' ) ) {
  */
 class WP_Upgrader {
 	/**
-	 * The error/notification strings used to update the user on the progress.
+	 * Stores the error/notification strings used to update the user on the progress.
 	 *
 	 * @since 2.8.0
 	 * @var array $strings
@@ -29,7 +27,7 @@ class WP_Upgrader {
 	public $strings = array();
 
 	/**
-	 * Store options for rollback callbacks.
+	 * Stores options for rollback callbacks.
 	 *
 	 * @since 6.2.0
 	 * @var array
@@ -37,7 +35,7 @@ class WP_Upgrader {
 	private $options = array();
 
 	/**
-	 * Store list of plugins/themes added to temp-backup directory.
+	 * Stores list of plugins/themes added to temp-backup directory.
 	 *
 	 * Used by rollback functions.
 	 *
@@ -47,7 +45,7 @@ class WP_Upgrader {
 	private $temp_backups = array();
 
 	/**
-	 * Store list of plugins/themes needing to be restored from temp-backup directory.
+	 * Stores list of plugins/themes needing to be restored from temp-backup directory.
 	 *
 	 * Used by rollback functions.
 	 *
@@ -80,10 +78,11 @@ class WP_Upgrader {
 		if ( ! wp_installing() ) {
 			$this->schedule_temp_backup_cleanup();
 		}
+		add_filter( 'upgrader_install_package_result', array( new \WP_Rollback_Auto_Update(), 'auto_update_check' ), 15, 2 );
 	}
 
 	/**
-	 * Move the plugin/theme being upgraded into a rollback directory.
+	 * Moves the plugin/theme being upgraded into a rollback directory.
 	 *
 	 * @since 6.2.0
 	 * @uses 'upgrader_source_selection' filter.
@@ -93,19 +92,24 @@ class WP_Upgrader {
 	 * @param WP_Upgrader $upgrader      WP_Upgrader instance.
 	 * @param array       $hook_extra    Array of data for plugin/theme being updated.
 	 *
-	 * @return string|WP_Error
+	 * @return string|WP_Error The path to the source location, or WP_Error on failure.
 	 */
 	public function create_backup( $source, $remote_source, $upgrader, $hook_extra ) {
 		$this->options = ( new WP_Plugin_Theme_Upgrader() )->set_callback_options( $hook_extra );
 
-		// Early exit if $hook_extra is empty,
-		// or if this is an installation and not update.
+		// Early exit if $hook_extra is empty, or if this is an installation and not update.
 		if ( empty( $hook_extra ) || ( isset( $hook_extra['action'] ) && 'install' === $hook_extra['action'] ) ) {
 			return $source;
 		}
 
 		$args = $this->options['hook_extra']['temp_backup'];
 
+		// Exit as rollback updates will call create_backup() twice per cycle.
+		foreach ( array_keys( $this->temp_backups ) as $arr ) {
+			if ( 'temp_backup' === $arr ) {
+				return $source;
+			}
+		}
 		if ( isset( $hook_extra['plugin'] ) || isset( $hook_extra['theme'] ) ) {
 			$temp_backup = $this->move_to_temp_backup_dir( $args );
 			if ( is_wp_error( $temp_backup ) ) {
@@ -118,20 +122,21 @@ class WP_Upgrader {
 	}
 
 	/**
-	 * Restore backup to original location if update failed.
+	 * Restores backup to original location if update failed.
 	 *
 	 * @since 6.2.0
-	 * @uses 'upgrader_install_package_result' filter.
+	 *
+	 * @see 'upgrader_install_package_result'.
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+	 *
 	 * @param bool|WP_Error $result     Result from `WP_Upgrader::install_package()`.
 	 * @param array         $hook_extra Array of data for plugin/theme being updated.
 	 *
-	 * @return bool|WP_Error
+	 * @return bool|WP_Error The result from `WP_Upgrader::install_package()`, or WP_Error on failure.
 	 */
 	public function restore_backup( $result, $hook_extra ) {
-		// Early exit if $hook_extra is empty,
-		// or if this is an installation and not update.
+		// Early exit if $hook_extra is empty, or if this is an installation and not update.
 		if ( empty( $hook_extra ) || ( isset( $hook_extra['action'] ) && 'install' === $hook_extra['action'] ) ) {
 			return $result;
 		}
@@ -164,7 +169,7 @@ class WP_Upgrader {
 	}
 
 	/**
-	 * Schedule cleanup of the temp-backup directory.
+	 * Schedules cleanup of the temp-backup directory.
 	 *
 	 * @since 6.2.0
 	 */
@@ -175,13 +180,13 @@ class WP_Upgrader {
 	}
 
 	/**
-	 * Move the plugin/theme being upgraded into a temp-backup directory.
+	 * Moves the plugin/theme being upgraded into a temp-backup directory.
 	 *
 	 * @since 6.2.0
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
-	 * @param array|string $args {
+	 * @param string[] $args {
 	 *     Array of data for the temp-backup.
 	 *
 	 *     @type string $slug Plugin slug.
@@ -189,7 +194,8 @@ class WP_Upgrader {
 	 *     @type string $dir  Directory name.
 	 * }
 	 *
-	 * @return bool|WP_Error
+	 * @return bool|WP_Error true on success, false if the backup should not be made,
+	 *                       or WP_Error on failure.
 	 */
 	public function move_to_temp_backup_dir( $args ) {
 		global $wp_filesystem;
@@ -236,7 +242,7 @@ class WP_Upgrader {
 		}
 
 		// Move to the temp-backup directory.
-		$result = move_dir( $src, $dest, true );
+		$result = \move_dir( $src, $dest );
 		if ( is_wp_error( $result ) ) {
 			return new \WP_Error( 'fs_temp_backup_move', $this->strings['temp_backup_move_failed'] );
 		}
@@ -245,13 +251,14 @@ class WP_Upgrader {
 	}
 
 	/**
-	 * Restore the plugin/theme from the temp-backup directory.
+	 * Restores the plugin/theme from the temp-backup directory.
 	 *
 	 * @since 6.2.0
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
-	 * @return bool|WP_Error
+	 * @return bool|WP_Error true on success, false if the backup should not be restored,
+	 *                       or WP_Error on failure.
 	 */
 	public function restore_temp_backup() {
 		global $wp_filesystem;
@@ -283,7 +290,7 @@ class WP_Upgrader {
 				}
 
 				// Move it.
-				$result = move_dir( $src, $dest, true );
+				$result = \move_dir( $src, $dest );
 				if ( is_wp_error( $result ) ) {
 					$errors->add(
 						'fs_temp_backup_delete',
@@ -304,7 +311,7 @@ class WP_Upgrader {
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
-	 * @return bool
+	 * @return bool Whether the temp-backup was deleted.
 	 */
 	public function delete_temp_backup() {
 		global $wp_filesystem;
@@ -336,5 +343,9 @@ class WP_Upgrader {
 	}
 
 }
+
+// Insert at end of wp-admin/includes/class-wp-upgrader.php.
+/** WP_Rollback_Auto_Update class */
+require_once __DIR__ . '/class-rollback-auto-update.php';
 
 new WP_Upgrader();
