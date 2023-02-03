@@ -1,5 +1,8 @@
 [unreleased]
 
+#### 5.0.1 / 2023-02-03
+* ensure `move_dir()` called with 3rd parameter as `move_dir($from, $to, true)`
+
 #### 5.0.0 / 2023-02-02
 * during `WP_Rollback_Auto_Update::restart_updates` remove shutdown hook for `WP_Upgrader::delete_temp_backup`
 * skip second sequential call to `create_backup`
