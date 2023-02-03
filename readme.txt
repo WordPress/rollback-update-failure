@@ -7,7 +7,7 @@ License: MIT
 Requires PHP: 5.6
 Requires at least: 6.2
 Tested up to: 6.2
-Stable Tag: 4.1.2
+Stable Tag: 5.0.0
 
 This is a feature plugin for testing automatic rollback of a plugin or theme update failure.
 
@@ -15,9 +15,7 @@ This is a feature plugin for testing automatic rollback of a plugin or theme upd
 
 This is a feature plugin for testing automatic rollback of a plugin or theme update failure.
 
-Requires https://github.com/afragen/faster-updates. Only tests from update-core.php page.
-
-It is based on the [PR](https://github.com/WordPress/wordpress-develop/pull/1492) for [#51857](https://core.trac.wordpress.org/ticket/51857). Current [PR #2225](https://github.com/WordPress/wordpress-develop/pull/2225/) for inclusion to core.
+It is based on the [PR](https://github.com/WordPress/wordpress-develop/pull/1492) for [#51857](https://core.trac.wordpress.org/ticket/51857). Current [PR #2225](https://github.com/WordPress/wordpress-develop/pull/2225/) and [PR #3958](https://github.com/WordPress/wordpress-develop/pull/3958) for inclusion to core.
 
 * When updating a plugin/theme, the old version of the plugin/theme gets moved to a `wp-content/temp-backup/plugins/PLUGINNAME` or `wp-content/temp-backup/themes/THEMENAME` folder. The reason we chose to **move** instead of **zip**, is because zipping/unzipping are very resources-intensive processes, and would increase the risk on low-end, shared hosts. Moving on the other hand is performed instantly and won't be a bottleneck.
 * If the update fails, then the "backup" we kept in the `temp-backup` folder gets restored to its original location
@@ -55,6 +53,12 @@ Logo from a meme generator. [Original artwork](http://hyperboleandahalf.blogspot
 ## Changelog
 
 Please see the Github repository: [CHANGELOG.md](https://github.com/afragen/rollback-update-failure/blob/main/CHANGELOG.md).
+
+#### 5.0.0 / 2023-02-02
+* during `WP_Rollback_Auto_Update::restart_updates` remove shutdown hook for `WP_Upgrader::delete_temp_backup`
+* skip second sequential call to `create_backup`
+* now require at least WP 6.2-beta1, deactivate if requirements not met
+* Faster Updates no longer required as [committed to core](https://core.trac.wordpress.org/changeset/55204)
 
 #### 4.1.2 / 2023-01-25
 * update `move_dir()` for new parameter
