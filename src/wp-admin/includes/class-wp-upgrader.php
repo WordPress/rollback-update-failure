@@ -7,8 +7,6 @@
 
 namespace Rollback_Update_Failure;
 
-use function \Faster_Updates\Functions\move_dir; // TODO: delete.
-
 /*
  * Exit if called directly.
  */
@@ -244,7 +242,7 @@ class WP_Upgrader {
 		}
 
 		// Move to the temp-backup directory.
-		$result = move_dir( $src, $dest ); // TODO: backslash.
+		$result = \move_dir( $src, $dest );
 		if ( is_wp_error( $result ) ) {
 			return new \WP_Error( 'fs_temp_backup_move', $this->strings['temp_backup_move_failed'] );
 		}
@@ -292,7 +290,7 @@ class WP_Upgrader {
 				}
 
 				// Move it.
-				$result = move_dir( $src, $dest ); // TODO: backslash.
+				$result = \move_dir( $src, $dest );
 				if ( is_wp_error( $result ) ) {
 					$errors->add(
 						'fs_temp_backup_delete',
