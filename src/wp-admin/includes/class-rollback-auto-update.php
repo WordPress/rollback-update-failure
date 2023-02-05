@@ -72,7 +72,7 @@ class WP_Rollback_Auto_Update {
 		}
 
 		// Already processed.
-		if ( in_array( $hook_extra['plugin'], self::$processed ) ) {
+		if ( in_array( $hook_extra['plugin'], self::$processed, true ) ) {
 			return $result;
 		}
 
