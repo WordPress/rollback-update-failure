@@ -70,6 +70,12 @@ class WP_Rollback_Auto_Update {
 		if ( 'rollback-update-failure/plugin.php' === $hook_extra['plugin'] ) {
 			return $result;
 		}
+
+		// Already processed.
+		if ( in_array( $hook_extra['plugin'], self::$processed ) ) {
+			return $result;
+		}
+
 		error_log( $hook_extra['plugin'] . ' processing...' );
 
 		// This possibly helps to avoid a potential race condition on servers that may start to
