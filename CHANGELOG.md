@@ -1,5 +1,8 @@
 [unreleased]
 
+#### 5.0.2 / 2023-02-05
+* make variables static to retain value during auto-update run
+
 #### 5.0.1 / 2023-02-03
 * ensure `move_dir()` called with 3rd parameter as `move_dir($from, $to, true)`
 
