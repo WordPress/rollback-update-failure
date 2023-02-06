@@ -36,7 +36,7 @@ class WP_Rollback_Auto_Update {
 	/**
 	 * Stores `update_plugins` transient.
 	 *
-	 * @var \stdClass
+	 * @var stdClass
 	 */
 	private static $current;
 
@@ -78,9 +78,11 @@ class WP_Rollback_Auto_Update {
 
 		error_log( $hook_extra['plugin'] . ' processing...' );
 
-		// This possibly helps to avoid a potential race condition on servers that may start to
-		// process the next plugin for auto-updating before the handler can pick up an error from
-		// the previously processed plugin.
+		/**
+		 * This possibly helps to avoid a potential race condition on servers that may start to
+		 * process the next plugin for auto-updating before the handler can pick up an error from
+		 * the previously processed plugin.
+		 */
 		sleep( 2 );
 
 		$this->no_error     = false;
