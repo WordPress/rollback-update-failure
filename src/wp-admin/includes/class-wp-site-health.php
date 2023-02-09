@@ -40,7 +40,7 @@ class WP_Site_Health {
 	/**
 	 * Additional tests for site-health.
 	 *
-	 * @since 6.2.0
+	 * @since 6.3.0
 	 *
 	 * @param array $tests Available site-health tests.
 	 *
@@ -62,7 +62,7 @@ class WP_Site_Health {
 	/**
 	 * Test available disk-space for updates/upgrades.
 	 *
-	 * @since 6.2.0
+	 * @since 6.3.0
 	 *
 	 * @return array The test results.
 	 */
@@ -110,7 +110,7 @@ class WP_Site_Health {
 	/**
 	 * Test if plugin and theme updates temp-backup folders are writable or can be created.
 	 *
-	 * @since 6.2.0
+	 * @since 6.3.0
 	 *
 	 * @return array The test results.
 	 */
