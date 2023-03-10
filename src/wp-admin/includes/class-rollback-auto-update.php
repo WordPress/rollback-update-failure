@@ -153,7 +153,7 @@ class WP_Rollback_Auto_Update {
 		$this->no_error = 200 === $code;
 
 		if ( str_contains( $body, 'wp-die-message' ) || 200 !== $code ) {
-			$error = new \WP_Error(
+			$error = new WP_Error(
 				'new_version_error',
 				sprintf(
 					/* translators: %s: The name of the plugin. */
@@ -286,15 +286,15 @@ class WP_Rollback_Auto_Update {
 			return;
 		}
 
-		$skin     = new \Automatic_Upgrader_Skin();
-		$upgrader = new \Plugin_Upgrader( $skin );
+		$skin     = new Automatic_Upgrader_Skin();
+		$upgrader = new Plugin_Upgrader( $skin );
 		$upgrader->bulk_upgrade( $remaining_auto_updates );
 
 		// TODO: change for core.
 		if ( WP_ROLLBACK_COMMITTED ) {
 			remove_action( 'shutdown', array( new WP_Upgrader(), 'delete_temp_backup' ), 100 );
 		} else {
-		remove_action( 'shutdown', array( new \Rollback_Update_Failure\WP_Upgrader(), 'delete_temp_backup' ), 100 );
+			remove_action( 'shutdown', array( new \Rollback_Update_Failure\WP_Upgrader(), 'delete_temp_backup' ), 100 );
 		}
 	}
 
@@ -304,7 +304,7 @@ class WP_Rollback_Auto_Update {
 	private function restart_core_updates() {
 		$core_update = find_core_auto_update();
 		if ( $core_update ) {
-			$core_updater = new \WP_Automatic_Updater();
+			$core_updater = new WP_Automatic_Updater();
 			$core_updater->update( 'core', $core_update );
 		}
 	}
@@ -383,7 +383,7 @@ class WP_Rollback_Auto_Update {
 			}
 		}
 
-		$automatic_upgrader      = new \WP_Automatic_Updater();
+		$automatic_upgrader      = new WP_Automatic_Updater();
 		$send_plugin_theme_email = new \ReflectionMethod( $automatic_upgrader, 'send_plugin_theme_email' );
 		$send_plugin_theme_email->setAccessible( true );
 		$send_plugin_theme_email->invoke( $automatic_upgrader, 'mixed', $successful, $failed );
