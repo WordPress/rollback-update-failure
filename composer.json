@@ -21,10 +21,6 @@
   },
   "autoload": {
     "files": [
-      "src/wp-admin/includes/class-wp-site-health.php",
-      "src/wp-admin/includes/class-plugin-theme-upgrader.php",
-      "src/wp-admin/includes/class-wp-upgrader.php",
-      "src/wp-includes/update.php",
       "src/testing/failure-simulator.php"
     ]
   }

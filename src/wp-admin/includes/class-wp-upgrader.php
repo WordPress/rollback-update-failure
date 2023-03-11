@@ -78,7 +78,6 @@ class WP_Upgrader {
 		if ( ! wp_installing() ) {
 			$this->schedule_temp_backup_cleanup();
 		}
-		add_filter( 'upgrader_install_package_result', array( new \WP_Rollback_Auto_Update(), 'auto_update_check' ), 15, 2 );
 	}
 
 	/**
@@ -344,8 +343,5 @@ class WP_Upgrader {
 
 }
 
-// Insert at end of wp-admin/includes/class-wp-upgrader.php.
-/** WP_Rollback_Auto_Update class */
-require_once __DIR__ . '/class-rollback-auto-update.php';
 
 new WP_Upgrader();
