@@ -45,14 +45,12 @@ if ( version_compare( get_bloginfo( 'version' ), '6.3-beta1', '>=' ) ) {
 	define( 'WP_ROLLBACK_COMMITTED', false );
 }
 
-// Hooray move_dir() has been committed.
 if ( ! WP_ROLLBACK_MOVE_DIR ) {
 	require_once ABSPATH . 'wp-admin/includes/plugin.php';
 	deactivate_plugins( __FILE__ );
 	return;
 }
 
-// TODO: add exclusion once committed to trunk.
 if ( ! WP_ROLLBACK_COMMITTED ) {
 	require_once __DIR__ . '/src/wp-admin/includes/class-wp-site-health.php';
 	require_once __DIR__ . '/src/wp-admin/includes/class-plugin-theme-upgrader.php';
