@@ -90,6 +90,7 @@ class WP_Rollback_Auto_Update {
 			return $result;
 		}
 
+		// TODO: remove before commit.
 		error_log( $hook_extra['plugin'] . ' processing...' );
 
 		/*
@@ -120,6 +121,7 @@ class WP_Rollback_Auto_Update {
 
 		// Needs to run for both active and inactive plugins. Don't ask why, just accept it.
 		$this->check_plugin_for_errors( $hook_extra['plugin'] );
+		// TODO: remove before commit.
 		error_log( $hook_extra['plugin'] . ' auto updated.' );
 
 		return $result;
@@ -301,6 +303,7 @@ class WP_Rollback_Auto_Update {
 		$delete_temp_backup = new ReflectionMethod( $rollback_updater, 'delete_temp_backup' );
 		$delete_temp_backup->invoke( $rollback_updater );
 
+		// TODO: remove before commit.
 		error_log( $this->handler_args['hook_extra']['plugin'] . ' rolled back' );
 	}
 
