@@ -3,6 +3,7 @@
 * update using constant to check version for when `move_dir()` was committed
 * update using constant to check version for when `Rollback` was committed
 * update for PR compatibility
+* developery stuff
 
 #### 5.0.2 / 2023-02-05
 * make variables static to retain value during auto-update run
