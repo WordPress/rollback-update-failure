@@ -3,7 +3,7 @@
         'name' => 'wordpress/rollback-update-failure',
         'pretty_version' => 'dev-develop',
         'version' => 'dev-develop',
-        'reference' => '9f913aed46bf32c0f651cd608ec8167a0902d8b0',
+        'reference' => '0f551026e1445f5e43625c6fb18d4553a30016af',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -31,7 +31,7 @@
         'wordpress/rollback-update-failure' => array(
             'pretty_version' => 'dev-develop',
             'version' => 'dev-develop',
-            'reference' => '9f913aed46bf32c0f651cd608ec8167a0902d8b0',
+            'reference' => '0f551026e1445f5e43625c6fb18d4553a30016af',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
