@@ -19,12 +19,18 @@
   "require": {
     "php": ">=5.6"
   },
+  "require-dev": {
+    "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
+    "squizlabs/php_codesniffer": "3.6.0",
+    "wp-coding-standards/wpcs": "~2.3.0"
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  },
   "autoload": {
     "files": [
-      "src/wp-admin/includes/class-wp-site-health.php",
-      "src/wp-admin/includes/class-plugin-theme-upgrader.php",
-      "src/wp-admin/includes/class-wp-upgrader.php",
-      "src/wp-includes/update.php",
       "src/testing/failure-simulator.php"
     ]
   }

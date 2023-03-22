@@ -12,7 +12,7 @@ namespace Rollback_Update_Failure\Testing;
  * PHP version check and exit.
  */
 if ( ! defined( 'WPINC' ) ) {
-	die;
+	return;
 }
 
 if ( ! class_exists( '\Rollback_Update_Failure\Testing\Failure_Simulator' ) ) {

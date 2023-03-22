@@ -15,12 +15,16 @@ class WP_Rollback_Auto_Update {
 	/**
 	 * Stores handler parameters.
 	 *
+	 * @since 6.3.0
+	 *
 	 * @var array
 	 */
 	private $handler_args = array();
 
 	/**
 	 * Stores successfully updated plugins.
+	 *
+	 * @since 6.3.0
 	 *
 	 * @var array
 	 */
@@ -29,6 +33,8 @@ class WP_Rollback_Auto_Update {
 	/**
 	 * Stores fataling plugins.
 	 *
+	 * @since 6.3.0
+	 *
 	 * @var array
 	 */
 	private static $fatals = array();
@@ -36,19 +42,25 @@ class WP_Rollback_Auto_Update {
 	/**
 	 * Stores `update_plugins` transient.
 	 *
-	 * @var \stdClass
+	 * @since 6.3.0
+	 *
+	 * @var stdClass
 	 */
 	private static $current;
 
 	/**
 	 * Stores boolean for no error from check_plugin_for_errors().
 	 *
+	 * @since 6.3.0
+	 *
 	 * @var bool
 	 */
-	private $no_error = false;
+	private $update_is_safe = false;
 
 	/**
 	 * Stores error codes.
+	 *
+	 * @since 6.3.0
 	 *
 	 * @var int
 	 */
@@ -56,6 +68,8 @@ class WP_Rollback_Auto_Update {
 
 	/**
 	 * Checks the validity of the updated plugin.
+	 *
+	 * @since 6.3.0
 	 *
 	 * @param array|WP_Error $result     Result from WP_Upgrader::install_package().
 	 * @param array          $hook_extra Extra arguments passed to hooked filters.
@@ -76,16 +90,19 @@ class WP_Rollback_Auto_Update {
 			return $result;
 		}
 
+		// TODO: remove before commit.
 		error_log( $hook_extra['plugin'] . ' processing...' );
 
-		// This possibly helps to avoid a potential race condition on servers that may start to
-		// process the next plugin for auto-updating before the handler can pick up an error from
-		// the previously processed plugin.
+		/*
+		 * This possibly helps to avoid a potential race condition on servers that may start to
+		 * process the next plugin for auto-updating before the handler can pick up an error from
+		 * the previously processed plugin.
+		 */
 		sleep( 2 );
 
-		$this->no_error     = false;
-		static::$current    = get_site_transient( 'update_plugins' );
-		$this->handler_args = array(
+		$this->update_is_safe = false;
+		static::$current      = get_site_transient( 'update_plugins' );
+		$this->handler_args   = array(
 			'handler_error' => '',
 			'result'        => $result,
 			'hook_extra'    => $hook_extra,
@@ -104,6 +121,7 @@ class WP_Rollback_Auto_Update {
 
 		// Needs to run for both active and inactive plugins. Don't ask why, just accept it.
 		$this->check_plugin_for_errors( $hook_extra['plugin'] );
+		// TODO: remove before commit.
 		error_log( $hook_extra['plugin'] . ' auto updated.' );
 
 		return $result;
@@ -115,16 +133,20 @@ class WP_Rollback_Auto_Update {
 	 * If an error is found, the previously installed version will be reinstalled
 	 * and an email will be sent to the site administrator.
 	 *
+	 * @since 6.3.0
+	 *
+	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+	 *
 	 * @param string $plugin The plugin to check.
 	 *
-	 * @throws \Exception If errors are present.
+	 * @throws Exception If errors are present.
 	 *
 	 * @return void
 	 */
 	private function check_plugin_for_errors( $plugin ) {
 		global $wp_filesystem;
 
-		if ( file_exists( ABSPATH . '.maintenance' ) ) {
+		if ( $wp_filesystem->exists( ABSPATH . '.maintenance' ) ) {
 			$wp_filesystem->delete( ABSPATH . '.maintenance' );
 		}
 
@@ -143,28 +165,28 @@ class WP_Rollback_Auto_Update {
 
 		if ( is_wp_error( $response ) ) {
 			// If it isn't possible to run the check, assume an error.
-			throw new \Exception( $response->get_error_message() );
+			throw new Exception( $response->get_error_message() );
 		}
 
-		$code           = wp_remote_retrieve_response_code( $response );
-		$body           = wp_remote_retrieve_body( $response );
-		$this->no_error = 200 === $code;
+		$code                 = wp_remote_retrieve_response_code( $response );
+		$body                 = wp_remote_retrieve_body( $response );
+		$this->update_is_safe = 200 === $code;
 
 		if ( str_contains( $body, 'wp-die-message' ) || 200 !== $code ) {
-			$error = new \WP_Error(
-				'new_version_error',
+			throw new Exception(
 				sprintf(
 					/* translators: %s: The name of the plugin. */
 					__( 'The new version of %s contains an error' ),
 					get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin )['Name']
 				)
 			);
-			throw new \Exception( $error->get_error_message() );
 		}
 	}
 
 	/**
 	 * Initializes handlers.
+	 *
+	 * @since 6.3.0
 	 */
 	private function initialize_handlers() {
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler
@@ -174,6 +196,8 @@ class WP_Rollback_Auto_Update {
 
 	/**
 	 * Handles Errors.
+	 *
+	 * @since 6.3.0
 	 */
 	public function error_handler() {
 		$this->handler_args['handler_error'] = 'Error Caught';
@@ -182,6 +206,8 @@ class WP_Rollback_Auto_Update {
 
 	/**
 	 * Handles Exceptions.
+	 *
+	 * @since 6.3.0
 	 */
 	public function exception_handler() {
 		$this->handler_args['handler_error'] = 'Exception Caught';
@@ -190,6 +216,8 @@ class WP_Rollback_Auto_Update {
 
 	/**
 	 * Handles errors by running Rollback.
+	 *
+	 * @since 6.3.0
 	 *
 	 * @param bool $skip If false, assume fatal and process.
 	 *                   Default false.
@@ -202,7 +230,7 @@ class WP_Rollback_Auto_Update {
 
 		$this->cron_rollback();
 
-		/**
+		/*
 		 * This possibly helps to avoid a potential race condition on servers that may start to
 		 * process the next plugin for auto-updating before the handler can pick up an error from
 		 * the previously processed plugin.
@@ -215,14 +243,16 @@ class WP_Rollback_Auto_Update {
 	}
 
 	/**
-	 * Skip (exit handler() early) for non-fatal errors or non-errors.
+	 * Return whether to skip (exit handler() early) for non-fatal errors or non-errors.
 	 *
-	 * @return bool
+	 * @since 6.3.0
+	 *
+	 * @return bool Whether to skip for non-fatal errors or non-errors.
 	 */
 	private function non_fatal_errors() {
-		$e                = error_get_last();
-		$non_fatal_errors = ( ! empty( $e ) && $this->error_types !== $e['type'] );
-		$skip             = is_plugin_active( $this->handler_args['hook_extra']['plugin'] ) || $this->no_error;
+		$last_error       = error_get_last();
+		$non_fatal_errors = ( ! empty( $last_error ) && $this->error_types !== $last_error['type'] );
+		$skip             = is_plugin_active( $this->handler_args['hook_extra']['plugin'] ) || $this->update_is_safe;
 		$skip             = $skip ? $skip : $non_fatal_errors;
 
 		return $skip;
@@ -230,6 +260,8 @@ class WP_Rollback_Auto_Update {
 
 	/**
 	 * Rolls back during cron.
+	 *
+	 * @since 6.3.0
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 */
@@ -245,31 +277,40 @@ class WP_Rollback_Auto_Update {
 		);
 
 		include_once $wp_filesystem->wp_plugins_dir() . 'rollback-update-failure/wp-admin/includes/class-wp-upgrader.php';
-		$rollback_updater = new \Rollback_Update_Failure\WP_Upgrader(); // TODO: change for core.
+
+		// TODO: change for core.
+		if ( WP_ROLLBACK_COMMITTED ) {
+			$rollback_updater = new WP_Upgrader();
+		} else {
+			$rollback_updater = new \Rollback_Update_Failure\WP_Upgrader();
+		}
 
 		// Set private $temp_restores variable.
-		$ref_temp_restores = new \ReflectionProperty( $rollback_updater, 'temp_restores' );
+		$ref_temp_restores = new ReflectionProperty( $rollback_updater, 'temp_restores' );
 		$ref_temp_restores->setAccessible( true );
 		$ref_temp_restores->setValue( $rollback_updater, $temp_backup );
 
 		// Set private $temp_backups variable.
-		$ref_temp_backups = new \ReflectionProperty( $rollback_updater, 'temp_backups' );
+		$ref_temp_backups = new ReflectionProperty( $rollback_updater, 'temp_backups' );
 		$ref_temp_backups->setAccessible( true );
 		$ref_temp_backups->setValue( $rollback_updater, $temp_backup );
 
 		// Call Rollback's restore_temp_backup().
-		$restore_temp_backup = new \ReflectionMethod( $rollback_updater, 'restore_temp_backup' );
+		$restore_temp_backup = new ReflectionMethod( $rollback_updater, 'restore_temp_backup' );
 		$restore_temp_backup->invoke( $rollback_updater );
 
 		// Call Rollback's delete_temp_backup().
-		$delete_temp_backup = new \ReflectionMethod( $rollback_updater, 'delete_temp_backup' );
+		$delete_temp_backup = new ReflectionMethod( $rollback_updater, 'delete_temp_backup' );
 		$delete_temp_backup->invoke( $rollback_updater );
 
+		// TODO: remove before commit.
 		error_log( $this->handler_args['hook_extra']['plugin'] . ' rolled back' );
 	}
 
 	/**
 	 * Restart update process for plugins that remain after a fatal.
+	 *
+	 * @since 6.3.0
 	 */
 	private function restart_updates() {
 		$remaining_auto_updates = $this->get_remaining_auto_updates();
@@ -278,25 +319,35 @@ class WP_Rollback_Auto_Update {
 			return;
 		}
 
-		$skin     = new \Automatic_Upgrader_Skin();
-		$upgrader = new \Plugin_Upgrader( $skin );
+		$skin     = new Automatic_Upgrader_Skin();
+		$upgrader = new Plugin_Upgrader( $skin );
 		$upgrader->bulk_upgrade( $remaining_auto_updates );
-		remove_action( 'shutdown', array( new \Rollback_Update_Failure\WP_Upgrader(), 'delete_temp_backup' ), 100 );
+
+		// TODO: change for core.
+		if ( WP_ROLLBACK_COMMITTED ) {
+			remove_action( 'shutdown', array( new WP_Upgrader(), 'delete_temp_backup' ), 100 );
+		} else {
+			remove_action( 'shutdown', array( new \Rollback_Update_Failure\WP_Upgrader(), 'delete_temp_backup' ), 100 );
+		}
 	}
 
 	/**
 	 * Restart update process for core.
+	 *
+	 * @since 6.3.0
 	 */
 	private function restart_core_updates() {
 		$core_update = find_core_auto_update();
 		if ( $core_update ) {
-			$core_updater = new \WP_Automatic_Updater();
+			$core_updater = new WP_Automatic_Updater();
 			$core_updater->update( 'core', $core_update );
 		}
 	}
 
 	/**
 	 * Get array of non-fataling auto-updates remaining.
+	 *
+	 * @since 6.3.0
 	 *
 	 * @return array
 	 */
@@ -320,9 +371,11 @@ class WP_Rollback_Auto_Update {
 
 	/**
 	 * Sends an email noting successful and failed updates.
+	 *
+	 * @since 6.3.0
 	 */
 	private function send_update_result_email() {
-		add_filter( 'auto_plugin_theme_update_email', array( $this, 'props' ), 10, 4 );
+		add_filter( 'auto_plugin_theme_update_email', array( $this, 'auto_update_rollback_message' ), 10, 4 );
 		$successful = array();
 		$failed     = array();
 
@@ -369,14 +422,18 @@ class WP_Rollback_Auto_Update {
 			}
 		}
 
-		$automatic_upgrader      = new \WP_Automatic_Updater();
-		$send_plugin_theme_email = new \ReflectionMethod( $automatic_upgrader, 'send_plugin_theme_email' );
+		$automatic_upgrader      = new WP_Automatic_Updater();
+		$send_plugin_theme_email = new ReflectionMethod( $automatic_upgrader, 'send_plugin_theme_email' );
 		$send_plugin_theme_email->setAccessible( true );
 		$send_plugin_theme_email->invoke( $automatic_upgrader, 'mixed', $successful, $failed );
+
+		remove_filter( 'auto_plugin_theme_update_email', array( $this, 'auto_update_rollback_message' ), 10 );
 	}
 
 	/**
-	 * Credit where credit is due.
+	 * Add auto-update failure message to email.
+	 *
+	 * @since 6.3.0
 	 *
 	 * @param array  $email {
 	 *     Array of email arguments that will be passed to wp_mail().
@@ -393,7 +450,7 @@ class WP_Rollback_Auto_Update {
 	 *
 	 * @return array
 	 */
-	public function props( $email, $type, $successful_updates, $failed_updates ) {
+	public function auto_update_rollback_message( $email, $type, $successful_updates, $failed_updates ) {
 		if ( empty( $failed_updates ) ) {
 			return $email;
 		}

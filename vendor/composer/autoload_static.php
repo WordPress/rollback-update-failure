@@ -7,11 +7,21 @@ namespace Composer\Autoload;
 class ComposerStaticInit0cc063009b6bb78f3eefc5c4bf451e79
 {
     public static $files = array (
-        '0bf10fa328b0742cbb01a29b7224601d' => __DIR__ . '/../..' . '/src/wp-admin/includes/class-wp-site-health.php',
-        'e9b5c5dc9b3d7813fdda4df144a4ed64' => __DIR__ . '/../..' . '/src/wp-admin/includes/class-plugin-theme-upgrader.php',
-        '40e7095e110333db19e8c24c3c016c98' => __DIR__ . '/../..' . '/src/wp-admin/includes/class-wp-upgrader.php',
-        '4d27640b7b314f6885d24d133d099499' => __DIR__ . '/../..' . '/src/wp-includes/update.php',
         '5c681423340f9bde556e5e4b95d0f1a6' => __DIR__ . '/../..' . '/src/testing/failure-simulator.php',
+    );
+
+    public static $prefixLengthsPsr4 = array (
+        'D' => 
+        array (
+            'Dealerdirect\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\' => 55,
+        ),
+    );
+
+    public static $prefixDirsPsr4 = array (
+        'Dealerdirect\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/dealerdirect/phpcodesniffer-composer-installer/src',
+        ),
     );
 
     public static $classMap = array (
@@ -21,6 +31,8 @@ class ComposerStaticInit0cc063009b6bb78f3eefc5c4bf451e79
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
+            $loader->prefixLengthsPsr4 = ComposerStaticInit0cc063009b6bb78f3eefc5c4bf451e79::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit0cc063009b6bb78f3eefc5c4bf451e79::$prefixDirsPsr4;
             $loader->classMap = ComposerStaticInit0cc063009b6bb78f3eefc5c4bf451e79::$classMap;
 
         }, null, ClassLoader::class);

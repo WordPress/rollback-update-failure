@@ -29,7 +29,7 @@ class WP_Upgrader {
 	/**
 	 * Stores options for rollback callbacks.
 	 *
-	 * @since 6.2.0
+	 * @since 6.3.0
 	 * @var array
 	 */
 	private $options = array();
@@ -39,7 +39,7 @@ class WP_Upgrader {
 	 *
 	 * Used by rollback functions.
 	 *
-	 * @since 6.2.0
+	 * @since 6.3.0
 	 * @var array
 	 */
 	private $temp_backups = array();
@@ -49,7 +49,7 @@ class WP_Upgrader {
 	 *
 	 * Used by rollback functions.
 	 *
-	 * @since 6.2.0
+	 * @since 6.3.0
 	 * @var array
 	 */
 	private $temp_restores = array();
@@ -78,13 +78,12 @@ class WP_Upgrader {
 		if ( ! wp_installing() ) {
 			$this->schedule_temp_backup_cleanup();
 		}
-		add_filter( 'upgrader_install_package_result', array( new \WP_Rollback_Auto_Update(), 'auto_update_check' ), 15, 2 );
 	}
 
 	/**
 	 * Moves the plugin/theme being upgraded into a rollback directory.
 	 *
-	 * @since 6.2.0
+	 * @since 6.3.0
 	 * @uses 'upgrader_source_selection' filter.
 	 *
 	 * @param string      $source        File source location.
@@ -124,7 +123,7 @@ class WP_Upgrader {
 	/**
 	 * Restores backup to original location if update failed.
 	 *
-	 * @since 6.2.0
+	 * @since 6.3.0
 	 *
 	 * @see 'upgrader_install_package_result'.
 	 *
@@ -171,7 +170,7 @@ class WP_Upgrader {
 	/**
 	 * Schedules cleanup of the temp-backup directory.
 	 *
-	 * @since 6.2.0
+	 * @since 6.3.0
 	 */
 	protected function schedule_temp_backup_cleanup() {
 		if ( false === wp_next_scheduled( 'wp_delete_temp_updater_backups' ) ) {
@@ -182,7 +181,7 @@ class WP_Upgrader {
 	/**
 	 * Moves the plugin/theme being upgraded into a temp-backup directory.
 	 *
-	 * @since 6.2.0
+	 * @since 6.3.0
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
@@ -253,7 +252,7 @@ class WP_Upgrader {
 	/**
 	 * Restores the plugin/theme from the temp-backup directory.
 	 *
-	 * @since 6.2.0
+	 * @since 6.3.0
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
@@ -307,7 +306,7 @@ class WP_Upgrader {
 	/**
 	 * Deletes a temp-backup.
 	 *
-	 * @since 6.2.0
+	 * @since 6.3.0
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
@@ -344,8 +343,5 @@ class WP_Upgrader {
 
 }
 
-// Insert at end of wp-admin/includes/class-wp-upgrader.php.
-/** WP_Rollback_Auto_Update class */
-require_once __DIR__ . '/class-rollback-auto-update.php';
 
 new WP_Upgrader();
