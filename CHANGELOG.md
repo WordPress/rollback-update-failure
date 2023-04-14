@@ -1,5 +1,10 @@
 [unreleased]
 
+#### 5.0.4 / 2023-04-14
+* update tests
+* update GitHub Actions
+* ignore vendor directory
+
 #### 5.0.3 / 2023-03-22
 * update @since
 * update using constant to check version for when `move_dir()` was committed
