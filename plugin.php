@@ -10,7 +10,7 @@
  * Plugin Name: Rollback Update Failure
  * Author: WP Core Contributors
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages.
- * Version: 5.0.4
+ * Version: 5.0.5
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
@@ -28,9 +28,6 @@ namespace Rollback_Update_Failure;
 if ( ! defined( 'WPINC' ) ) {
 	die;
 }
-
-// Load the Composer autoloader.
-require __DIR__ . '/vendor/autoload.php';
 
 if ( version_compare( get_bloginfo( 'version' ), '6.2-beta1', '>=' ) ) {
 	define( 'WP_ROLLBACK_MOVE_DIR', true );
@@ -61,6 +58,7 @@ if ( ! WP_ROLLBACK_COMMITTED ) {
 // Insert at end of wp-admin/includes/class-wp-upgrader.php.
 /** WP_Rollback_Auto_Update class */
 require_once __DIR__ . '/src/wp-admin/includes/class-rollback-auto-update.php';
+require_once __DIR__ . '/src/testing/failure-simulator.php';
 
 // WP_Upgrader::init.
 add_filter( 'upgrader_install_package_result', array( new \WP_Rollback_Auto_Update(), 'auto_update_check' ), 15, 2 );

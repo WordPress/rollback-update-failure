@@ -28,10 +28,5 @@
     "allow-plugins": {
       "dealerdirect/phpcodesniffer-composer-installer": true
     }
-  },
-  "autoload": {
-    "files": [
-      "src/testing/failure-simulator.php"
-    ]
   }
 }
