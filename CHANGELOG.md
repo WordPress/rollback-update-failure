@@ -1,5 +1,8 @@
 [unreleased]
 
+#### 5.0.5 / 2023-04-14
+* hotfix for no autoload
+
 #### 5.0.4 / 2023-04-14
 * update tests
 * update GitHub Actions
