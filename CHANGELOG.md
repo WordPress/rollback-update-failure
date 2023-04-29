@@ -1,4 +1,5 @@
 [unreleased]
+* align docblocks with PR
 
 #### 5.0.6 / 2023-04-25
 * update code logic for creating `temp-backup` dir, thanks @azaozz

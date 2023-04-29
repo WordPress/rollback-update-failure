@@ -193,8 +193,7 @@ class WP_Upgrader {
 	 *     @type string $dir  Directory name.
 	 * }
 	 *
-	 * @return bool|WP_Error true on success, false if the backup should not be made,
-	 *                       or WP_Error on failure.
+	 * @return bool|WP_Error true for success, false for early exit, otherwise WP_Error.
 	 */
 	public function move_to_temp_backup_dir( $args ) {
 		global $wp_filesystem;
@@ -258,8 +257,7 @@ class WP_Upgrader {
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
-	 * @return bool|WP_Error true on success, false if the backup should not be restored,
-	 *                       or WP_Error on failure.
+	 * @return bool|WP_Error true for success, false for early exit, otherwise WP_Error.
 	 */
 	public function restore_temp_backup() {
 		global $wp_filesystem;
@@ -312,7 +310,7 @@ class WP_Upgrader {
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
-	 * @return bool Whether the temp-backup was deleted.
+	 * @return bool|WP_Error true for success, false for early exit, otherwise WP_Error.
 	 */
 	public function delete_temp_backup() {
 		global $wp_filesystem;
