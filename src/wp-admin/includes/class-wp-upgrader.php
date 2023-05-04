@@ -35,7 +35,7 @@ class WP_Upgrader {
 	private $options = array();
 
 	/**
-	 * Stores list of plugins/themes added to temp-backup directory.
+	 * Stores list of plugins/themes added to temporary backup directory.
 	 *
 	 * Used by rollback functions.
 	 *
@@ -45,7 +45,7 @@ class WP_Upgrader {
 	private $temp_backups = array();
 
 	/**
-	 * Stores list of plugins/themes needing to be restored from temp-backup directory.
+	 * Stores list of plugins/themes needing to be restored from temporary backup directory.
 	 *
 	 * Used by rollback functions.
 	 *
@@ -59,8 +59,8 @@ class WP_Upgrader {
 	 */
 	public function __construct() {
 		// Add generic strings to Rollback_Update_Failure::$strings.
-		$this->strings['temp_backup_mkdir_failed'] = __( 'Could not create temp-backup directory.', 'rollback-update-failure' );
-		$this->strings['temp_backup_move_failed']  = __( 'Could not move old version to the temp-backup directory.', 'rollback-update-failure' );
+		$this->strings['temp_backup_mkdir_failed'] = __( 'Could not create upgrade-temp-backup directory.', 'rollback-update-failure' );
+		$this->strings['temp_backup_move_failed']  = __( 'Could not move old version to the upgrade-temp-backup directory.', 'rollback-update-failure' );
 		/* translators: %s: The theme/plugin slug. */
 		$this->strings['temp_backup_restore_failed'] = __( 'Could not restore original version of %s.', 'rollback-update-failure' );
 		$this->strings['fs_no_content_dir']          = __( 'Unable to locate WordPress content directory (wp-content).' );
@@ -158,7 +158,7 @@ class WP_Upgrader {
 			}
 		}
 
-		// Clean up the backup kept in the temp-backup directory.
+		// Clean up the backup kept in the temporary backup directory.
 		if ( ! empty( $this->options['hook_extra']['temp_backup'] ) ) {
 			// Delete the backup on `shutdown` to avoid a PHP timeout.
 			add_action( 'shutdown', array( $this, 'delete_temp_backup' ), 100, 0 );
@@ -168,7 +168,7 @@ class WP_Upgrader {
 	}
 
 	/**
-	 * Schedules cleanup of the temp-backup directory.
+	 * Schedules cleanup of the temporary backup directory.
 	 *
 	 * @since 6.3.0
 	 */
@@ -179,14 +179,14 @@ class WP_Upgrader {
 	}
 
 	/**
-	 * Moves the plugin/theme being upgraded into a temp-backup directory.
+	 * Moves the plugin/theme being upgraded into a temporary backup directory.
 	 *
 	 * @since 6.3.0
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
 	 * @param string[] $args {
-	 *     Array of data for the temp-backup.
+	 *     Array of data for the temporary backup.
 	 *
 	 *     @type string $slug Plugin slug.
 	 *     @type string $src  File path to directory.
@@ -217,10 +217,10 @@ class WP_Upgrader {
 			return new \WP_Error( 'fs_no_content_dir', $this->strings['fs_no_content_dir'] );
 		}
 
-		$dest_dir = $wp_filesystem->wp_content_dir() . 'temp-backup/';
+		$dest_dir = $wp_filesystem->wp_content_dir() . 'upgrade-temp-backup/';
 		$sub_dir  = $dest_dir . $args['dir'] . '/';
 
-		// Create the temp-backup directory if it does not exist.
+		// Create the upgrade-temp-backup directory if it does not exist.
 		if ( ! $wp_filesystem->is_dir( $sub_dir ) ) {
 			if ( ! $wp_filesystem->is_dir( $dest_dir ) ) {
 				$wp_filesystem->mkdir( $dest_dir, FS_CHMOD_DIR );
@@ -236,12 +236,12 @@ class WP_Upgrader {
 		$src     = trailingslashit( $src_dir ) . $args['slug'];
 		$dest    = $dest_dir . trailingslashit( $args['dir'] ) . $args['slug'] . '-backup';
 
-		// Delete the temp-backup directory if it already exists.
+		// Delete the upgrade-temp-backup directory if it already exists.
 		if ( $wp_filesystem->is_dir( $dest ) ) {
 			$wp_filesystem->delete( $dest, true );
 		}
 
-		// Move to the temp-backup directory.
+		// Move to the upgrade-temp-backup directory.
 		$result = move_dir( $src, $dest, true );
 		if ( is_wp_error( $result ) ) {
 			return new \WP_Error( 'fs_temp_backup_move', $this->strings['temp_backup_move_failed'] );
@@ -251,7 +251,7 @@ class WP_Upgrader {
 	}
 
 	/**
-	 * Restores the plugin/theme from the temp-backup directory.
+	 * Restores the plugin/theme from the temporary backup directory.
 	 *
 	 * @since 6.3.0
 	 *
@@ -274,7 +274,7 @@ class WP_Upgrader {
 				return $errors;
 			}
 
-			$src      = $wp_filesystem->wp_content_dir() . 'temp-backup/' . $args['dir'] . '/' . $args['slug'] . '-backup';
+			$src      = $wp_filesystem->wp_content_dir() . 'upgrade-temp-backup/' . $args['dir'] . '/' . $args['slug'] . '-backup';
 			$dest_dir = $wp_filesystem->find_folder( $args['src'] );
 			$dest     = trailingslashit( $dest_dir ) . $args['slug'];
 
@@ -304,7 +304,7 @@ class WP_Upgrader {
 	}
 
 	/**
-	 * Deletes a temp-backup.
+	 * Deletes a temporary backup.
 	 *
 	 * @since 6.3.0
 	 *
@@ -327,7 +327,7 @@ class WP_Upgrader {
 				return $errors;
 			}
 
-			$temp_backup_dir = $wp_filesystem->wp_content_dir() . "temp-backup/{$args['dir']}/{$args['slug']}-backup";
+			$temp_backup_dir = $wp_filesystem->wp_content_dir() . "upgrade-temp-backup/{$args['dir']}/{$args['slug']}-backup";
 
 			if ( ! $wp_filesystem->delete( $temp_backup_dir, true ) ) {
 				$errors->add(
