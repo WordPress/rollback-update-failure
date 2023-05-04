@@ -15,7 +15,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * Deletes all contents of the temp-backup directory.
+ * Deletes all contents of the temporary backup directory.
  *
  * @since 6.3.0
  *
@@ -38,7 +38,7 @@ function wp_delete_all_temp_backups() {
 }
 
 /**
- * Remove `temp-backup` directory.
+ * Removes the temporary backup directory.
  *
  * @since 6.3.0
  *
@@ -46,7 +46,7 @@ function wp_delete_all_temp_backups() {
  *
  * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
  *
- * @return void|WP_Error
+ * @return void|WP_Error void on success, or a WP_Error object on failure.
  */
 function _wp_delete_all_temp_backups() {
 	global $wp_filesystem;
@@ -60,7 +60,7 @@ function _wp_delete_all_temp_backups() {
 		return new WP_Error( 'fs_no_content_dir', __( 'Unable to locate WordPress content directory (wp-content).' ) );
 	}
 
-	$temp_backup_dir = $wp_filesystem->wp_content_dir() . 'temp-backup/';
+	$temp_backup_dir = $wp_filesystem->wp_content_dir() . 'upgrade-temp-backup/';
 	$dirlist         = $wp_filesystem->dirlist( $temp_backup_dir );
 	$dirlist         = $dirlist ? $dirlist : array();
 

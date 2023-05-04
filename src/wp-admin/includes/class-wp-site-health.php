@@ -48,7 +48,7 @@ class WP_Site_Health {
 	 */
 	public function site_status_tests( $tests ) {
 		$tests['direct']['update_temp_backup_writable']  = array(
-			'label' => __( 'Updates temp-backup folder access' ),
+			'label' => __( 'Updates temporary backup folder access' ),
 			'test'  => array( $this, 'get_test_update_temp_backup_writable' ),
 		);
 		$tests['direct']['available_updates_disk_space'] = array(
@@ -108,7 +108,7 @@ class WP_Site_Health {
 	}
 
 	/**
-	 * Test if plugin and theme updates temp-backup folders are writable or can be created.
+	 * Test if plugin and theme updates temporary backup folders are writable or can be created.
 	 *
 	 * @since 6.3.0
 	 *
@@ -116,16 +116,16 @@ class WP_Site_Health {
 	 */
 	public function get_test_update_temp_backup_writable() {
 		$result = array(
-			'label'       => __( 'Plugin and theme update temp-backup folder is writable', 'rollback-update-failure' ),
+			'label'       => __( 'Plugin and theme update temporary backup folder is writable', 'rollback-update-failure' ),
 			'status'      => 'good',
 			'badge'       => array(
 				'label' => __( 'Security', 'rollback-update-failure' ),
 				'color' => 'blue',
 			),
 			'description' => sprintf(
-				/* Translators: %s: "wp-content/temp-backup". */
+				/* Translators: %s: "wp-content/upgrade-temp-backup". */
 				'<p>' . __( 'The %s folder used to improve the stability of plugin and theme updates is writable.', 'rollback-update-failure' ) . '</p>',
-				'<code>wp-content/temp-backup</code>'
+				'<code>wp-content/upgrade-temp-backup</code>'
 			),
 			'actions'     => '',
 			'test'        => 'update_temp_backup_writable',
@@ -145,21 +145,21 @@ class WP_Site_Health {
 
 		$upgrade_folder_exists      = $wp_filesystem->is_dir( "$wp_content/upgrade" );
 		$upgrade_folder_is_writable = $wp_filesystem->is_writable( "$wp_content/upgrade" );
-		$backup_folder_exists       = $wp_filesystem->is_dir( "$wp_content/temp-backup" );
-		$backup_folder_is_writable  = $wp_filesystem->is_writable( "$wp_content/temp-backup" );
-		$plugins_folder_exists      = $wp_filesystem->is_dir( "$wp_content/temp-backup/plugins" );
-		$plugins_folder_is_writable = $wp_filesystem->is_writable( "$wp_content/temp-backup/plugins" );
-		$themes_folder_exists       = $wp_filesystem->is_dir( "$wp_content/temp-backup/themes" );
-		$themes_folder_is_writable  = $wp_filesystem->is_writable( "$wp_content/temp-backup/themes" );
+		$backup_folder_exists       = $wp_filesystem->is_dir( "$wp_content/upgrade-temp-backup" );
+		$backup_folder_is_writable  = $wp_filesystem->is_writable( "$wp_content/upgrade-temp-backup" );
+		$plugins_folder_exists      = $wp_filesystem->is_dir( "$wp_content/upgrade-temp-backup/plugins" );
+		$plugins_folder_is_writable = $wp_filesystem->is_writable( "$wp_content/upgrade-temp-backup/plugins" );
+		$themes_folder_exists       = $wp_filesystem->is_dir( "$wp_content/upgrade-temp-backup/themes" );
+		$themes_folder_is_writable  = $wp_filesystem->is_writable( "$wp_content/upgrade-temp-backup/themes" );
 
 		if ( $plugins_folder_exists && ! $plugins_folder_is_writable && $themes_folder_exists && ! $themes_folder_is_writable ) {
 			$result['status']      = 'critical';
-			$result['label']       = __( 'Plugins and themes temp-backup folders exist but are not writable', 'rollback-update-failure' );
+			$result['label']       = __( 'Plugins and themes temporary backup folders exist but are not writable', 'rollback-update-failure' );
 			$result['description'] = sprintf(
-				/* translators: %s: '<code>wp-content/temp-backup/plugins</code>' */
+				/* translators: %s: '<code>wp-content/upgrade-temp-backup/plugins</code>' */
 				'<p>' . __( 'The %1$s and %2$s folders exist but are not writable. These folders are used to improve the stability of plugin updates. Please make sure the server has write permissions to these folders.', 'rollback-update-failure' ) . '</p>',
-				'<code>wp-content/temp-backup/plugins</code>',
-				'<code>wp-content/temp-backup/themes</code>'
+				'<code>wp-content/upgrade-temp-backup/plugins</code>',
+				'<code>wp-content/upgrade-temp-backup/themes</code>'
 			);
 
 			return $result;
@@ -167,11 +167,11 @@ class WP_Site_Health {
 
 		if ( $plugins_folder_exists && ! $plugins_folder_is_writable ) {
 			$result['status']      = 'critical';
-			$result['label']       = __( 'Plugins temp-backup folder exists but is not writable', 'rollback-update-failure' );
+			$result['label']       = __( 'Plugins temporary backup folder exists but is not writable', 'rollback-update-failure' );
 			$result['description'] = sprintf(
-				/* translators: %s: '<code>wp-content/temp-backup/plugins</code>' */
+				/* translators: %s: '<code>wp-content/upgrade-temp-backup/plugins</code>' */
 				'<p>' . __( 'The %s folder exists but is not writable. This folder is used to improve the stability of plugin updates. Please make sure the server has write permissions to this folder.', 'rollback-update-failure' ) . '</p>',
-				'<code>wp-content/temp-backup/plugins</code>'
+				'<code>wp-content/upgrade-temp-backup/plugins</code>'
 			);
 
 			return $result;
@@ -179,11 +179,11 @@ class WP_Site_Health {
 
 		if ( $themes_folder_exists && ! $themes_folder_is_writable ) {
 			$result['status']      = 'critical';
-			$result['label']       = __( 'Themes temp-backup folder exists but is not writable', 'rollback-update-failure' );
+			$result['label']       = __( 'Themes temporary backup folder exists but is not writable', 'rollback-update-failure' );
 			$result['description'] = sprintf(
-				/* translators: %s: '<code>wp-content/temp-backup/themes</code>' */
+				/* translators: %s: '<code>wp-content/upgrade-temp-backup/themes</code>' */
 				'<p>' . __( 'The %s folder exists but is not writable. This folder is used to improve the stability of theme updates. Please make sure the server has write permissions to this folder.', 'rollback-update-failure' ) . '</p>',
-				'<code>wp-content/temp-backup/themes</code>'
+				'<code>wp-content/upgrade-temp-backup/themes</code>'
 			);
 
 			return $result;
@@ -191,11 +191,11 @@ class WP_Site_Health {
 
 		if ( ( ! $plugins_folder_exists || ! $themes_folder_exists ) && $backup_folder_exists && ! $backup_folder_is_writable ) {
 			$result['status']      = 'critical';
-			$result['label']       = __( 'The temp-backup folder exists but is not writable', 'rollback-update-failure' );
+			$result['label']       = __( 'The upgrade-temp-backup folder exists but is not writable', 'rollback-update-failure' );
 			$result['description'] = sprintf(
-				/* translators: %s: '<code>wp-content/temp-backup</code>' */
+				/* translators: %s: '<code>wp-content/upgrade-temp-backup</code>' */
 				'<p>' . __( 'The %s folder exists but is not writable. This folder is used to improve the stability of plugin and theme updates. Please make sure the server has write permissions to this folder.', 'rollback-update-failure' ) . '</p>',
-				'<code>wp-content/temp-backup</code>'
+				'<code>wp-content/upgrade-temp-backup</code>'
 			);
 
 			return $result;

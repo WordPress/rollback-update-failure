@@ -1,5 +1,10 @@
 [unreleased]
 
+#### 5.1.0 / 2023-05-03
+* align docblocks with PR
+* update for Rollback committed to core
+* change `temp-backup` to `upgrade-temp-backup`
+
 #### 5.0.6 / 2023-04-25
 * update code logic for creating `temp-backup` dir, thanks @azaozz
 
