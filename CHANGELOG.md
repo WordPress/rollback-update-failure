@@ -1,5 +1,8 @@
 [unreleased]
 
+#### 5.1.1 / 2023-05-05
+* update readme
+
 #### 5.1.0 / 2023-05-03
 * align docblocks with PR
 * update for Rollback committed to core
