@@ -1,4 +1,5 @@
 [unreleased]
+* update readme
 
 #### 5.1.0 / 2023-05-03
 * align docblocks with PR
