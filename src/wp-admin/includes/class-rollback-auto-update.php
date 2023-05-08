@@ -328,7 +328,11 @@ class WP_Rollback_Auto_Update {
 		}
 
 		if ( ! empty( $remaining_theme_auto_updates ) ) {
-			// Cleanup 'upgrader_clear_destination' hook as it isn't removed due to plugin error.
+			/*
+			 * Cleanup 'upgrader_clear_destination' hook as it isn't removed due to plugin error.
+			 *
+			 * `remove_filter( 'upgrader_clear_destination', array( Plugin_Updater, 'delete_old_plugin' ) );` didn't work.
+			 */
 			remove_all_filters( 'upgrader_clear_destination' );
 			$theme_upgrader = new Theme_Upgrader( $skin );
 			$theme_upgrader->bulk_upgrade( $remaining_theme_auto_updates );
