@@ -2,6 +2,7 @@
 * restart theme auto-updates
 * remove guard for Rollback not being committed
 * get Plugin_Upgrader via hook
+* cleanup Plugin_Upgrader hook from fatal update
 
 #### 5.1.1 / 2023-05-05
 * update readme
