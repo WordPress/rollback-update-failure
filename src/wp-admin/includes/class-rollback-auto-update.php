@@ -67,6 +67,14 @@ class WP_Rollback_Auto_Update {
 	private $update_is_safe = false;
 
 	/**
+	 * Stores instance of Plugin_Upgrader.
+	 * TODO: remove before commit.
+	 *
+	 * @var Plugin_Upgrader
+	 */
+	private static $plugin_upgrader;
+
+	/**
 	 * Stores error codes.
 	 *
 	 * @since 6.3.0
@@ -76,15 +84,37 @@ class WP_Rollback_Auto_Update {
 	public $error_types = E_ERROR | E_PARSE | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR;
 
 	/**
+	 * Get Plugin_Upgrader
+	 *
+	 * TODO: remove before commit.
+	 *
+	 * @param string      $source        File source location.
+	 * @param string      $remote_source Remote file source location.
+	 * @param WP_Upgrader $obj           WP_Upgrader or child class instance.
+	 *
+	 * @return string
+	 */
+	public function get_plugin_upgrader( $source, $remote_source, $obj ) {
+		if ( ! isset( static::$plugin_upgrader ) && $obj instanceof Plugin_Upgrader ) {
+			static::$plugin_upgrader = $obj;
+		}
+
+		return $source;
+	}
+
+	/**
 	 * Checks the validity of the updated plugin.
+	 * TODO: add $this to passed parameter for 'upgrader_install_package_result' hook.
+	 * then add
 	 *
 	 * @since 6.3.0
 	 *
 	 * @param array|WP_Error $result     Result from WP_Upgrader::install_package().
 	 * @param array          $hook_extra Extra arguments passed to hooked filters.
+	 * @param WP_Upgrader    $upgrader   WP_Upgrader or child class instance.
 	 * @return array|WP_Error
 	 */
-	public function auto_update_check( $result, $hook_extra ) {
+	public function auto_update_check( $result, $hook_extra, $upgrader = null ) {
 		if ( is_wp_error( $result ) || ! wp_doing_cron() || ! isset( $hook_extra['plugin'] ) ) {
 			return $result;
 		}
@@ -183,6 +213,9 @@ class WP_Rollback_Auto_Update {
 		$this->update_is_safe = 200 === $code;
 
 		if ( str_contains( $body, 'wp-die-message' ) || 200 !== $code ) {
+			// TODO: remove before commit.
+			$upgrader = $upgrader instanceof Plugin_Upgrader ? $upgrader : static::$plugin_upgrader;
+
 			throw new Exception(
 				sprintf(
 					/* translators: %s: The name of the plugin. */

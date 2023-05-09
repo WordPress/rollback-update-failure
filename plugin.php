@@ -59,5 +59,5 @@ if ( ! WP_ROLLBACK_COMMITTED ) {
 require_once __DIR__ . '/src/wp-admin/includes/class-rollback-auto-update.php';
 require_once __DIR__ . '/src/testing/failure-simulator.php';
 
-// WP_Upgrader::init.
+add_filter( 'upgrader_source_selection', array( new \WP_Rollback_Auto_Update(), 'get_plugin_upgrader' ), 10, 3 );
 add_filter( 'upgrader_install_package_result', array( new \WP_Rollback_Auto_Update(), 'auto_update_check' ), 15, 2 );
