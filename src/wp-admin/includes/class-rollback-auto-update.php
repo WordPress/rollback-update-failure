@@ -94,7 +94,7 @@ class WP_Rollback_Auto_Update {
 	 *
 	 * @return string
 	 */
-	public function get_plugin_upgrader( $source, $remote_source, $obj ) {
+	public function set_plugin_upgrader( $source, $remote_source, $obj ) {
 		if ( ! isset( static::$plugin_upgrader ) && $obj instanceof Plugin_Upgrader ) {
 			static::$plugin_upgrader = $obj;
 		}
