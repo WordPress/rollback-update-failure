@@ -46,7 +46,16 @@ class WP_Rollback_Auto_Update {
 	 *
 	 * @var stdClass
 	 */
-	private static $current;
+	private static $current_plugins;
+
+	/**
+	 * Stores `update_themes` transient.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @var stdClass
+	 */
+	private static $current_themes;
 
 	/**
 	 * Stores boolean for no error from check_plugin_for_errors().
@@ -58,6 +67,14 @@ class WP_Rollback_Auto_Update {
 	private $update_is_safe = false;
 
 	/**
+	 * Stores instance of Plugin_Upgrader.
+	 * TODO: remove before commit.
+	 *
+	 * @var Plugin_Upgrader
+	 */
+	private static $plugin_upgrader;
+
+	/**
 	 * Stores error codes.
 	 *
 	 * @since 6.3.0
@@ -67,15 +84,37 @@ class WP_Rollback_Auto_Update {
 	public $error_types = E_ERROR | E_PARSE | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR;
 
 	/**
+	 * Get Plugin_Upgrader
+	 *
+	 * TODO: remove before commit.
+	 *
+	 * @param string      $source        File source location.
+	 * @param string      $remote_source Remote file source location.
+	 * @param WP_Upgrader $obj           WP_Upgrader or child class instance.
+	 *
+	 * @return string
+	 */
+	public function set_plugin_upgrader( $source, $remote_source, $obj ) {
+		if ( ! isset( static::$plugin_upgrader ) && $obj instanceof Plugin_Upgrader ) {
+			static::$plugin_upgrader = $obj;
+		}
+
+		return $source;
+	}
+
+	/**
 	 * Checks the validity of the updated plugin.
+	 * TODO: add $this to passed parameter for 'upgrader_install_package_result' hook.
+	 * then add
 	 *
 	 * @since 6.3.0
 	 *
 	 * @param array|WP_Error $result     Result from WP_Upgrader::install_package().
 	 * @param array          $hook_extra Extra arguments passed to hooked filters.
+	 * @param WP_Upgrader    $upgrader   WP_Upgrader or child class instance.
 	 * @return array|WP_Error
 	 */
-	public function auto_update_check( $result, $hook_extra ) {
+	public function auto_update_check( $result, $hook_extra, $upgrader = null ) {
 		if ( is_wp_error( $result ) || ! wp_doing_cron() || ! isset( $hook_extra['plugin'] ) ) {
 			return $result;
 		}
@@ -101,7 +140,6 @@ class WP_Rollback_Auto_Update {
 		sleep( 2 );
 
 		$this->update_is_safe = false;
-		static::$current      = get_site_transient( 'update_plugins' );
 		$this->handler_args   = array(
 			'handler_error' => '',
 			'result'        => $result,
@@ -120,7 +158,7 @@ class WP_Rollback_Auto_Update {
 		}
 
 		// Needs to run for both active and inactive plugins. Don't ask why, just accept it.
-		$this->check_plugin_for_errors( $hook_extra['plugin'] );
+		$this->check_plugin_for_errors( $hook_extra['plugin'], $upgrader );
 		// TODO: remove before commit.
 		error_log( $hook_extra['plugin'] . ' auto updated.' );
 
@@ -137,13 +175,14 @@ class WP_Rollback_Auto_Update {
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
-	 * @param string $plugin The plugin to check.
+	 * @param string      $plugin The plugin to check.
+	 * @param WP_Upgrader $upgrader WP_Upgrader or child class instance.
 	 *
 	 * @throws Exception If errors are present.
 	 *
 	 * @return void
 	 */
-	private function check_plugin_for_errors( $plugin ) {
+	private function check_plugin_for_errors( $plugin, $upgrader ) {
 		global $wp_filesystem;
 
 		if ( $wp_filesystem->exists( ABSPATH . '.maintenance' ) ) {
@@ -173,6 +212,18 @@ class WP_Rollback_Auto_Update {
 		$this->update_is_safe = 200 === $code;
 
 		if ( str_contains( $body, 'wp-die-message' ) || 200 !== $code ) {
+			// TODO: remove before commit.
+			$upgrader = $upgrader instanceof Plugin_Upgrader ? $upgrader : static::$plugin_upgrader;
+
+			/*
+			 * If a plugin upgrade fails prior to a theme upgrade running, the plugin upgrader will have
+			 * hooked the 'Plugin_Upgrader::delete_old_plugin()' method to 'upgrader_clear_destination',
+			 * which will return a `WP_Error` object and prevent the process from continuing.
+			 *
+			 * To resolve this, the hook must be removed using the original plugin upgrader instance.
+			 */
+			remove_filter( 'upgrader_clear_destination', array( $upgrader, 'delete_old_plugin' ) );
+
 			throw new Exception(
 				sprintf(
 					/* translators: %s: The name of the plugin. */
@@ -237,6 +288,9 @@ class WP_Rollback_Auto_Update {
 		 */
 		sleep( 2 );
 
+		static::$current_plugins = get_site_transient( 'update_plugins' );
+		static::$current_themes  = get_site_transient( 'update_themes' );
+
 		$this->restart_updates();
 		$this->restart_core_updates();
 		$this->send_update_result_email();
@@ -278,12 +332,7 @@ class WP_Rollback_Auto_Update {
 
 		include_once $wp_filesystem->wp_plugins_dir() . 'rollback-update-failure/wp-admin/includes/class-wp-upgrader.php';
 
-		// TODO: change for core.
-		if ( WP_ROLLBACK_COMMITTED ) {
-			$rollback_updater = new WP_Upgrader();
-		} else {
-			$rollback_updater = new \Rollback_Update_Failure\WP_Upgrader();
-		}
+		$rollback_updater = new WP_Upgrader();
 
 		// Set private $temp_restores variable.
 		$ref_temp_restores = new ReflectionProperty( $rollback_updater, 'temp_restores' );
@@ -313,22 +362,21 @@ class WP_Rollback_Auto_Update {
 	 * @since 6.3.0
 	 */
 	private function restart_updates() {
-		$remaining_auto_updates = $this->get_remaining_auto_updates();
+		$remaining_plugin_auto_updates = $this->get_remaining_plugin_auto_updates();
+		$remaining_theme_auto_updates  = $this->get_remaining_theme_auto_updates();
+		$skin                          = new Automatic_Upgrader_Skin();
 
-		if ( empty( $remaining_auto_updates ) ) {
-			return;
+		if ( ! empty( $remaining_plugin_auto_updates ) ) {
+			$plugin_upgrader = new Plugin_Upgrader( $skin );
+			$plugin_upgrader->bulk_upgrade( $remaining_plugin_auto_updates );
 		}
 
-		$skin     = new Automatic_Upgrader_Skin();
-		$upgrader = new Plugin_Upgrader( $skin );
-		$upgrader->bulk_upgrade( $remaining_auto_updates );
-
-		// TODO: change for core.
-		if ( WP_ROLLBACK_COMMITTED ) {
-			remove_action( 'shutdown', array( new WP_Upgrader(), 'delete_temp_backup' ), 100 );
-		} else {
-			remove_action( 'shutdown', array( new \Rollback_Update_Failure\WP_Upgrader(), 'delete_temp_backup' ), 100 );
+		if ( ! empty( $remaining_theme_auto_updates ) ) {
+			$theme_upgrader = new Theme_Upgrader( $skin );
+			$theme_upgrader->bulk_upgrade( $remaining_theme_auto_updates );
 		}
+
+		remove_action( 'shutdown', array( new WP_Upgrader(), 'delete_temp_backup' ), 100 );
 	}
 
 	/**
@@ -345,23 +393,48 @@ class WP_Rollback_Auto_Update {
 	}
 
 	/**
-	 * Get array of non-fataling auto-updates remaining.
+	 * Get array of non-fataling plugin auto-updates remaining.
 	 *
 	 * @since 6.3.0
 	 *
 	 * @return array
 	 */
-	private function get_remaining_auto_updates() {
+	private function get_remaining_plugin_auto_updates() {
 		if ( empty( $this->handler_args ) ) {
 			return array();
 		}
 
 		// Get array of plugins set for auto-updating.
 		$auto_updates    = (array) get_site_option( 'auto_update_plugins', array() );
-		$current_plugins = array_keys( static::$current->response );
+		$current_plugins = array_keys( static::$current_plugins->response );
 
 		// Get all auto-updating plugins that have updates available.
 		$current_auto_updates = array_intersect( $auto_updates, $current_plugins );
+
+		// Get array of non-fatal auto-updates remaining.
+		$remaining_auto_updates = array_diff( $current_auto_updates, self::$processed, self::$fatals );
+
+		return $remaining_auto_updates;
+	}
+
+	/**
+	 * Get array of non-fataling theme auto-updates remaining.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @return array
+	 */
+	private function get_remaining_theme_auto_updates() {
+		if ( empty( $this->handler_args ) ) {
+			return array();
+		}
+
+		// Get array of themes set for auto-updating.
+		$auto_updates   = (array) get_site_option( 'auto_update_themes', array() );
+		$current_themes = array_keys( static::$current_themes->response );
+
+		// Get all auto-updating plugins that have updates available.
+		$current_auto_updates = array_intersect( $auto_updates, $current_themes );
 
 		// Get array of non-fatal auto-updates remaining.
 		$remaining_auto_updates = array_diff( $current_auto_updates, self::$processed, self::$fatals );
@@ -385,8 +458,8 @@ class WP_Rollback_Auto_Update {
 		 */
 		$plugins = get_plugins();
 
-		foreach ( static::$current->response as $k => $update ) {
-			$item = static::$current->response[ $k ];
+		foreach ( static::$current_plugins->response as $k => $update ) {
+			$item = static::$current_plugins->response[ $k ];
 			$name = $plugins[ $update->plugin ]['Name'];
 
 			/*
@@ -394,12 +467,12 @@ class WP_Rollback_Auto_Update {
 			 * at this stage of an auto-update when not implementing this
 			 * feature directly in Core.
 			 */
-			$current_version = static::$current->checked[ $update->plugin ];
+			$current_version = static::$current_plugins->checked[ $update->plugin ];
 
 			/*
 			 * The `current_version` property does not exist yet. Add it.
 			 *
-			 * `static::$current->response[ $k ]` is an instance of `stdClass`,
+			 * `static::$current_plugins->response[ $k ]` is an instance of `stdClass`,
 			 * so this should not fall victim to PHP 8.2's deprecation of
 			 * dynamic properties.
 			 */
