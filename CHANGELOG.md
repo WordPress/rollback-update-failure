@@ -1,4 +1,6 @@
 [unreleased]
+
+#### 5.2.0 / 2023-05-09
 * restart theme auto-updates
 * remove guard for Rollback not being committed
 * set Plugin_Upgrader via hook
