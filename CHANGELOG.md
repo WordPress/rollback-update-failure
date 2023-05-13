@@ -1,4 +1,5 @@
 [unreleased]
+* improved language for email
 
 #### 5.2.0 / 2023-05-09
 * restart theme auto-updates

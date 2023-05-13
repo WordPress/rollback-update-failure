@@ -528,7 +528,7 @@ class WP_Rollback_Auto_Update {
 			return $email;
 		}
 		$body   = explode( "\n", $email['body'] );
-		$failed = __( 'These plugins failed to update or may have been rolled back due to detection of a fatal error:' );
+		$failed = __( 'These plugins failed to update or may have been restored from a temporary backup due to detection of a fatal error:' );
 		array_splice( $body, 6, 1, $failed );
 		$props = __( 'The WordPress Rollbackenberg Team' );
 		array_splice( $body, -1, 1, $props );
