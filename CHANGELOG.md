@@ -1,5 +1,6 @@
 [unreleased]
 * improved language for email
+* ensure `find_core_auto_update()` is available
 
 #### 5.2.0 / 2023-05-09
 * restart theme auto-updates

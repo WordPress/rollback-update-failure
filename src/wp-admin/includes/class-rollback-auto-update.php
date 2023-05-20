@@ -385,6 +385,10 @@ class WP_Rollback_Auto_Update {
 	 * @since 6.3.0
 	 */
 	private function restart_core_updates() {
+		if ( ! function_exists( 'find_core_auto_update' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/update.php';
+		}
+
 		$core_update = find_core_auto_update();
 		if ( $core_update ) {
 			$core_updater = new WP_Automatic_Updater();
