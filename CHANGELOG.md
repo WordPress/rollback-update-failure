@@ -1,4 +1,6 @@
 [unreleased]
+
+#### 5.3.0 / 2023-05-21
 * improved language for email
 * ensure `find_core_auto_update()` is available
 * put guard for Rollback part 2 not being committed back
