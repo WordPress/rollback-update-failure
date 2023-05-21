@@ -332,7 +332,12 @@ class WP_Rollback_Auto_Update {
 
 		include_once $wp_filesystem->wp_plugins_dir() . 'rollback-update-failure/wp-admin/includes/class-wp-upgrader.php';
 
-		$rollback_updater = new WP_Upgrader();
+		// TODO: change for core.
+		if ( WP_ROLLBACK_COMMITTED ) {
+			$rollback_updater = new WP_Upgrader();
+		} else {
+			$rollback_updater = new \Rollback_Update_Failure\WP_Upgrader();
+		}
 
 		// Set private $temp_restores variable.
 		$ref_temp_restores = new ReflectionProperty( $rollback_updater, 'temp_restores' );
@@ -376,7 +381,12 @@ class WP_Rollback_Auto_Update {
 			$theme_upgrader->bulk_upgrade( $remaining_theme_auto_updates );
 		}
 
-		remove_action( 'shutdown', array( new WP_Upgrader(), 'delete_temp_backup' ), 100 );
+		// TODO: change for core.
+		if ( WP_ROLLBACK_COMMITTED ) {
+			remove_action( 'shutdown', array( new WP_Upgrader(), 'delete_temp_backup' ), 100 );
+		} else {
+			remove_action( 'shutdown', array( new \Rollback_Update_Failure\WP_Upgrader(), 'delete_temp_backup' ), 100 );
+		}
 	}
 
 	/**
