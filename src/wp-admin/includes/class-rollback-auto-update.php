@@ -104,8 +104,8 @@ class WP_Rollback_Auto_Update {
 
 	/**
 	 * Checks the validity of the updated plugin.
-	 * TODO: add $this to passed parameter for 'upgrader_install_package_result' hook.
-	 * then add
+	 * TODO: Add $this to passed parameter for 'upgrader_install_package_result' hook.
+	 *       Remove $upgrader default value for PR.
 	 *
 	 * @since 6.3.0
 	 *
@@ -332,7 +332,12 @@ class WP_Rollback_Auto_Update {
 
 		include_once $wp_filesystem->wp_plugins_dir() . 'rollback-update-failure/wp-admin/includes/class-wp-upgrader.php';
 
-		$rollback_updater = new WP_Upgrader();
+		// TODO: change for core.
+		if ( WP_ROLLBACK_COMMITTED ) {
+			$rollback_updater = new WP_Upgrader();
+		} else {
+			$rollback_updater = new \Rollback_Update_Failure\WP_Upgrader();
+		}
 
 		// Set private $temp_restores variable.
 		$ref_temp_restores = new ReflectionProperty( $rollback_updater, 'temp_restores' );
@@ -373,10 +378,19 @@ class WP_Rollback_Auto_Update {
 
 		if ( ! empty( $remaining_theme_auto_updates ) ) {
 			$theme_upgrader = new Theme_Upgrader( $skin );
-			$theme_upgrader->bulk_upgrade( $remaining_theme_auto_updates );
+			$results        = $theme_upgrader->bulk_upgrade( $remaining_theme_auto_updates );
+
+			foreach ( array_keys( $results ) as $theme ) {
+				self::$processed[] = $theme;
+			}
 		}
 
-		remove_action( 'shutdown', array( new WP_Upgrader(), 'delete_temp_backup' ), 100 );
+		// TODO: change for core.
+		if ( WP_ROLLBACK_COMMITTED ) {
+			remove_action( 'shutdown', array( new WP_Upgrader(), 'delete_temp_backup' ), 100 );
+		} else {
+			remove_action( 'shutdown', array( new \Rollback_Update_Failure\WP_Upgrader(), 'delete_temp_backup' ), 100 );
+		}
 	}
 
 	/**
@@ -385,6 +399,10 @@ class WP_Rollback_Auto_Update {
 	 * @since 6.3.0
 	 */
 	private function restart_core_updates() {
+		if ( ! function_exists( 'find_core_auto_update' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/update.php';
+		}
+
 		$core_update = find_core_auto_update();
 		if ( $core_update ) {
 			$core_updater = new WP_Automatic_Updater();
@@ -452,46 +470,49 @@ class WP_Rollback_Auto_Update {
 		$successful = array();
 		$failed     = array();
 
-		/*
-		 * Using `get_plugin_data()` instead has produced warnings/errors
-		 * as the files may not be in place at this time.
-		 */
-		$plugins = get_plugins();
+		$plugin_theme_email_data = array(
+			'plugin' => array( 'data' => get_plugins() ),
+			'theme'  => array( 'data' => wp_get_themes() ),
+		);
 
-		foreach ( static::$current_plugins->response as $k => $update ) {
-			$item = static::$current_plugins->response[ $k ];
-			$name = $plugins[ $update->plugin ]['Name'];
+		foreach ( $plugin_theme_email_data as $type => $data ) {
+			$current_items = 'plugin' === $type ? static::$current_plugins : static::$current_themes;
 
-			/*
-			 * This appears to be the only way to get a plugin's older version
-			 * at this stage of an auto-update when not implementing this
-			 * feature directly in Core.
-			 */
-			$current_version = static::$current_plugins->checked[ $update->plugin ];
+			foreach ( $current_items->response as $k => $update ) {
+				$item = $current_items->response[ $k ];
 
-			/*
-			 * The `current_version` property does not exist yet. Add it.
-			 *
-			 * `static::$current_plugins->response[ $k ]` is an instance of `stdClass`,
-			 * so this should not fall victim to PHP 8.2's deprecation of
-			 * dynamic properties.
-			 */
-			$item->current_version = $current_version;
+				if ( 'plugin' === $type ) {
+					$file                  = $update->plugin;
+					$name                  = $data['data'][ $file ]['Name'];
+					$current_version       = $current_items->checked[ $file ];
+					$item->current_version = $current_version;
+					$type_result           = (object) array(
+						'name' => $name,
+						'item' => $item,
+					);
+				}
 
-			$plugin_result = (object) array(
-				'name' => $name,
-				'item' => $item,
-			);
+				if ( 'theme' === $type ) {
+					$file                    = $update['theme'];
+					$name                    = $data['data'][ $file ]->get( 'Name' );
+					$current_version         = $current_items->checked[ $file ];
+					$item['current_version'] = $current_version;
+					$type_result             = (object) array(
+						'name' => $name,
+						'item' => (object) $item,
+					);
+				}
 
-			$success = array_diff( self::$processed, self::$fatals );
+				$success = array_diff( self::$processed, self::$fatals );
 
-			if ( in_array( $update->plugin, $success, true ) ) {
-				$successful['plugin'][] = $plugin_result;
-				continue;
-			}
+				if ( in_array( $file, $success, true ) ) {
+					$successful[ $type ][] = $type_result;
+					continue;
+				}
 
-			if ( in_array( $update->plugin, self::$fatals, true ) ) {
-				$failed['plugin'][] = $plugin_result;
+				if ( in_array( $file, self::$fatals, true ) ) {
+					$failed[ $type ][] = $type_result;
+				}
 			}
 		}
 
@@ -528,7 +549,7 @@ class WP_Rollback_Auto_Update {
 			return $email;
 		}
 		$body   = explode( "\n", $email['body'] );
-		$failed = __( 'These plugins failed to update or may have been rolled back due to detection of a fatal error:' );
+		$failed = __( 'These plugins failed to update or may have been restored from a temporary backup due to detection of a fatal error:' );
 		array_splice( $body, 6, 1, $failed );
 		$props = __( 'The WordPress Rollbackenberg Team' );
 		array_splice( $body, -1, 1, $props );
