@@ -1,6 +1,7 @@
 [unreleased]
 * improved language for email
 * ensure `find_core_auto_update()` is available
+* put guard for Rollback part 2 not being committed back
 
 #### 5.2.0 / 2023-05-09
 * restart theme auto-updates

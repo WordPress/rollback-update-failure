@@ -104,8 +104,8 @@ class WP_Rollback_Auto_Update {
 
 	/**
 	 * Checks the validity of the updated plugin.
-	 * TODO: add $this to passed parameter for 'upgrader_install_package_result' hook.
-	 * then add
+	 * TODO: Add $this to passed parameter for 'upgrader_install_package_result' hook.
+	 *       Remove $upgrader default value for PR.
 	 *
 	 * @since 6.3.0
 	 *
