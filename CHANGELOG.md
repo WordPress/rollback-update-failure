@@ -1,4 +1,5 @@
 [unreleased]
+* cleanup email sending
 
 #### 5.3.0 / 2023-05-21
 * improved language for email
