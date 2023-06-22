@@ -330,8 +330,6 @@ class WP_Rollback_Auto_Update {
 			),
 		);
 
-		include_once $wp_filesystem->wp_plugins_dir() . 'rollback-update-failure/wp-admin/includes/class-wp-upgrader.php';
-
 		// TODO: change for core.
 		if ( WP_ROLLBACK_COMMITTED ) {
 			$rollback_updater = new WP_Upgrader();
