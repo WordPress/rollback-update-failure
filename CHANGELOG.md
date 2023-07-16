@@ -1,5 +1,8 @@
 [unreleased]
 
+#### 5.3.3 / 2023-07-16
+* remove Reflection in `WP_Rollback_Auto_Update::cron_rollback()` as methods are public
+
 #### 5.3.2 / 2023-07-10
 * cleanup
 
