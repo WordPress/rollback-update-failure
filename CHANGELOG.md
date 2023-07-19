@@ -1,4 +1,5 @@
 [unreleased]
+* add version check for Rollback part 3
 
 #### 5.3.3 / 2023-07-16
 * remove Reflection in `WP_Rollback_Auto_Update::cron_rollback()` as methods are public
