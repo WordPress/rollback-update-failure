@@ -253,7 +253,7 @@ class WP_Rollback_Auto_Update {
 		 *
 		 * To resolve this, the hook must be removed using the original plugin upgrader instance.
 		 */
-		remove_filter( 'upgrader_clear_destination', array( self::$plugin_upgrader, 'delete_old_plugin' ) );
+		remove_filter( 'upgrader_clear_destination', array( static::$plugin_upgrader, 'delete_old_plugin' ) );
 
 		$this->restart_updates();
 		$this->restart_core_updates();
