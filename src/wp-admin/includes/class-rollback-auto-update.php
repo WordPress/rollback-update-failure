@@ -163,8 +163,7 @@ class WP_Rollback_Auto_Update {
 
 		// TODO: include in PR.
 		// static::$plugin_upgrader = $upgrader;
-		$this->update_is_safe = false;
-		$this->handler_args   = array(
+		$this->handler_args = array(
 			'handler_error' => '',
 			'result'        => $result,
 			'hook_extra'    => $hook_extra,
@@ -233,6 +232,7 @@ class WP_Rollback_Auto_Update {
 			return;
 		}
 		self::$fatals[] = $this->handler_args['hook_extra']['plugin'];
+		self::$fatals   = array_unique( self::$fatals );
 
 		$this->cron_rollback();
 		if ( isset( self::$is_active[ $this->handler_args['hook_extra']['plugin'] ] )
@@ -249,6 +249,8 @@ class WP_Rollback_Auto_Update {
 
 		static::$current_plugins = get_site_transient( 'update_plugins' );
 		static::$current_themes  = get_site_transient( 'update_themes' );
+		static::$plugins         = get_plugins();
+		static::$themes          = wp_get_themes();
 
 		/*
 		 * If a plugin upgrade fails prior to a theme upgrade running, the plugin upgrader will have
