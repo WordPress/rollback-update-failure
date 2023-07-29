@@ -154,7 +154,6 @@ class WP_Rollback_Auto_Update {
 
 		// TODO: include in PR.
 		// static::$plugin_upgrader = $upgrader;
-
 		$this->update_is_safe = false;
 		$this->handler_args   = array(
 			'handler_error' => '',
