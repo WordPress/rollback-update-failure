@@ -77,7 +77,8 @@ class WP_Rollback_Auto_Update {
 
 	/**
 	 * Stores instance of Plugin_Upgrader.
-	 * TODO: remove before commit.
+	 *
+	 * @since 6.4.0
 	 *
 	 * @var Plugin_Upgrader
 	 */
@@ -147,6 +148,12 @@ class WP_Rollback_Auto_Update {
 		 * the previously processed plugin.
 		 */
 		sleep( 2 );
+
+		// TODO: remove before commit.
+		static::$plugin_upgrader = $upgrader instanceof Plugin_Upgrader ? $upgrader : static::$plugin_upgrader;
+
+		// TODO: include in PR.
+		// static::$plugin_upgrader = $upgrader;
 
 		$this->update_is_safe = false;
 		$this->handler_args   = array(
@@ -302,6 +309,15 @@ class WP_Rollback_Auto_Update {
 
 		static::$current_plugins = get_site_transient( 'update_plugins' );
 		static::$current_themes  = get_site_transient( 'update_themes' );
+
+		/*
+		 * If a plugin upgrade fails prior to a theme upgrade running, the plugin upgrader will have
+		 * hooked the 'Plugin_Upgrader::delete_old_plugin()' method to 'upgrader_clear_destination',
+		 * which will return a `WP_Error` object and prevent the process from continuing.
+		 *
+		 * To resolve this, the hook must be removed using the original plugin upgrader instance.
+		 */
+		remove_filter( 'upgrader_clear_destination', array( self::$plugin_upgrader, 'delete_old_plugin' ) );
 
 		$this->restart_updates();
 		$this->restart_core_updates();
