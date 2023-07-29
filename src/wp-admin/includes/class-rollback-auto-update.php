@@ -40,6 +40,15 @@ class WP_Rollback_Auto_Update {
 	private static $fatals = array();
 
 	/**
+	 * Stores active state of plugins being updated.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @var array
+	 */
+	private static $is_active = array();
+
+	/**
 	 * Stores `update_plugins` transient.
 	 *
 	 * @since 6.4.0
@@ -150,6 +159,9 @@ class WP_Rollback_Auto_Update {
 		$this->initialize_handlers();
 
 		self::$processed[] = $hook_extra['plugin'];
+		if ( is_plugin_active( $hook_extra['plugin'] ) ) {
+			self::$is_active[ $hook_extra['plugin'] ] = true;
+		}
 
 		if ( is_plugin_inactive( $hook_extra['plugin'] ) ) {
 			// Working parts of plugin_sandbox_scrape().
