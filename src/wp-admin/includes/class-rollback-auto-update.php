@@ -206,7 +206,7 @@ class WP_Rollback_Auto_Update {
 	 */
 	public function error_handler() {
 		$this->handler_args['handler_error'] = 'Error Caught';
-		$this->handler( $this->non_fatal_errors() );
+		$this->handler();
 	}
 
 	/**
@@ -216,21 +216,15 @@ class WP_Rollback_Auto_Update {
 	 */
 	public function exception_handler() {
 		$this->handler_args['handler_error'] = 'Exception Caught';
-		$this->handler( false );
+		$this->handler();
 	}
 
 	/**
 	 * Handles errors by running Rollback.
 	 *
 	 * @since 6.4.0
-	 *
-	 * @param bool $skip If false, assume fatal and process.
-	 *                   Default false.
 	 */
-	private function handler( $skip = false ) {
-		if ( $skip ) {
-			return;
-		}
+	private function handler() {
 		self::$fatals[] = $this->handler_args['hook_extra']['plugin'];
 		self::$fatals   = array_unique( self::$fatals );
 
@@ -264,22 +258,6 @@ class WP_Rollback_Auto_Update {
 		$this->restart_updates();
 		$this->restart_core_updates();
 		$this->send_update_result_email();
-	}
-
-	/**
-	 * Return whether to skip (exit handler() early) for non-fatal errors or non-errors.
-	 *
-	 * @since 6.4.0
-	 *
-	 * @return bool Whether to skip for non-fatal errors or non-errors.
-	 */
-	private function non_fatal_errors() {
-		$last_error       = error_get_last();
-		$non_fatal_errors = ( ! empty( $last_error ) && $this->error_types !== $last_error['type'] );
-		$skip             = is_plugin_active( $this->handler_args['hook_extra']['plugin'] ) || $this->update_is_safe;
-		$skip             = $skip ? $skip : $non_fatal_errors;
-
-		return $skip;
 	}
 
 	/**
