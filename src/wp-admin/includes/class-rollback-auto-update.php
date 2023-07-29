@@ -195,7 +195,7 @@ class WP_Rollback_Auto_Update {
 	 */
 	private function initialize_handlers() {
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler
-		set_error_handler( array( $this, 'error_handler' ), ( E_ALL ^ static::$error_types ) );
+		set_error_handler( array( $this, 'error_handler' ), ( E_ALL ^ self::$error_types ) );
 		set_exception_handler( array( $this, 'exception_handler' ) );
 	}
 
@@ -241,10 +241,10 @@ class WP_Rollback_Auto_Update {
 		 */
 		sleep( 2 );
 
-		static::$current_plugins = get_site_transient( 'update_plugins' );
-		static::$current_themes  = get_site_transient( 'update_themes' );
-		static::$plugins         = get_plugins();
-		static::$themes          = wp_get_themes();
+		self::$current_plugins = get_site_transient( 'update_plugins' );
+		self::$current_themes  = get_site_transient( 'update_themes' );
+		self::$plugins         = get_plugins();
+		self::$themes          = wp_get_themes();
 
 		/*
 		 * If a plugin upgrade fails prior to a theme upgrade running, the plugin upgrader will have
@@ -370,7 +370,7 @@ class WP_Rollback_Auto_Update {
 
 		// Get array of plugins set for auto-updating.
 		$auto_updates    = (array) get_site_option( 'auto_update_plugins', array() );
-		$current_plugins = array_keys( static::$current_plugins->response );
+		$current_plugins = array_keys( self::$current_plugins->response );
 
 		// Get all auto-updating plugins that have updates available.
 		$current_auto_updates = array_intersect( $auto_updates, $current_plugins );
@@ -395,7 +395,7 @@ class WP_Rollback_Auto_Update {
 
 		// Get array of themes set for auto-updating.
 		$auto_updates   = (array) get_site_option( 'auto_update_themes', array() );
-		$current_themes = array_keys( static::$current_themes->response );
+		$current_themes = array_keys( self::$current_themes->response );
 
 		// Get all auto-updating plugins that have updates available.
 		$current_auto_updates = array_intersect( $auto_updates, $current_themes );
@@ -417,12 +417,12 @@ class WP_Rollback_Auto_Update {
 		$failed     = array();
 
 		$plugin_theme_email_data = array(
-			'plugin' => array( 'data' => static::$plugins ),
-			'theme'  => array( 'data' => static::$themes ),
+			'plugin' => array( 'data' => self::$plugins ),
+			'theme'  => array( 'data' => self::$themes ),
 		);
 
 		foreach ( $plugin_theme_email_data as $type => $data ) {
-			$current_items = 'plugin' === $type ? static::$current_plugins : static::$current_themes;
+			$current_items = 'plugin' === $type ? self::$current_plugins : self::$current_themes;
 
 			foreach ( array_keys( $current_items->response ) as $file ) {
 				$item            = $current_items->response[ $file ];
