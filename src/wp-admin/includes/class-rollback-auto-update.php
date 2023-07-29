@@ -67,13 +67,22 @@ class WP_Rollback_Auto_Update {
 	private static $current_themes;
 
 	/**
-	 * Stores boolean for no error from check_plugin_for_errors().
+	 * Stores get_plugins().
 	 *
 	 * @since 6.4.0
 	 *
-	 * @var bool
+	 * @var array
 	 */
-	private $update_is_safe = false;
+	private static $plugins;
+
+	/**
+	 * Stores wp_get_themes().
+	 *
+	 * @since 6.4.0
+	 *
+	 * @var array
+	 */
+	private static $themes;
 
 	/**
 	 * Stores instance of Plugin_Upgrader.
@@ -91,7 +100,7 @@ class WP_Rollback_Auto_Update {
 	 *
 	 * @var int
 	 */
-	public $error_types = E_ERROR | E_PARSE | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR;
+	public static $error_types = E_ERROR | E_PARSE | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR;
 
 	/**
 	 * Get Plugin_Upgrader
@@ -187,7 +196,7 @@ class WP_Rollback_Auto_Update {
 	 */
 	private function initialize_handlers() {
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler
-		set_error_handler( array( $this, 'error_handler' ), ( E_ALL ^ $this->error_types ) );
+		set_error_handler( array( $this, 'error_handler' ), ( E_ALL ^ static::$error_types ) );
 		set_exception_handler( array( $this, 'exception_handler' ) );
 	}
 
@@ -428,8 +437,8 @@ class WP_Rollback_Auto_Update {
 		$failed     = array();
 
 		$plugin_theme_email_data = array(
-			'plugin' => array( 'data' => get_plugins() ),
-			'theme'  => array( 'data' => wp_get_themes() ),
+			'plugin' => array( 'data' => static::$plugins ),
+			'theme'  => array( 'data' => static::$themes ),
 		);
 
 		foreach ( $plugin_theme_email_data as $type => $data ) {
