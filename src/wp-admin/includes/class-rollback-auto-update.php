@@ -226,7 +226,8 @@ class WP_Rollback_Auto_Update {
 		self::$fatals[] = $this->handler_args['hook_extra']['plugin'];
 
 		$this->cron_rollback();
-		if ( self::$is_active[ $this->handler_args['hook_extra']['plugin'] ] ) {
+		if ( isset( self::$is_active[ $this->handler_args['hook_extra']['plugin'] ] )
+			&& self::$is_active[ $this->handler_args['hook_extra']['plugin'] ] ) {
 			activate_plugin( $this->handler_args['hook_extra']['plugin'] );
 		}
 
@@ -335,7 +336,9 @@ class WP_Rollback_Auto_Update {
 			$results        = $theme_upgrader->bulk_upgrade( $remaining_theme_auto_updates );
 
 			foreach ( array_keys( $results ) as $theme ) {
-				self::$processed[] = $theme;
+				if ( ! is_wp_error( $theme ) ) {
+					self::$processed[] = $theme;
+				}
 			}
 		}
 
