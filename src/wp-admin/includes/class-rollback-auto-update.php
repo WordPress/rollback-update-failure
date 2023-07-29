@@ -168,89 +168,17 @@ class WP_Rollback_Auto_Update {
 		self::$processed[] = $hook_extra['plugin'];
 		if ( is_plugin_active( $hook_extra['plugin'] ) ) {
 			self::$is_active[ $hook_extra['plugin'] ] = true;
+			deactivate_plugins( $hook_extra['plugin'] );
 		}
 
-		if ( is_plugin_inactive( $hook_extra['plugin'] ) ) {
-			// Working parts of plugin_sandbox_scrape().
-			wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $hook_extra['plugin'] );
-			include WP_PLUGIN_DIR . '/' . $hook_extra['plugin'];
-		}
+		// Working parts of plugin_sandbox_scrape().
+		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $hook_extra['plugin'] );
+		include WP_PLUGIN_DIR . '/' . $hook_extra['plugin'];
 
-		// Needs to run for both active and inactive plugins. Don't ask why, just accept it.
-		$this->check_plugin_for_errors( $hook_extra['plugin'], $upgrader );
 		// TODO: remove before commit.
 		error_log( $hook_extra['plugin'] . ' auto updated.' );
 
 		return $result;
-	}
-
-	/**
-	 * Checks a new plugin version for errors.
-	 *
-	 * If an error is found, the previously installed version will be reinstalled
-	 * and an email will be sent to the site administrator.
-	 *
-	 * @since 6.4.0
-	 *
-	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
-	 *
-	 * @param string      $plugin The plugin to check.
-	 * @param WP_Upgrader $upgrader WP_Upgrader or child class instance.
-	 *
-	 * @throws Exception If errors are present.
-	 *
-	 * @return void
-	 */
-	private function check_plugin_for_errors( $plugin, $upgrader ) {
-		global $wp_filesystem;
-
-		if ( $wp_filesystem->exists( ABSPATH . '.maintenance' ) ) {
-			$wp_filesystem->delete( ABSPATH . '.maintenance' );
-		}
-
-		$nonce    = wp_create_nonce( 'plugin-activation-error_' . $plugin );
-		$response = wp_remote_get(
-			add_query_arg(
-				array(
-					'action'   => 'error_scrape',
-					'plugin'   => $plugin,
-					'_wpnonce' => $nonce,
-				),
-				admin_url( 'plugins.php' )
-			),
-			array( 'timeout' => 60 )
-		);
-
-		if ( is_wp_error( $response ) ) {
-			// If it isn't possible to run the check, assume an error.
-			throw new Exception( $response->get_error_message() );
-		}
-
-		$code                 = wp_remote_retrieve_response_code( $response );
-		$body                 = wp_remote_retrieve_body( $response );
-		$this->update_is_safe = 200 === $code;
-
-		if ( str_contains( $body, 'wp-die-message' ) || 200 !== $code ) {
-			// TODO: remove before commit.
-			$upgrader = $upgrader instanceof Plugin_Upgrader ? $upgrader : static::$plugin_upgrader;
-
-			/*
-			 * If a plugin upgrade fails prior to a theme upgrade running, the plugin upgrader will have
-			 * hooked the 'Plugin_Upgrader::delete_old_plugin()' method to 'upgrader_clear_destination',
-			 * which will return a `WP_Error` object and prevent the process from continuing.
-			 *
-			 * To resolve this, the hook must be removed using the original plugin upgrader instance.
-			 */
-			remove_filter( 'upgrader_clear_destination', array( $upgrader, 'delete_old_plugin' ) );
-
-			throw new Exception(
-				sprintf(
-					/* translators: %s: The name of the plugin. */
-					__( 'The new version of %s contains an error' ),
-					get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin )['Name']
-				)
-			);
-		}
 	}
 
 	/**
@@ -299,6 +227,9 @@ class WP_Rollback_Auto_Update {
 		self::$fatals[] = $this->handler_args['hook_extra']['plugin'];
 
 		$this->cron_rollback();
+		if ( self::$is_active[ $this->handler_args['hook_extra']['plugin'] ] ) {
+			activate_plugin( $this->handler_args['hook_extra']['plugin'] );
+		}
 
 		/*
 		 * This possibly helps to avoid a potential race condition on servers that may start to
