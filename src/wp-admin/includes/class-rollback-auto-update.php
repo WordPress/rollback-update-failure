@@ -40,6 +40,15 @@ class WP_Rollback_Auto_Update {
 	private static $fatals = array();
 
 	/**
+	 * Stores active state of plugins being updated.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @var array
+	 */
+	private static $is_active = array();
+
+	/**
 	 * Stores `update_plugins` transient.
 	 *
 	 * @since 6.4.0
@@ -58,17 +67,27 @@ class WP_Rollback_Auto_Update {
 	private static $current_themes;
 
 	/**
-	 * Stores boolean for no error from check_plugin_for_errors().
+	 * Stores get_plugins().
 	 *
 	 * @since 6.4.0
 	 *
-	 * @var bool
+	 * @var array
 	 */
-	private $update_is_safe = false;
+	private static $plugins;
+
+	/**
+	 * Stores wp_get_themes().
+	 *
+	 * @since 6.4.0
+	 *
+	 * @var array
+	 */
+	private static $themes;
 
 	/**
 	 * Stores instance of Plugin_Upgrader.
-	 * TODO: remove before commit.
+	 *
+	 * @since 6.4.0
 	 *
 	 * @var Plugin_Upgrader
 	 */
@@ -81,7 +100,7 @@ class WP_Rollback_Auto_Update {
 	 *
 	 * @var int
 	 */
-	public $error_types = E_ERROR | E_PARSE | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR;
+	public static $error_types = E_ERROR | E_PARSE | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR;
 
 	/**
 	 * Get Plugin_Upgrader
@@ -95,7 +114,7 @@ class WP_Rollback_Auto_Update {
 	 * @return string
 	 */
 	public function set_plugin_upgrader( $source, $remote_source, $obj ) {
-		if ( ! isset( static::$plugin_upgrader ) && $obj instanceof Plugin_Upgrader ) {
+		if ( $obj instanceof Plugin_Upgrader ) {
 			static::$plugin_upgrader = $obj;
 		}
 
@@ -125,7 +144,7 @@ class WP_Rollback_Auto_Update {
 		}
 
 		// Already processed.
-		if ( in_array( $hook_extra['plugin'], self::$processed, true ) ) {
+		if ( in_array( $hook_extra['plugin'], array_diff( self::$processed, self::$fatals ), true ) ) {
 			return $result;
 		}
 
@@ -139,8 +158,12 @@ class WP_Rollback_Auto_Update {
 		 */
 		sleep( 2 );
 
-		$this->update_is_safe = false;
-		$this->handler_args   = array(
+		// TODO: remove before commit.
+		static::$plugin_upgrader = $upgrader instanceof Plugin_Upgrader ? $upgrader : static::$plugin_upgrader;
+
+		// TODO: include in PR.
+		// static::$plugin_upgrader = $upgrader;
+		$this->handler_args = array(
 			'handler_error' => '',
 			'result'        => $result,
 			'hook_extra'    => $hook_extra,
@@ -150,88 +173,19 @@ class WP_Rollback_Auto_Update {
 		$this->initialize_handlers();
 
 		self::$processed[] = $hook_extra['plugin'];
-
-		if ( is_plugin_inactive( $hook_extra['plugin'] ) ) {
-			// Working parts of plugin_sandbox_scrape().
-			wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $hook_extra['plugin'] );
-			include WP_PLUGIN_DIR . '/' . $hook_extra['plugin'];
+		if ( is_plugin_active( $hook_extra['plugin'] ) ) {
+			self::$is_active[ $hook_extra['plugin'] ] = true;
+			deactivate_plugins( $hook_extra['plugin'] );
 		}
 
-		// Needs to run for both active and inactive plugins. Don't ask why, just accept it.
-		$this->check_plugin_for_errors( $hook_extra['plugin'], $upgrader );
+		// Working parts of plugin_sandbox_scrape().
+		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $hook_extra['plugin'] );
+		include WP_PLUGIN_DIR . '/' . $hook_extra['plugin'];
+
 		// TODO: remove before commit.
 		error_log( $hook_extra['plugin'] . ' auto updated.' );
 
 		return $result;
-	}
-
-	/**
-	 * Checks a new plugin version for errors.
-	 *
-	 * If an error is found, the previously installed version will be reinstalled
-	 * and an email will be sent to the site administrator.
-	 *
-	 * @since 6.4.0
-	 *
-	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
-	 *
-	 * @param string      $plugin The plugin to check.
-	 * @param WP_Upgrader $upgrader WP_Upgrader or child class instance.
-	 *
-	 * @throws Exception If errors are present.
-	 *
-	 * @return void
-	 */
-	private function check_plugin_for_errors( $plugin, $upgrader ) {
-		global $wp_filesystem;
-
-		if ( $wp_filesystem->exists( ABSPATH . '.maintenance' ) ) {
-			$wp_filesystem->delete( ABSPATH . '.maintenance' );
-		}
-
-		$nonce    = wp_create_nonce( 'plugin-activation-error_' . $plugin );
-		$response = wp_remote_get(
-			add_query_arg(
-				array(
-					'action'   => 'error_scrape',
-					'plugin'   => $plugin,
-					'_wpnonce' => $nonce,
-				),
-				admin_url( 'plugins.php' )
-			),
-			array( 'timeout' => 60 )
-		);
-
-		if ( is_wp_error( $response ) ) {
-			// If it isn't possible to run the check, assume an error.
-			throw new Exception( $response->get_error_message() );
-		}
-
-		$code                 = wp_remote_retrieve_response_code( $response );
-		$body                 = wp_remote_retrieve_body( $response );
-		$this->update_is_safe = 200 === $code;
-
-		if ( str_contains( $body, 'wp-die-message' ) || 200 !== $code ) {
-			// TODO: remove before commit.
-			$upgrader = $upgrader instanceof Plugin_Upgrader ? $upgrader : static::$plugin_upgrader;
-
-			/*
-			 * If a plugin upgrade fails prior to a theme upgrade running, the plugin upgrader will have
-			 * hooked the 'Plugin_Upgrader::delete_old_plugin()' method to 'upgrader_clear_destination',
-			 * which will return a `WP_Error` object and prevent the process from continuing.
-			 *
-			 * To resolve this, the hook must be removed using the original plugin upgrader instance.
-			 */
-			remove_filter( 'upgrader_clear_destination', array( $upgrader, 'delete_old_plugin' ) );
-
-			throw new Exception(
-				sprintf(
-					/* translators: %s: The name of the plugin. */
-					__( 'The new version of %s contains an error' ),
-					get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin )['Name']
-				)
-			);
-		}
 	}
 
 	/**
@@ -241,7 +195,7 @@ class WP_Rollback_Auto_Update {
 	 */
 	private function initialize_handlers() {
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler
-		set_error_handler( array( $this, 'error_handler' ), ( E_ALL ^ $this->error_types ) );
+		set_error_handler( array( $this, 'error_handler' ), ( E_ALL ^ self::$error_types ) );
 		set_exception_handler( array( $this, 'exception_handler' ) );
 	}
 
@@ -252,7 +206,7 @@ class WP_Rollback_Auto_Update {
 	 */
 	public function error_handler() {
 		$this->handler_args['handler_error'] = 'Error Caught';
-		$this->handler( $this->non_fatal_errors() );
+		$this->handler();
 	}
 
 	/**
@@ -262,24 +216,23 @@ class WP_Rollback_Auto_Update {
 	 */
 	public function exception_handler() {
 		$this->handler_args['handler_error'] = 'Exception Caught';
-		$this->handler( false );
+		$this->handler();
 	}
 
 	/**
 	 * Handles errors by running Rollback.
 	 *
 	 * @since 6.4.0
-	 *
-	 * @param bool $skip If false, assume fatal and process.
-	 *                   Default false.
 	 */
-	private function handler( $skip = false ) {
-		if ( $skip ) {
-			return;
-		}
+	private function handler() {
 		self::$fatals[] = $this->handler_args['hook_extra']['plugin'];
+		self::$fatals   = array_unique( self::$fatals );
 
 		$this->cron_rollback();
+		if ( isset( self::$is_active[ $this->handler_args['hook_extra']['plugin'] ] )
+			&& self::$is_active[ $this->handler_args['hook_extra']['plugin'] ] ) {
+			activate_plugin( $this->handler_args['hook_extra']['plugin'] );
+		}
 
 		/*
 		 * This possibly helps to avoid a potential race condition on servers that may start to
@@ -288,28 +241,23 @@ class WP_Rollback_Auto_Update {
 		 */
 		sleep( 2 );
 
-		static::$current_plugins = get_site_transient( 'update_plugins' );
-		static::$current_themes  = get_site_transient( 'update_themes' );
+		self::$current_plugins = get_site_transient( 'update_plugins' );
+		self::$current_themes  = get_site_transient( 'update_themes' );
+		self::$plugins         = get_plugins();
+		self::$themes          = wp_get_themes();
+
+		/*
+		 * If a plugin upgrade fails prior to a theme upgrade running, the plugin upgrader will have
+		 * hooked the 'Plugin_Upgrader::delete_old_plugin()' method to 'upgrader_clear_destination',
+		 * which will return a `WP_Error` object and prevent the process from continuing.
+		 *
+		 * To resolve this, the hook must be removed using the original plugin upgrader instance.
+		 */
+		remove_filter( 'upgrader_clear_destination', array( static::$plugin_upgrader, 'delete_old_plugin' ) );
 
 		$this->restart_updates();
 		$this->restart_core_updates();
 		$this->send_update_result_email();
-	}
-
-	/**
-	 * Return whether to skip (exit handler() early) for non-fatal errors or non-errors.
-	 *
-	 * @since 6.4.0
-	 *
-	 * @return bool Whether to skip for non-fatal errors or non-errors.
-	 */
-	private function non_fatal_errors() {
-		$last_error       = error_get_last();
-		$non_fatal_errors = ( ! empty( $last_error ) && $this->error_types !== $last_error['type'] );
-		$skip             = is_plugin_active( $this->handler_args['hook_extra']['plugin'] ) || $this->update_is_safe;
-		$skip             = $skip ? $skip : $non_fatal_errors;
-
-		return $skip;
 	}
 
 	/**
@@ -377,7 +325,9 @@ class WP_Rollback_Auto_Update {
 			$results        = $theme_upgrader->bulk_upgrade( $remaining_theme_auto_updates );
 
 			foreach ( array_keys( $results ) as $theme ) {
-				self::$processed[] = $theme;
+				if ( ! is_wp_error( $theme ) ) {
+					self::$processed[] = $theme;
+				}
 			}
 		}
 
@@ -420,7 +370,7 @@ class WP_Rollback_Auto_Update {
 
 		// Get array of plugins set for auto-updating.
 		$auto_updates    = (array) get_site_option( 'auto_update_plugins', array() );
-		$current_plugins = array_keys( static::$current_plugins->response );
+		$current_plugins = array_keys( self::$current_plugins->response );
 
 		// Get all auto-updating plugins that have updates available.
 		$current_auto_updates = array_intersect( $auto_updates, $current_plugins );
@@ -445,7 +395,7 @@ class WP_Rollback_Auto_Update {
 
 		// Get array of themes set for auto-updating.
 		$auto_updates   = (array) get_site_option( 'auto_update_themes', array() );
-		$current_themes = array_keys( static::$current_themes->response );
+		$current_themes = array_keys( self::$current_themes->response );
 
 		// Get all auto-updating plugins that have updates available.
 		$current_auto_updates = array_intersect( $auto_updates, $current_themes );
@@ -467,12 +417,12 @@ class WP_Rollback_Auto_Update {
 		$failed     = array();
 
 		$plugin_theme_email_data = array(
-			'plugin' => array( 'data' => get_plugins() ),
-			'theme'  => array( 'data' => wp_get_themes() ),
+			'plugin' => array( 'data' => self::$plugins ),
+			'theme'  => array( 'data' => self::$themes ),
 		);
 
 		foreach ( $plugin_theme_email_data as $type => $data ) {
-			$current_items = 'plugin' === $type ? static::$current_plugins : static::$current_themes;
+			$current_items = 'plugin' === $type ? self::$current_plugins : self::$current_themes;
 
 			foreach ( array_keys( $current_items->response ) as $file ) {
 				$item            = $current_items->response[ $file ];
