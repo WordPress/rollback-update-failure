@@ -1,6 +1,6 @@
 [unreleased]
 * add version check for Rollback part 3
-* deactivate/reactivate plugin during auto-update test to use same `plugin_sandbox_scrape()` as core
+* deactivate/reactivate plugin during auto-update test to use same `plugin_sandbox_scrape()` as Core
 
 #### 5.3.3 / 2023-07-16
 * remove Reflection in `WP_Rollback_Auto_Update::cron_rollback()` as methods are public
