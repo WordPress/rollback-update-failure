@@ -138,6 +138,7 @@ class WP_Rollback_Auto_Update {
 			return $result;
 		}
 
+		// TODO: remove before commit.
 		// Checking our own plugin will cause a PHP Fatal redeclaration error.
 		if ( 'rollback-update-failure/plugin.php' === $hook_extra['plugin'] ) {
 			return $result;
@@ -412,7 +413,6 @@ class WP_Rollback_Auto_Update {
 	 * @since 6.4.0
 	 */
 	private function send_update_result_email() {
-		add_filter( 'auto_plugin_theme_update_email', array( $this, 'auto_update_rollback_message' ), 10, 4 );
 		$successful = array();
 		$failed     = array();
 
@@ -458,6 +458,8 @@ class WP_Rollback_Auto_Update {
 				}
 			}
 		}
+
+		add_filter( 'auto_plugin_theme_update_email', array( $this, 'auto_update_rollback_message' ), 10, 4 );
 
 		$automatic_upgrader      = new WP_Automatic_Updater();
 		$send_plugin_theme_email = new ReflectionMethod( $automatic_upgrader, 'send_plugin_theme_email' );
