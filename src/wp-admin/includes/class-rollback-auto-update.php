@@ -138,12 +138,6 @@ class WP_Rollback_Auto_Update {
 			return $result;
 		}
 
-		// TODO: remove before commit.
-		// Checking our own plugin will cause a PHP Fatal redeclaration error.
-		if ( 'rollback-update-failure/plugin.php' === $hook_extra['plugin'] ) {
-			return $result;
-		}
-
 		// Already processed.
 		if ( in_array( $hook_extra['plugin'], array_diff( self::$processed, self::$fatals ), true ) ) {
 			return $result;
@@ -181,7 +175,7 @@ class WP_Rollback_Auto_Update {
 
 		// Working parts of plugin_sandbox_scrape().
 		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $hook_extra['plugin'] );
-		include WP_PLUGIN_DIR . '/' . $hook_extra['plugin'];
+		include_once WP_PLUGIN_DIR . '/' . $hook_extra['plugin'];
 
 		// TODO: remove before commit.
 		error_log( $hook_extra['plugin'] . ' auto updated.' );
