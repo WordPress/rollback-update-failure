@@ -175,7 +175,7 @@ class WP_Rollback_Auto_Update {
 
 		// Working parts of plugin_sandbox_scrape().
 		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $hook_extra['plugin'] );
-		include_once WP_PLUGIN_DIR . '/' . $hook_extra['plugin'];
+		include WP_PLUGIN_DIR . '/' . $hook_extra['plugin'];
 
 		// TODO: remove before commit.
 		error_log( $hook_extra['plugin'] . ' auto updated.' );
