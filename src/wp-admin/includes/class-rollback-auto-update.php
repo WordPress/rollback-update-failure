@@ -199,7 +199,8 @@ class WP_Rollback_Auto_Update {
 	 *
 	 * @since 6.4.0
 	 */
-	public function error_handler( $errno, $errstr, $errfile, $errline ) {
+	public function error_handler( $errstr ) {
+		error_log( var_export( $errstr, true ) );
 		$this->handler_args['handler_error'] = 'Error Caught';
 		$this->handler();
 	}
