@@ -173,7 +173,10 @@ class WP_Rollback_Auto_Update {
 			deactivate_plugins( $hook_extra['plugin'] );
 		}
 
-		// Working parts of plugin_sandbox_scrape().
+		/*
+		 * Working parts of plugin_sandbox_scrape().
+		 * Must use 'include()' instead of 'include_once()' to surface errors.
+		 */
 		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $hook_extra['plugin'] );
 		include WP_PLUGIN_DIR . '/' . $hook_extra['plugin'];
 
