@@ -206,8 +206,6 @@ class WP_Rollback_Auto_Update {
 	 * @param string $errstr Error message.
 	 */
 	public function error_handler( $errno, $errstr ) {
-		// TODO: remove before commit.
-		error_log( var_export( $errstr, true ) );
 		$this->handler_args['handler_error'] = 'Error Caught';
 		$this->handler_args['error_msg'] = $errstr;
 		$this->handler();
@@ -223,8 +221,6 @@ class WP_Rollback_Auto_Update {
 	 * @return void
 	 */
 	public function exception_handler( Throwable $exception ) {
-		// TODO: remove before commit.
-		error_log( var_export( $exception->getMessage(), true ) );
 		$this->handler_args['handler_error'] = 'Exception Caught';
 		$this->handler_args['error_msg'] = $exception->getMessage();
 		$this->handler();
@@ -236,6 +232,9 @@ class WP_Rollback_Auto_Update {
 	 * @since 6.4.0
 	 */
 	private function handler() {
+		// TODO: remove before commit.
+		error_log( var_export( $this->handler_args['error_msg'], true ) );
+
 		self::$fatals[] = $this->handler_args['hook_extra']['plugin'];
 		self::$fatals   = array_unique( self::$fatals );
 
