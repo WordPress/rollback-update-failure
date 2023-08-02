@@ -209,6 +209,7 @@ class WP_Rollback_Auto_Update {
 		// TODO: remove before commit.
 		error_log( var_export( $errstr, true ) );
 		$this->handler_args['handler_error'] = 'Error Caught';
+		$this->handler_args['error_msg'] = $errstr;
 		$this->handler();
 	}
 
@@ -225,6 +226,7 @@ class WP_Rollback_Auto_Update {
 		// TODO: remove before commit.
 		error_log( var_export( $exception->getMessage(), true ) );
 		$this->handler_args['handler_error'] = 'Exception Caught';
+		$this->handler_args['error_msg'] = $exception->getMessage();
 		$this->handler();
 	}
 
