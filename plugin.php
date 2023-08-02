@@ -29,24 +29,29 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-if ( version_compare( get_bloginfo( 'version' ), '6.2-beta1', '>=' ) ) {
-	define( 'WP_ROLLBACK_MOVE_DIR', true );
-} else {
-	define( 'WP_ROLLBACK_MOVE_DIR', false );
+if ( ! defined( 'WP_ROLLBACK_MOVE_DIR' ) ) {
+	if ( version_compare( get_bloginfo( 'version' ), '6.2-beta1', '>=' ) ) {
+		define( 'WP_ROLLBACK_MOVE_DIR', true );
+	} else {
+		define( 'WP_ROLLBACK_MOVE_DIR', false );
+	}
 }
 
-if ( version_compare( get_bloginfo( 'version' ), '6.3-alpha-55720', '>=' ) ) {
-	define( 'WP_ROLLBACK_COMMITTED', true );
-} else {
-	define( 'WP_ROLLBACK_COMMITTED', false );
+if ( ! defined( 'WP_ROLLBACK_COMMITTED' ) ) {
+	if ( version_compare( get_bloginfo( 'version' ), '6.3-alpha-55720', '>=' ) ) {
+		define( 'WP_ROLLBACK_COMMITTED', true );
+	} else {
+		define( 'WP_ROLLBACK_COMMITTED', false );
+	}
 }
 
-if ( version_compare( get_bloginfo( 'version' ), '6.4-beta1', '>=' ) ) {
-	define( 'WP_ROLLBACK_AUTO_UPDATE_COMMITTED', true );
-} else {
-	define( 'WP_ROLLBACK_AUTO_UPDATE_COMMITTED', false );
+if ( ! defined( 'WP_ROLLBACK_AUTO_UPDATE_COMMITTED' ) ) {
+	if ( version_compare( get_bloginfo( 'version' ), '6.4-beta1', '>=' ) ) {
+		define( 'WP_ROLLBACK_AUTO_UPDATE_COMMITTED', true );
+	} else {
+		define( 'WP_ROLLBACK_AUTO_UPDATE_COMMITTED', false );
+	}
 }
-
 
 if ( ! WP_ROLLBACK_MOVE_DIR ) {
 	require_once ABSPATH . 'wp-admin/includes/plugin.php';
