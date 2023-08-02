@@ -4,9 +4,9 @@ Plugin Name: Rollback Update Failure
 Contributors: afragen, aristath, costdev, pbiron
 Tags: feature plugin, update, failure
 License: MIT
-Requires PHP: 5.6
-Requires at least: 6.2
-Tested up to: 6.3
+Requires PHP: 7.0
+Requires at least: 6.3
+Tested up to: 6.4
 Stable Tag: 5.3.3
 
 This is a feature plugin for testing automatic rollback of a plugin or theme update failure.

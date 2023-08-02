@@ -6,8 +6,8 @@
 * Contributors: afragen, aristath, costdev, pbiron
 * Tags: feature plugin, update, failure, auto-update
 * License: MIT
-* Requires PHP: 5.6
-* Requires at least: 6.2
+* Requires PHP: 7.0
+* Requires at least: 6.3
 * Stable Tag: main
 
 This is a feature plugin for testing automatic rollback of a plugin or theme update failure.
