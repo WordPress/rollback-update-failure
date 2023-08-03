@@ -257,8 +257,7 @@ class WP_Rollback_Auto_Update {
 			$this->restart_updates();
 			$this->restart_core_updates();
 			$this->send_update_result_email();
-
-			return $result;
+			exit();
 		}
 		$this->handler_args['handler_error'] = 'Caught';
 		$this->handler_args['error_msg']     = $last_error['message'];
@@ -287,6 +286,7 @@ class WP_Rollback_Auto_Update {
 				return $this->handler_args['result'];
 			}
 		}
+
 		return false;
 	}
 
