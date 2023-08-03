@@ -253,6 +253,8 @@ class WP_Rollback_Auto_Update {
 		$last_error = error_get_last();
 		$result     = $this->check_passing_errors( $last_error['message'] );
 		if ( is_array( $result ) ) {
+			// TODO: remove before commit.
+			error_log( $this->handler_args['hook_extra']['plugin'] . ' auto updated.' );
 			// Restart everything again.
 			$this->restart_updates();
 			$this->restart_core_updates();
