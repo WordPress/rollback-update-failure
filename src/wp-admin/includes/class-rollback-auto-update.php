@@ -207,6 +207,7 @@ class WP_Rollback_Auto_Update {
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler
 		set_error_handler( array( $this, 'error_handler' ), ( E_ALL ^ self::$error_types ) );
 		set_exception_handler( array( $this, 'exception_handler' ) );
+		register_shutdown_function( array( $this, 'shutdown_function' ) );
 	}
 
 	/**
@@ -235,6 +236,19 @@ class WP_Rollback_Auto_Update {
 	public function exception_handler( Throwable $exception ) {
 		$this->handler_args['handler_error'] = 'Exception Caught';
 		$this->handler_args['error_msg'] = $exception->getMessage();
+	/**
+	 * Shutdown function.
+	 *
+	 * @return array|void
+	 */
+	public function shutdown_function() {
+		$last_error = error_get_last();
+		$result     = $this->check_passing_errors( $last_error );
+		if ( is_array( $result ) ) {
+			return $result;
+		}
+		$this->handler_args['handler_error'] = 'Caught';
+		$this->handler_args['error_msg']     = $last_error;
 		$this->handler();
 	}
 
