@@ -294,8 +294,8 @@ class WP_Rollback_Auto_Update {
 
 			return $this->handler_args['result'];
 		}
-
-		return false;
+		$this->send_update_result_email();
+		exit();
 	}
 
 	/**
