@@ -220,12 +220,7 @@ class WP_Rollback_Auto_Update {
 	 * @return array|void
 	 */
 	public function error_handler( $errno, $errstr ) {
-		$result = $this->check_passing_errors(
-			array(
-				'type'    => $errno,
-				'message' => $errstr,
-			)
-		);
+		$result = $this->check_passing_errors( $errstr );
 		if ( is_array( $result ) ) {
 			return $result;
 		}
@@ -256,26 +251,26 @@ class WP_Rollback_Auto_Update {
 	 */
 	public function shutdown_function() {
 		$last_error = error_get_last();
-		$result     = $this->check_passing_errors( $last_error );
+		$result     = $this->check_passing_errors( $last_error['message'] );
 		if ( is_array( $result ) ) {
 			return $result;
 		}
 		$this->handler_args['handler_error'] = 'Caught';
-		$this->handler_args['error_msg']     = $last_error;
+		$this->handler_args['error_msg']     = $last_error['message'];
 		$this->handler();
 	}
 
 	/**
 	 * Check for errors only caused by an active plugin using 'include()'.
 	 *
-	 * @param array $error Error from handler.
+	 * @param string $error_msg Error message from handler.
 	 *
 	 * @return array|bool
 	 */
-	private function check_passing_errors( $error ) {
+	private function check_passing_errors( $error_msg ) {
 		$regexes = array( '/Cannot declare class/', '/Constant([ _A-Z]+)already defined/' );
 		foreach ( $regexes as $regex ) {
-			preg_match( $regex, $error['message'], $matches );
+			preg_match( $regex, $error_msg, $matches );
 			if ( ! empty( $matches ) ) {
 				// Reactivate if needed.
 				if ( isset( self::$is_active[ $this->handler_args['hook_extra']['plugin'] ] )
