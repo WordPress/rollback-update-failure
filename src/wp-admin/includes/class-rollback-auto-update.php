@@ -301,7 +301,7 @@ class WP_Rollback_Auto_Update {
 			return $this->handler_args['result'];
 		}
 		$this->send_update_result_email();
-		exit();
+		return false;
 	}
 
 	/**
