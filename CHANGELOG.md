@@ -2,6 +2,8 @@
 * add version check for Rollback part 3
 * deactivate/reactivate plugin during auto-update test to use same `plugin_sandbox_scrape()` as Core
 * increase requirements to WP 6.3 and PHP 7.0
+* add shutdown function
+* add method to check if we want an error to pass through, likley caused by calling `include()` on an activated plugin
 
 #### 5.3.3 / 2023-07-16
 * remove Reflection in `WP_Rollback_Auto_Update::cron_rollback()` as methods are public
