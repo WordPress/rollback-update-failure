@@ -103,6 +103,13 @@ class WP_Rollback_Auto_Update {
 	public static $error_types = E_ERROR | E_PARSE | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR;
 
 	/**
+	 * Stores bool if email sent.
+	 *
+	 * @var bool
+	 */
+	private static $email_sent = false;
+
+	/**
 	 * Get Plugin_Upgrader
 	 *
 	 * TODO: remove before commit.
@@ -145,6 +152,11 @@ class WP_Rollback_Auto_Update {
 
 		// TODO: remove before commit.
 		error_log( $hook_extra['plugin'] . ' processing...' );
+
+		self::$current_plugins = get_site_transient( 'update_plugins' );
+		self::$current_themes  = get_site_transient( 'update_themes' );
+		self::$plugins         = get_plugins();
+		self::$themes          = wp_get_themes();
 
 		/*
 		 * This possibly helps to avoid a potential race condition on servers that may start to
@@ -250,11 +262,6 @@ class WP_Rollback_Auto_Update {
 		 * the previously processed plugin.
 		 */
 		sleep( 2 );
-
-		self::$current_plugins = get_site_transient( 'update_plugins' );
-		self::$current_themes  = get_site_transient( 'update_themes' );
-		self::$plugins         = get_plugins();
-		self::$themes          = wp_get_themes();
 
 		/*
 		 * If a plugin upgrade fails prior to a theme upgrade running, the plugin upgrader will have
@@ -412,6 +419,9 @@ class WP_Rollback_Auto_Update {
 	 * @since 6.4.0
 	 */
 	private function send_update_result_email() {
+		if ( static::$email_sent ) {
+			return;
+		}
 		$successful = array();
 		$failed     = array();
 
@@ -466,6 +476,7 @@ class WP_Rollback_Auto_Update {
 		$send_plugin_theme_email->invoke( $automatic_upgrader, 'mixed', $successful, $failed );
 
 		remove_filter( 'auto_plugin_theme_update_email', array( $this, 'auto_update_rollback_message' ), 10 );
+		static::$email_sent = true;
 	}
 
 	/**
