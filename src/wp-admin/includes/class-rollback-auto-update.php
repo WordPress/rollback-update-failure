@@ -103,6 +103,15 @@ class WP_Rollback_Auto_Update {
 	public static $error_types = E_ERROR | E_PARSE | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR;
 
 	/**
+	 * Stores array of regex for error exceptions.
+	 * These errors occur because a plugin loaded in memory results in some errors during 'include()'
+	 * that do not occur during manual updating as a browser redirect clears the memory.
+	 *
+	 * @var array
+	 */
+	private static $error_exceptions = array( 'Cannot declare class', 'Constant([ _A-Z]+)already defined' );
+
+	/**
 	 * Stores bool if email sent.
 	 *
 	 * @var bool
@@ -274,19 +283,16 @@ class WP_Rollback_Auto_Update {
 	 * @return array|bool
 	 */
 	private function check_passing_errors( $error_msg ) {
-		$regexes = array( '/Cannot declare class/', '/Constant([ _A-Z]+)already defined/' );
-		foreach ( $regexes as $regex ) {
-			preg_match( $regex, $error_msg, $matches );
-			if ( ! empty( $matches ) ) {
-				// Reactivate if needed.
-				if ( isset( self::$is_active[ $this->handler_args['hook_extra']['plugin'] ] )
-					&& self::$is_active[ $this->handler_args['hook_extra']['plugin'] ]
-				) {
-					activate_plugin( $this->handler_args['hook_extra']['plugin'] );
-				}
-
-				return $this->handler_args['result'];
+		preg_match( '/(' . implode( '|', static::$error_exceptions ) . ')/', $error_msg, $matches );
+		if ( ! empty( $matches ) ) {
+			// Reactivate if needed.
+			if ( isset( self::$is_active[ $this->handler_args['hook_extra']['plugin'] ] )
+				&& self::$is_active[ $this->handler_args['hook_extra']['plugin'] ]
+			) {
+				activate_plugin( $this->handler_args['hook_extra']['plugin'] );
 			}
+
+			return $this->handler_args['result'];
 		}
 
 		return false;
