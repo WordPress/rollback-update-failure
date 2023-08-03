@@ -201,6 +201,12 @@ class WP_Rollback_Auto_Update {
 		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $hook_extra['plugin'] );
 		include WP_PLUGIN_DIR . '/' . $hook_extra['plugin'];
 
+		if ( isset( self::$is_active[ $this->handler_args['hook_extra']['plugin'] ] )
+			&& self::$is_active[ $this->handler_args['hook_extra']['plugin'] ]
+		) {
+			activate_plugin( $this->handler_args['hook_extra']['plugin'] );
+		}
+
 		// TODO: remove before commit.
 		error_log( $hook_extra['plugin'] . ' auto updated.' );
 
