@@ -217,10 +217,20 @@ class WP_Rollback_Auto_Update {
 	 *
 	 * @param int    $errno  Error number.
 	 * @param string $errstr Error message.
+	 * @return array|void
 	 */
 	public function error_handler( $errno, $errstr ) {
+		$result = $this->check_passing_errors(
+			array(
+				'type'    => $errno,
+				'message' => $errstr,
+			)
+		);
+		if ( is_array( $result ) ) {
+			return $result;
+		}
 		$this->handler_args['handler_error'] = 'Error Caught';
-		$this->handler_args['error_msg'] = $errstr;
+		$this->handler_args['error_msg']     = $errstr;
 		$this->handler();
 	}
 
@@ -235,7 +245,10 @@ class WP_Rollback_Auto_Update {
 	 */
 	public function exception_handler( Throwable $exception ) {
 		$this->handler_args['handler_error'] = 'Exception Caught';
-		$this->handler_args['error_msg'] = $exception->getMessage();
+		$this->handler_args['error_msg']     = $exception->getMessage();
+		$this->handler();
+	}
+
 	/**
 	 * Shutdown function.
 	 *
@@ -253,6 +266,31 @@ class WP_Rollback_Auto_Update {
 	}
 
 	/**
+	 * Check for errors only caused by an active plugin using 'include()'.
+	 *
+	 * @param array $error Error from handler.
+	 *
+	 * @return array|bool
+	 */
+	private function check_passing_errors( $error ) {
+		$regexes = array( '/Cannot declare class/', '/Constant([ _A-Z]+)already defined/' );
+		foreach ( $regexes as $regex ) {
+			preg_match( $regex, $error['message'], $matches );
+			if ( ! empty( $matches ) ) {
+				// Reactivate if needed.
+				if ( isset( self::$is_active[ $this->handler_args['hook_extra']['plugin'] ] )
+					&& self::$is_active[ $this->handler_args['hook_extra']['plugin'] ]
+				) {
+					activate_plugin( $this->handler_args['hook_extra']['plugin'] );
+				}
+
+				return $this->handler_args['result'];
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Handles errors by running Rollback.
 	 *
 	 * @since 6.4.0
@@ -266,7 +304,8 @@ class WP_Rollback_Auto_Update {
 
 		$this->cron_rollback();
 		if ( isset( self::$is_active[ $this->handler_args['hook_extra']['plugin'] ] )
-			&& self::$is_active[ $this->handler_args['hook_extra']['plugin'] ] ) {
+			&& self::$is_active[ $this->handler_args['hook_extra']['plugin'] ]
+		) {
 			activate_plugin( $this->handler_args['hook_extra']['plugin'] );
 		}
 
