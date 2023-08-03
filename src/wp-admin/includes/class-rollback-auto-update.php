@@ -253,6 +253,11 @@ class WP_Rollback_Auto_Update {
 		$last_error = error_get_last();
 		$result     = $this->check_passing_errors( $last_error['message'] );
 		if ( is_array( $result ) ) {
+			// Restart everything again.
+			$this->restart_updates();
+			$this->restart_core_updates();
+			$this->send_update_result_email();
+
 			return $result;
 		}
 		$this->handler_args['handler_error'] = 'Caught';
