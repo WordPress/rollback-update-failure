@@ -112,6 +112,13 @@ class WP_Rollback_Auto_Update {
 	private static $error_exceptions = array( 'Cannot declare class', 'Constant([ _A-Z]+)already defined' );
 
 	/**
+	 * Stores bool if email has been sent.
+	 *
+	 * @var bool
+	 */
+	private static $email_sent = false;
+
+	/**
 	 * Get Plugin_Upgrader
 	 *
 	 * TODO: remove before commit.
@@ -471,6 +478,9 @@ class WP_Rollback_Auto_Update {
 	 * @since 6.4.0
 	 */
 	private function send_update_result_email() {
+		if ( self::$email_sent ) {
+			return;
+		}
 		$successful = array();
 		$failed     = array();
 
@@ -525,6 +535,7 @@ class WP_Rollback_Auto_Update {
 		$send_plugin_theme_email->invoke( $automatic_upgrader, 'mixed', $successful, $failed );
 
 		remove_filter( 'auto_plugin_theme_update_email', array( $this, 'auto_update_rollback_message' ), 10 );
+		self::$email_sent = true;
 	}
 
 	/**
