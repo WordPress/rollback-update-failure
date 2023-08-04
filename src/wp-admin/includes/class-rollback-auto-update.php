@@ -201,11 +201,7 @@ class WP_Rollback_Auto_Update {
 		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $hook_extra['plugin'] );
 		include WP_PLUGIN_DIR . '/' . $hook_extra['plugin'];
 
-		if ( isset( self::$is_active[ $this->handler_args['hook_extra']['plugin'] ] )
-			&& self::$is_active[ $this->handler_args['hook_extra']['plugin'] ]
-		) {
-			activate_plugin( $this->handler_args['hook_extra']['plugin'] );
-		}
+		$this->reactivate_plugin();
 
 		// TODO: remove before commit.
 		error_log( $hook_extra['plugin'] . ' auto updated.' );
@@ -291,13 +287,7 @@ class WP_Rollback_Auto_Update {
 	private function check_passing_errors( $error_msg ) {
 		preg_match( '/(' . implode( '|', static::$error_exceptions ) . ')/', $error_msg, $matches );
 		if ( ! empty( $matches ) ) {
-			// Reactivate if needed.
-			if ( isset( self::$is_active[ $this->handler_args['hook_extra']['plugin'] ] )
-				&& self::$is_active[ $this->handler_args['hook_extra']['plugin'] ]
-			) {
-				activate_plugin( $this->handler_args['hook_extra']['plugin'] );
-			}
-
+			$this->reactivate_plugin();
 			return $this->handler_args['result'];
 		}
 		$this->send_update_result_email();
@@ -317,11 +307,7 @@ class WP_Rollback_Auto_Update {
 		self::$fatals   = array_unique( self::$fatals );
 
 		$this->cron_rollback();
-		if ( isset( self::$is_active[ $this->handler_args['hook_extra']['plugin'] ] )
-			&& self::$is_active[ $this->handler_args['hook_extra']['plugin'] ]
-		) {
-			activate_plugin( $this->handler_args['hook_extra']['plugin'] );
-		}
+		$this->reactivate_plugin();
 
 		/*
 		 * This possibly helps to avoid a potential race condition on servers that may start to
@@ -478,6 +464,19 @@ class WP_Rollback_Auto_Update {
 		$remaining_auto_updates = array_diff( $current_auto_updates, self::$processed, self::$fatals );
 
 		return $remaining_auto_updates;
+	}
+
+	/**
+	 * Re-activate plugins de-activated during auto-update check.
+	 *
+	 * @return void
+	 */
+	private function reactivate_plugin() {
+		if ( isset( self::$is_active[ $this->handler_args['hook_extra']['plugin'] ] )
+		&& self::$is_active[ $this->handler_args['hook_extra']['plugin'] ]
+		) {
+			activate_plugin( $this->handler_args['hook_extra']['plugin'] );
+		}
 	}
 
 	/**
