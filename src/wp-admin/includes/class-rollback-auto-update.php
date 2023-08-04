@@ -183,7 +183,7 @@ class WP_Rollback_Auto_Update {
 
 		self::$processed[] = $hook_extra['plugin'];
 		if ( is_plugin_active( $hook_extra['plugin'] ) ) {
-			self::$is_active[ $hook_extra['plugin'] ] = true;
+			self::$is_active[] = $hook_extra['plugin'];
 			deactivate_plugins( $hook_extra['plugin'] );
 		}
 
@@ -193,8 +193,6 @@ class WP_Rollback_Auto_Update {
 		 */
 		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $hook_extra['plugin'] );
 		include WP_PLUGIN_DIR . '/' . $hook_extra['plugin'];
-
-		$this->reactivate_plugin();
 
 		// TODO: remove before commit.
 		error_log( $hook_extra['plugin'] . ' auto updated.' );
@@ -277,7 +275,6 @@ class WP_Rollback_Auto_Update {
 	private function check_passing_errors( $error_msg ) {
 		preg_match( '/(' . implode( '|', static::$error_exceptions ) . ')/', $error_msg, $matches );
 		if ( ! empty( $matches ) ) {
-			$this->reactivate_plugin();
 			return $this->handler_args['result'];
 		}
 
@@ -296,7 +293,6 @@ class WP_Rollback_Auto_Update {
 		self::$fatals[] = $this->handler_args['hook_extra']['plugin'];
 
 		$this->cron_rollback();
-		$this->reactivate_plugin();
 
 		/*
 		 * This possibly helps to avoid a potential race condition on servers that may start to
@@ -452,19 +448,6 @@ class WP_Rollback_Auto_Update {
 	}
 
 	/**
-	 * Re-activate plugins de-activated during auto-update check.
-	 *
-	 * @return void
-	 */
-	private function reactivate_plugin() {
-		if ( isset( self::$is_active[ $this->handler_args['hook_extra']['plugin'] ] )
-		&& self::$is_active[ $this->handler_args['hook_extra']['plugin'] ]
-		) {
-			activate_plugin( $this->handler_args['hook_extra']['plugin'] );
-		}
-	}
-
-	/**
 	 * Restart updates and send update result email.
 	 *
 	 * @return void
@@ -472,6 +455,13 @@ class WP_Rollback_Auto_Update {
 	private function restart_updates_and_send_email() {
 		$this->restart_updates();
 		$this->restart_core_updates();
+
+		/*
+		 * The following commands only run once after the above commands have completed.
+		 * Specifically, 'restart_updates()' will re-run until there are no further
+		 * plugin or themes updates remaining.
+		 */
+		activate_plugins( self::$is_active );
 		$this->send_update_result_email();
 	}
 
