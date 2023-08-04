@@ -297,6 +297,9 @@ class WP_Rollback_Auto_Update {
 		// TODO: remove before commit.
 		error_log( var_export( $this->handler_args['error_msg'], true ) );
 
+		if ( in_array( $this->handler_args['hook_extra']['plugin'], self::$fatals, true ) ) {
+			return;
+		}
 		self::$fatals[] = $this->handler_args['hook_extra']['plugin'];
 
 		$this->cron_rollback();
