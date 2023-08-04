@@ -112,13 +112,6 @@ class WP_Rollback_Auto_Update {
 	private static $error_exceptions = array( 'Cannot declare class', 'Constant([ _A-Z]+)already defined' );
 
 	/**
-	 * Stores bool if email sent.
-	 *
-	 * @var bool
-	 */
-	private static $email_sent = false;
-
-	/**
 	 * Get Plugin_Upgrader
 	 *
 	 * TODO: remove before commit.
@@ -267,9 +260,7 @@ class WP_Rollback_Auto_Update {
 			// TODO: remove before commit.
 			error_log( $this->handler_args['hook_extra']['plugin'] . ' auto updated.' );
 			// Restart everything again.
-			$this->restart_updates();
-			$this->restart_core_updates();
-			$this->send_update_result_email();
+			$this->restart_updates_and_send_email();
 			exit();
 		}
 		$this->handler_args['handler_error'] = 'Caught Shutdown';
@@ -290,7 +281,7 @@ class WP_Rollback_Auto_Update {
 			$this->reactivate_plugin();
 			return $this->handler_args['result'];
 		}
-		$this->send_update_result_email();
+
 		return false;
 	}
 
@@ -324,9 +315,7 @@ class WP_Rollback_Auto_Update {
 		 */
 		remove_filter( 'upgrader_clear_destination', array( static::$plugin_upgrader, 'delete_old_plugin' ) );
 
-		$this->restart_updates();
-		$this->restart_core_updates();
-		$this->send_update_result_email();
+		$this->restart_updates_and_send_email();
 	}
 
 	/**
@@ -477,14 +466,22 @@ class WP_Rollback_Auto_Update {
 	}
 
 	/**
+	 * Restart updates and send update result email.
+	 *
+	 * @return void
+	 */
+	private function restart_updates_and_send_email() {
+		$this->restart_updates();
+		$this->restart_core_updates();
+		$this->send_update_result_email();
+	}
+
+	/**
 	 * Sends an email noting successful and failed updates.
 	 *
 	 * @since 6.4.0
 	 */
 	private function send_update_result_email() {
-		if ( static::$email_sent ) {
-			return;
-		}
 		$successful = array();
 		$failed     = array();
 
@@ -539,7 +536,6 @@ class WP_Rollback_Auto_Update {
 		$send_plugin_theme_email->invoke( $automatic_upgrader, 'mixed', $successful, $failed );
 
 		remove_filter( 'auto_plugin_theme_update_email', array( $this, 'auto_update_rollback_message' ), 10 );
-		static::$email_sent = true;
 	}
 
 	/**
