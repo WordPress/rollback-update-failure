@@ -272,7 +272,7 @@ class WP_Rollback_Auto_Update {
 			$this->send_update_result_email();
 			exit();
 		}
-		$this->handler_args['handler_error'] = 'Caught';
+		$this->handler_args['handler_error'] = 'Caught Shutdown';
 		$this->handler_args['error_msg']     = $last_error['message'];
 		$this->handler();
 	}
@@ -304,7 +304,6 @@ class WP_Rollback_Auto_Update {
 		error_log( var_export( $this->handler_args['error_msg'], true ) );
 
 		self::$fatals[] = $this->handler_args['hook_extra']['plugin'];
-		self::$fatals   = array_unique( self::$fatals );
 
 		$this->cron_rollback();
 		$this->reactivate_plugin();
@@ -395,8 +394,6 @@ class WP_Rollback_Auto_Update {
 				}
 			}
 		}
-
-		remove_action( 'shutdown', array( static::$plugin_upgrader, 'delete_temp_backup' ), 100 );
 	}
 
 	/**
