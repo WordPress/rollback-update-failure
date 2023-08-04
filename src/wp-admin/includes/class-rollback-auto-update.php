@@ -410,7 +410,7 @@ class WP_Rollback_Auto_Update {
 			}
 		}
 
-		remove_action( 'shutdown', array( new WP_Upgrader(), 'delete_temp_backup' ), 100 );
+		remove_action( 'shutdown', array( static::$plugin_upgrader, 'delete_temp_backup' ), 100 );
 	}
 
 	/**
