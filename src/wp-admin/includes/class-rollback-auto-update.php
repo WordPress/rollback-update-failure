@@ -167,13 +167,6 @@ class WP_Rollback_Auto_Update {
 		self::$plugins         = get_plugins();
 		self::$themes          = wp_get_themes();
 
-		/*
-		 * This possibly helps to avoid a potential race condition on servers that may start to
-		 * process the next plugin for auto-updating before the handler can pick up an error from
-		 * the previously processed plugin.
-		 */
-		sleep( 2 );
-
 		// TODO: remove before commit.
 		static::$plugin_upgrader = $upgrader instanceof Plugin_Upgrader ? $upgrader : static::$plugin_upgrader;
 
@@ -303,13 +296,6 @@ class WP_Rollback_Auto_Update {
 		self::$fatals[] = $this->handler_args['hook_extra']['plugin'];
 
 		$this->cron_rollback();
-
-		/*
-		 * This possibly helps to avoid a potential race condition on servers that may start to
-		 * process the next plugin for auto-updating before the handler can pick up an error from
-		 * the previously processed plugin.
-		 */
-		sleep( 2 );
 
 		/*
 		 * If a plugin upgrade fails prior to a theme upgrade running, the plugin upgrader will have
