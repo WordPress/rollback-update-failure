@@ -273,9 +273,6 @@ class WP_Rollback_Auto_Update {
 	 * @return array|bool
 	 */
 	private function check_passing_errors( $error_msg ) {
-		if ( null === $error_msg ) {
-			return array();
-		}
 		preg_match( '/(' . implode( '|', static::$error_exceptions ) . ')/', $error_msg, $matches );
 		if ( ! empty( $matches ) ) {
 			return $this->handler_args['result'];
