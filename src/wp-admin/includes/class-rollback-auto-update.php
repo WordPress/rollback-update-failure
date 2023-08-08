@@ -254,7 +254,7 @@ class WP_Rollback_Auto_Update {
 	public function shutdown_function() {
 		$last_error = error_get_last();
 		$result     = $this->check_passing_errors( $last_error['message'] );
-		if ( is_array( $result ) ) {
+		if ( is_array( $result) ) {
 			// TODO: remove before commit.
 			error_log( $this->handler_args['hook_extra']['plugin'] . ' auto updated.' );
 			$this->restart_updates_and_send_email();
@@ -273,8 +273,8 @@ class WP_Rollback_Auto_Update {
 	 * @return array|bool
 	 */
 	private function check_passing_errors( $error_msg ) {
-		if ( null === $error_msg ) {
-			return array();
+		if ( null === $error_msg){
+			return [];
 		}
 		preg_match( '/(' . implode( '|', static::$error_exceptions ) . ')/', $error_msg, $matches );
 		if ( ! empty( $matches ) ) {
