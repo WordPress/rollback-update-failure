@@ -100,7 +100,7 @@ class WP_Rollback_Auto_Update {
 	 *
 	 * @var int
 	 */
-	public static $error_types = E_ERROR | E_PARSE | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR;
+	private static $error_types = E_ERROR | E_PARSE | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR;
 
 	/**
 	 * Stores array of regex for error exceptions.
