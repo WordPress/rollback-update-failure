@@ -1,7 +1,7 @@
 [unreleased]
-* add version check for Rollback part 3
-* deactivate/reactivate plugin during auto-update test to use same `plugin_sandbox_scrape()` as Core
 * increase requirements to WP 6.3 and PHP 7.0
+* add version check for Rollback part 3
+* deactivate/reactivate plugin during auto-update test similar `plugin_sandbox_scrape()` as Core
 * add shutdown function
 * add method to check if we want an error to pass through, likley caused by calling `include()` on an activated plugin
 
