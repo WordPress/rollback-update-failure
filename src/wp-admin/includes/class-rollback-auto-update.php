@@ -114,7 +114,7 @@ class WP_Rollback_Auto_Update {
 		'Constant([ _A-Z]+)already defined',
 		'Passing null to parameter(.*)of type(.*)is deprecated',
 		'Trying to access array offset on value of type null',
-		'\\\\ReturnTypeWillChange',
+		'ReturnTypeWillChange',
 	);
 
 	/**
