@@ -228,12 +228,21 @@ class WP_Rollback_Auto_Update {
 	 * @return array|void
 	 */
 	public function error_handler( $errno, $errstr ) {
-		$result = $this->check_passing_errors( $errstr );
+		$int_to_type = array(
+			2     => 'E_WARNING',
+			8     => 'E_NOTICE',
+			512   => 'E_USER_WARNING',
+			1024  => 'E_USER_NOTICE',
+			4096  => 'E_RECOVERABLE_ERROR',
+			8192  => 'E_DEPRECATED',
+			16384 => 'E_USER_DEPRECATED',
+		);
+		$result      = $this->check_passing_errors( $errstr );
 		if ( is_array( $result ) ) {
 			return $result;
 		}
 		$this->handler_args['handler_error'] = 'Error Caught';
-		$this->handler_args['error_msg']     = $errstr;
+		$this->handler_args['error_msg']     = $int_to_type[ $errno ] . ': ' . $errstr;
 		$this->handler();
 	}
 
@@ -297,7 +306,7 @@ class WP_Rollback_Auto_Update {
 	 */
 	private function handler() {
 		// TODO: remove before commit.
-		error_log( var_export( $this->handler_args['error_msg'], true ) );
+		error_log( var_export( 'RAU caught - ' . $this->handler_args['error_msg'], true ) );
 
 		if ( in_array( $this->handler_args['hook_extra']['plugin'], self::$fatals, true ) ) {
 			return;
