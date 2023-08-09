@@ -165,9 +165,6 @@ class WP_Rollback_Auto_Update {
 			return $result;
 		}
 
-		// TODO: remove before commit.
-		error_log( $hook_extra['plugin'] . ' processing...' );
-
 		self::$current_plugins = get_site_transient( 'update_plugins' );
 		self::$current_themes  = get_site_transient( 'update_themes' );
 		self::$plugins         = get_plugins();
@@ -199,9 +196,6 @@ class WP_Rollback_Auto_Update {
 		 */
 		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $hook_extra['plugin'] );
 		include WP_PLUGIN_DIR . '/' . $hook_extra['plugin'];
-
-		// TODO: remove before commit.
-		error_log( $hook_extra['plugin'] . ' auto updated.' );
 
 		return $result;
 	}
@@ -270,8 +264,6 @@ class WP_Rollback_Auto_Update {
 		$last_error = error_get_last();
 		$result     = $this->check_passing_errors( $last_error['message'] );
 		if ( is_array( $result ) ) {
-			// TODO: remove before commit.
-			error_log( $this->handler_args['hook_extra']['plugin'] . ' auto updated.' );
 			$this->restart_updates_and_send_email();
 			exit();
 		}
@@ -305,9 +297,7 @@ class WP_Rollback_Auto_Update {
 	 * @since 6.4.0
 	 */
 	private function handler() {
-		// TODO: remove before commit.
 		error_log( var_export( 'RAU caught - ' . $this->handler_args['error_msg'], true ) );
-
 		if ( in_array( $this->handler_args['hook_extra']['plugin'], self::$fatals, true ) ) {
 			return;
 		}
@@ -362,9 +352,6 @@ class WP_Rollback_Auto_Update {
 
 		// Call Rollback's delete_temp_backup().
 		$rollback_updater->delete_temp_backup();
-
-		// TODO: remove before commit.
-		error_log( $this->handler_args['hook_extra']['plugin'] . ' rolled back' );
 	}
 
 	/**
