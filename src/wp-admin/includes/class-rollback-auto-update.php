@@ -235,7 +235,7 @@ class WP_Rollback_Auto_Update {
 		if ( is_array( $result ) ) {
 			return $result;
 		}
-		$this->handler_args['handler_error'] = 'Error Caught';
+		$this->handler_args['handler_error'] = 'RAU Error Handler';
 		$this->handler_args['error_msg']     = $int_to_type[ $errno ] . ': ' . $errstr;
 		$this->handler();
 	}
@@ -250,7 +250,7 @@ class WP_Rollback_Auto_Update {
 	 * @return void
 	 */
 	public function exception_handler( Throwable $exception ) {
-		$this->handler_args['handler_error'] = 'Exception Caught';
+		$this->handler_args['handler_error'] = 'RAU Exception Handler';
 		$this->handler_args['error_msg']     = $exception->getMessage();
 		$this->handler();
 	}
@@ -267,7 +267,7 @@ class WP_Rollback_Auto_Update {
 			$this->restart_updates_and_send_email();
 			exit();
 		}
-		$this->handler_args['handler_error'] = 'Caught Shutdown';
+		$this->handler_args['handler_error'] = 'RAU Shutdown Function';
 		$this->handler_args['error_msg']     = $last_error['message'];
 		$this->handler();
 	}
@@ -297,7 +297,7 @@ class WP_Rollback_Auto_Update {
 	 * @since 6.4.0
 	 */
 	private function handler() {
-		error_log( var_export( 'RAU caught - ' . $this->handler_args['error_msg'], true ) );
+		error_log( var_export( $this->handler_args['handler_error'] . ' - ' . $this->handler_args['error_msg'], true ) );
 		if ( in_array( $this->handler_args['hook_extra']['plugin'], self::$fatals, true ) ) {
 			return;
 		}
@@ -463,7 +463,7 @@ class WP_Rollback_Auto_Update {
 		 * plugin or themes updates remaining.
 		 */
 		activate_plugins( self::$is_active );
-		//$this->send_update_result_email();
+		// $this->send_update_result_email();
 	}
 
 	/**
