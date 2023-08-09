@@ -476,7 +476,7 @@ class WP_Rollback_Auto_Update {
 		 * plugin or themes updates remaining.
 		 */
 		activate_plugins( self::$is_active );
-		$this->send_update_result_email();
+		//$this->send_update_result_email();
 	}
 
 	/**
