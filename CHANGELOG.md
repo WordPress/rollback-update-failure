@@ -1,5 +1,5 @@
 [unreleased]
-* added back `sleep( 2 )` to prevent potential race condition
+* add back `sleep( 2 )` to prevent potential race condition
 
 #### 6.0.0 / 2023-08-09
 * increase requirements to WP 6.3 and PHP 7.0
