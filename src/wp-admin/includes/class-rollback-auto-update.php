@@ -104,17 +104,21 @@ class WP_Rollback_Auto_Update {
 
 	/**
 	 * Stores array of regex for error exceptions.
-	 * These errors occur because a plugin loaded in memory results in some errors during 'include()'
-	 * that do not occur during manual updating as a browser redirect clears the memory.
+	 *
+	 * These errors occur because a plugin loaded in memory results in some errors
+	 * during 'include()' that do not occur during manual updating as a browser
+	 * redirect clears the memory.
+	 *
+	 * @since 6.4.0
 	 *
 	 * @var array
 	 */
 	private static $error_exceptions = array(
-		'Cannot declare class',
-		'Constant([ _A-Z]+)already defined',
-		'Passing null to parameter(.*)of type(.*)is deprecated',
-		'Trying to access array offset on value of type null',
-		'ReturnTypeWillChange',
+		'Cannot declare class', // class defined in main plugin file.
+		'Constant([ _A-Z]+)already defined', // constant defined in main plugin file.
+		'Passing null to parameter(.*)of type(.*)is deprecated', // PHP8 deprecation error.
+		'Trying to access array offset on value of type null', // PHP8 deprecation error.
+		'ReturnTypeWillChange', // PHP8 deprecation error.
 	);
 
 	/**
