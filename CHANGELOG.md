@@ -1,5 +1,6 @@
 [unreleased]
 * add back `sleep( 2 )` to prevent potential race condition
+* update error exception list
 
 #### 6.0.0 / 2023-08-09
 * increase requirements to WP 6.3 and PHP 7.0

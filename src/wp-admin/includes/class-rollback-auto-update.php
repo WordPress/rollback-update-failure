@@ -119,6 +119,7 @@ class WP_Rollback_Auto_Update {
 		'Passing null to parameter(.*)of type(.*)is deprecated', // PHP8 deprecation error.
 		'Trying to access array offset on value of type null', // PHP8 deprecation error.
 		'ReturnTypeWillChange', // PHP8 deprecation error.
+		'mkdir\(\): File exists', // Some strange error when constant defined in main plugin file.
 	);
 
 	/**
