@@ -482,7 +482,7 @@ class WP_Rollback_Auto_Update {
 		 * plugin or themes updates remaining.
 		 */
 		activate_plugins( self::$is_active );
-		// $this->send_update_result_email();
+		$this->send_update_result_email();
 	}
 
 	/**
@@ -575,12 +575,9 @@ class WP_Rollback_Auto_Update {
 		if ( empty( $failed_updates ) ) {
 			return $email;
 		}
-		$body    = explode( "\n", $email['body'] );
-		$failed  = __( 'Non-fatal errors may result in plugins being listed but the plugins should update.' ) . "\n";
-		$failed .= __( 'These plugins failed to update or may have been restored from a temporary backup due to detection of a fatal error:' );
+		$body   = explode( "\n", $email['body'] );
+		$failed = __( 'These plugins failed to update or should have been restored from a temporary backup due to detection of a fatal error:' );
 		array_splice( $body, 6, 1, $failed );
-		$props = __( 'The WordPress Rollbackenberg Team' );
-		array_splice( $body, -1, 1, $props );
 		$body          = implode( "\n", $body );
 		$email['body'] = $body;
 
