@@ -276,7 +276,7 @@ class WP_Rollback_Auto_Update {
 		$last_error = error_get_last();
 		$result     = $this->check_passing_errors( $last_error['message'] );
 		if ( is_array( $result ) ) {
-			$this->restart_updates_and_extra();
+			$this->restart_updates_and_send_email();
 			exit();
 		}
 		$this->handler_args['handler_error'] = 'RAU Shutdown Function';
@@ -333,7 +333,7 @@ class WP_Rollback_Auto_Update {
 		 */
 		remove_filter( 'upgrader_clear_destination', array( static::$plugin_upgrader, 'delete_old_plugin' ) );
 
-		$this->restart_updates_and_extra();
+		$this->restart_updates_and_send_email();
 	}
 
 	/**
@@ -472,7 +472,7 @@ class WP_Rollback_Auto_Update {
 	 *
 	 * @return void
 	 */
-	private function restart_updates_and_extra() {
+	private function restart_updates_and_send_email() {
 		$this->restart_updates();
 		$this->restart_core_updates();
 
@@ -482,7 +482,7 @@ class WP_Rollback_Auto_Update {
 		 * plugin or themes updates remaining.
 		 */
 		activate_plugins( self::$is_active );
-		// $this->send_update_result_email();
+		$this->send_update_result_email();
 	}
 
 	/**
