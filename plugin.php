@@ -10,7 +10,7 @@
  * Plugin Name: Rollback Update Failure
  * Author: WP Core Contributors
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages.
- * Version: 6.0.0.2
+ * Version: 6.0.1
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure

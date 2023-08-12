@@ -1,4 +1,6 @@
 [unreleased]
+
+#### 6.0.1 / 2023-08-12
 * add back `sleep( 2 )` to prevent potential race condition
 * update error exception list
 
