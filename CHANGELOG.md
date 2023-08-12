@@ -1,4 +1,5 @@
 [unreleased]
+* minor email message adjustment
 
 #### 6.1.0 / 2023-08-12
 * add failure email back otherwise no update email is sent
