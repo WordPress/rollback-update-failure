@@ -104,17 +104,22 @@ class WP_Rollback_Auto_Update {
 
 	/**
 	 * Stores array of regex for error exceptions.
-	 * These errors occur because a plugin loaded in memory results in some errors during 'include()'
-	 * that do not occur during manual updating as a browser redirect clears the memory.
+	 *
+	 * These errors occur because a plugin loaded in memory results in some errors
+	 * during 'include()' that do not occur during manual updating as a browser
+	 * redirect clears the memory.
+	 *
+	 * @since 6.4.0
 	 *
 	 * @var array
 	 */
 	private static $error_exceptions = array(
-		'Cannot declare class',
-		'Constant([ _A-Z]+)already defined',
-		'Passing null to parameter(.*)of type(.*)is deprecated',
-		'Trying to access array offset on value of type null',
-		'ReturnTypeWillChange',
+		'Cannot declare class', // class defined in main plugin file.
+		'Constant([ _A-Z]+)already defined', // constant defined in main plugin file.
+		'mkdir\(\): File exists', // constant defined in main plugin file.
+		'Passing null to parameter(.*)of type(.*)is deprecated', // PHP8 deprecation error.
+		'Trying to access array offset on value of type null', // PHP8 deprecation error.
+		'ReturnTypeWillChange', // PHP8 deprecation error.
 	);
 
 	/**
@@ -169,6 +174,13 @@ class WP_Rollback_Auto_Update {
 		self::$current_themes  = get_site_transient( 'update_themes' );
 		self::$plugins         = get_plugins();
 		self::$themes          = wp_get_themes();
+
+		/*
+		 * This possibly helps to avoid a potential race condition on servers that may start to
+		 * process the next plugin for auto-updating before the handler can pick up an error from
+		 * the previously processed plugin.
+		 */
+		sleep( 2 );
 
 		// TODO: remove before commit.
 		static::$plugin_upgrader = $upgrader instanceof Plugin_Upgrader ? $upgrader : static::$plugin_upgrader;
@@ -304,6 +316,13 @@ class WP_Rollback_Auto_Update {
 		self::$fatals[] = $this->handler_args['hook_extra']['plugin'];
 
 		$this->cron_rollback();
+
+		/*
+		 * This possibly helps to avoid a potential race condition on servers that may start to
+		 * process the next plugin for auto-updating before the handler can pick up an error from
+		 * the previously processed plugin.
+		 */
+		sleep( 2 );
 
 		/*
 		 * If a plugin upgrade fails prior to a theme upgrade running, the plugin upgrader will have

@@ -1,5 +1,9 @@
 [unreleased]
 
+#### 6.0.1 / 2023-08-12
+* add back `sleep( 2 )` to prevent potential race condition
+* update error exception list
+
 #### 6.0.0 / 2023-08-09
 * increase requirements to WP 6.3 and PHP 7.0
 * add version check for Rollback part 3
