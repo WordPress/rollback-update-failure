@@ -1,6 +1,6 @@
 [unreleased]
 * minor email message adjustment
-* add guard in email processing for invalid updates transient
+* add default value in email processing for invalid current version
 
 #### 6.1.0 / 2023-08-12
 * add failure email back otherwise no update email is sent
