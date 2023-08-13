@@ -505,6 +505,11 @@ class WP_Rollback_Auto_Update {
 		foreach ( $plugin_theme_email_data as $type => $data ) {
 			$current_items = 'plugin' === $type ? self::$current_plugins : self::$current_themes;
 
+			// Exit early if something wrong with updates transient.
+			if ( ! property_exists( $current_items, 'checked' ) ) {
+				return;
+			}
+
 			foreach ( array_keys( $current_items->response ) as $file ) {
 				$item            = $current_items->response[ $file ];
 				$current_version = $current_items->checked[ $file ];
