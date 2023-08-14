@@ -552,7 +552,7 @@ class WP_Rollback_Auto_Update {
 	 * @return array
 	 */
 	public function auto_update_rollback_message( $email, $type, $successful_updates, $failed_updates ) {
-		if ( empty( $failed_updates ) ) {
+		if ( empty( $failed_updates ) || 'success' === $type ) {
 			return $email;
 		}
 		$body   = explode( "\n", $email['body'] );
