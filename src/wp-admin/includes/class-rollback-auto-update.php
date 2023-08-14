@@ -522,10 +522,19 @@ class WP_Rollback_Auto_Update {
 
 		add_filter( 'auto_plugin_theme_update_email', array( $this, 'auto_update_rollback_message' ), 10, 4 );
 
+		// Set email message type.
+		if ( empty( $failed ) ) {
+			$email_type = 'success';
+		} elseif ( empty( $successful ) ) {
+			$email_type = 'fail';
+		} else {
+			$email_type = 'mixed';
+		}
+
 		$automatic_upgrader      = new WP_Automatic_Updater();
 		$send_plugin_theme_email = new ReflectionMethod( $automatic_upgrader, 'send_plugin_theme_email' );
 		$send_plugin_theme_email->setAccessible( true );
-		$send_plugin_theme_email->invoke( $automatic_upgrader, 'mixed', $successful, $failed );
+		$send_plugin_theme_email->invoke( $automatic_upgrader, $email_type, $successful, $failed );
 
 		remove_filter( 'auto_plugin_theme_update_email', array( $this, 'auto_update_rollback_message' ), 10 );
 		self::$email_sent = true;
