@@ -67,24 +67,6 @@ class WP_Rollback_Auto_Update {
 	private static $current_themes;
 
 	/**
-	 * Stores get_plugins().
-	 *
-	 * @since 6.4.0
-	 *
-	 * @var array
-	 */
-	private static $plugins;
-
-	/**
-	 * Stores wp_get_themes().
-	 *
-	 * @since 6.4.0
-	 *
-	 * @var array
-	 */
-	private static $themes;
-
-	/**
 	 * Stores instance of Plugin_Upgrader.
 	 *
 	 * @since 6.4.0
@@ -172,8 +154,6 @@ class WP_Rollback_Auto_Update {
 
 		self::$current_plugins = get_site_transient( 'update_plugins' );
 		self::$current_themes  = get_site_transient( 'update_themes' );
-		self::$plugins         = get_plugins();
-		self::$themes          = wp_get_themes();
 
 		/*
 		 * This possibly helps to avoid a potential race condition on servers that may start to
@@ -498,8 +478,8 @@ class WP_Rollback_Auto_Update {
 		$failed     = array();
 
 		$plugin_theme_email_data = array(
-			'plugin' => array( 'data' => self::$plugins ),
-			'theme'  => array( 'data' => self::$themes ),
+			'plugin' => array( 'data' => get_plugins() ),
+			'theme'  => array( 'data' => wp_get_themes() ),
 		);
 
 		foreach ( $plugin_theme_email_data as $type => $data ) {
