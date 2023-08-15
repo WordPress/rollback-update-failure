@@ -1,7 +1,7 @@
 [unreleased]
 * minor email message adjustment
 * add default value in email processing for invalid current version
-* set auto-update email type
+* use `WP_Automatic_Upgrader::after_plugin_theme_update()` for sending email
 
 #### 6.1.0 / 2023-08-12
 * add failure email back otherwise no update email is sent

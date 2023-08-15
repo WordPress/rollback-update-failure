@@ -474,8 +474,8 @@ class WP_Rollback_Auto_Update {
 		if ( self::$email_sent ) {
 			return;
 		}
-		$successful = array();
-		$failed     = array();
+		$result         = true;
+		$update_results = array();
 
 		$plugin_theme_email_data = array(
 			'plugin' => array( 'data' => get_plugins() ),
@@ -486,15 +486,27 @@ class WP_Rollback_Auto_Update {
 			$current_items = 'plugin' === $type ? self::$current_plugins : self::$current_themes;
 
 			foreach ( array_keys( $current_items->response ) as $file ) {
+				if ( ! in_array( $file, self::$processed, true ) ) {
+					continue;
+				}
+
 				$item            = $current_items->response[ $file ];
 				$current_version = property_exists( $current_items, 'checked' ) ? $current_items->checked[ $file ] : __( 'unavailable' );
+				$success         = array_diff( self::$processed, self::$fatals );
+
+				if ( in_array( $file, $success, true ) ) {
+					$result = true;
+				} elseif ( in_array( $file, self::$fatals, true ) ) {
+					$result = false;
+				}
 
 				if ( 'plugin' === $type ) {
 					$name                  = $data['data'][ $file ]['Name'];
 					$item->current_version = $current_version;
 					$type_result           = (object) array(
-						'name' => $name,
-						'item' => $item,
+						'name'   => $name,
+						'item'   => $item,
+						'result' => $result,
 					);
 				}
 
@@ -502,39 +514,23 @@ class WP_Rollback_Auto_Update {
 					$name                    = $data['data'][ $file ]->get( 'Name' );
 					$item['current_version'] = $current_version;
 					$type_result             = (object) array(
-						'name' => $name,
-						'item' => (object) $item,
+						'name'   => $name,
+						'item'   => (object) $item,
+						'result' => $result,
 					);
 				}
 
-				$success = array_diff( self::$processed, self::$fatals );
-
-				if ( in_array( $file, $success, true ) ) {
-					$successful[ $type ][] = $type_result;
-					continue;
+				$update_results[ $type ][] = $type_result;
+				}
 				}
 
-				if ( in_array( $file, self::$fatals, true ) ) {
-					$failed[ $type ][] = $type_result;
-				}
-			}
-		}
 
 		add_filter( 'auto_plugin_theme_update_email', array( $this, 'auto_update_rollback_message' ), 10, 4 );
 
-		// Set email message type.
-		if ( empty( $failed ) ) {
-			$email_type = 'success';
-		} elseif ( empty( $successful ) ) {
-			$email_type = 'fail';
-		} else {
-			$email_type = 'mixed';
-		}
-
 		$automatic_upgrader      = new WP_Automatic_Updater();
-		$send_plugin_theme_email = new ReflectionMethod( $automatic_upgrader, 'send_plugin_theme_email' );
+		$send_plugin_theme_email = new ReflectionMethod( $automatic_upgrader, 'after_plugin_theme_update' );
 		$send_plugin_theme_email->setAccessible( true );
-		$send_plugin_theme_email->invoke( $automatic_upgrader, $email_type, $successful, $failed );
+		$send_plugin_theme_email->invoke( $automatic_upgrader, $update_results );
 
 		remove_filter( 'auto_plugin_theme_update_email', array( $this, 'auto_update_rollback_message' ), 10 );
 		self::$email_sent = true;
