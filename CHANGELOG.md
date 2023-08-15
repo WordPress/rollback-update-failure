@@ -1,4 +1,6 @@
 [unreleased]
+
+#### 6.2.0 / 2023-08-15
 * minor email message adjustment
 * add default value in email processing for invalid current version
 * use `WP_Automatic_Upgrader::after_plugin_theme_update()` for sending email
