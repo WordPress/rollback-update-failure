@@ -107,6 +107,8 @@ class WP_Rollback_Auto_Update {
 	/**
 	 * Stores bool if email has been sent.
 	 *
+	 * @since 6.4.0
+	 *
 	 * @var bool
 	 */
 	private static $email_sent = false;
@@ -238,7 +240,6 @@ class WP_Rollback_Auto_Update {
 	 * @since 6.4.0
 	 *
 	 * @param Throwable $exception Exception object.
-	 *
 	 * @return void
 	 */
 	public function exception_handler( Throwable $exception ) {
@@ -267,8 +268,9 @@ class WP_Rollback_Auto_Update {
 	/**
 	 * Check for errors only caused by an active plugin using 'include()'.
 	 *
-	 * @param string $error_msg Error message from handler.
+	 * @since 6.4.0
 	 *
+	 * @param string $error_msg Error message from handler.
 	 * @return array|bool
 	 */
 	private function check_passing_errors( $error_msg ) {
@@ -450,6 +452,8 @@ class WP_Rollback_Auto_Update {
 	/**
 	 * Restart updates and send update result email.
 	 *
+	 * @since 6.4.0
+	 *
 	 * @return void
 	 */
 	private function restart_updates_and_send_email() {
@@ -555,7 +559,6 @@ class WP_Rollback_Auto_Update {
 	 * @param string $type               The type of email being sent. Can be one of 'success', 'fail', 'mixed'.
 	 * @param array  $successful_updates A list of updates that succeeded.
 	 * @param array  $failed_updates     A list of updates that failed.
-	 *
 	 * @return array
 	 */
 	public function auto_update_rollback_message( $email, $type, $successful_updates, $failed_updates ) {
