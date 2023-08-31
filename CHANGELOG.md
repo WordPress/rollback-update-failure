@@ -1,4 +1,5 @@
 [unreleased]
+* add error exception for defining function in main plugin class
 
 #### 6.2.0 / 2023-08-15
 * minor email message adjustment
