@@ -1,5 +1,8 @@
 [unreleased]
 
+#### 6.2.1 / 2023-09-02
+* add error exception for defining function in main plugin class
+
 #### 6.2.0 / 2023-08-15
 * minor email message adjustment
 * add default value in email processing for invalid current version
