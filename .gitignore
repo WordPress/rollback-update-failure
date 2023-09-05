@@ -2,8 +2,10 @@
 .idea
 .wordpress-org/*.pxd
 
+vendor
 vendor/bin
 vendor/dealerdirect
 vendor/squizlabs
 vendor/wp-coding-standards
-vendor
+vendor/phpcsstandards
+vendor/wp-coding-standards
