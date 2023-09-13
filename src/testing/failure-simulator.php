@@ -192,7 +192,6 @@ if ( ! class_exists( '\Rollback_Update_Failure\Testing\Failure_Simulator' ) ) {
 
 			return $result;
 		}
-
 	}
 }
 

@@ -340,7 +340,6 @@ class WP_Upgrader {
 
 		return $errors->has_errors() ? $errors : true;
 	}
-
 }
 
 
