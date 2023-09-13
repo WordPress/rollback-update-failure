@@ -1,4 +1,6 @@
 [unreleased]
+
+#### 6.2.2 / 2023-09-13
 * re-activate plugins at end of main loop
 
 #### 6.2.1 / 2023-09-02
