@@ -31,13 +31,13 @@ class WP_Rollback_Auto_Update {
 	private static $processed = array();
 
 	/**
-	 * Stores fataling plugins.
+	 * Stores plugins that were rolled back.
 	 *
 	 * @since 6.4.0
 	 *
-	 * @var array
+	 * @var string[]
 	 */
-	private static $fatals = array();
+	private static $rolled_back = array();
 
 	/**
 	 * Stores active state of plugins being updated.
