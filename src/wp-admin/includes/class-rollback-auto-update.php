@@ -13,42 +13,13 @@
 class WP_Rollback_Auto_Update {
 
 	/**
-	 * Stores data to be used when rolling back.
+	 * Stores instance of Plugin_Upgrader.
 	 *
 	 * @since 6.4.0
 	 *
-	 * @var array
+	 * @var Plugin_Upgrader
 	 */
-	private $rollback_data = array();
-
-	/**
-	 * Stores plugins and themes that have been processed.
-	 *
-	 * @since 6.4.0
-	 *
-	 * @var string[]
-	 */
-	private static $processed = array();
-
-	/**
-	 * Stores plugins that were rolled back.
-	 *
-	 * @since 6.4.0
-	 *
-	 * @var string[]
-	 */
-	private static $rolled_back = array();
-
-	/**
-	 * Stores plugins that were active before being updated.
-	 *
-	 * Used to reactivate plugins that were deactivated before testing.
-	 *
-	 * @since 6.4.0
-	 *
-	 * @var string[]
-	 */
-	private static $previously_active_plugins = array();
+	private static $plugin_upgrader;
 
 	/**
 	 * Stores update data for plugins with pending updates.
@@ -69,13 +40,15 @@ class WP_Rollback_Auto_Update {
 	private static $theme_updates;
 
 	/**
-	 * Stores instance of Plugin_Upgrader.
+	 * Stores plugins that were active before being updated.
+	 *
+	 * Used to reactivate plugins that were deactivated before testing.
 	 *
 	 * @since 6.4.0
 	 *
-	 * @var Plugin_Upgrader
+	 * @var string[]
 	 */
-	private static $plugin_upgrader;
+	private static $previously_active_plugins = array();
 
 	/**
 	 * Stores error codes to be detected by the error handler.
@@ -123,6 +96,33 @@ class WP_Rollback_Auto_Update {
 		'Trying to access array offset on value of type null',
 		'ReturnTypeWillChange',
 	);
+
+	/**
+	 * Stores data to be used when rolling back.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @var array
+	 */
+	private $rollback_data = array();
+
+	/**
+	 * Stores plugins and themes that have been processed.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @var string[]
+	 */
+	private static $processed = array();
+
+	/**
+	 * Stores plugins that were rolled back.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @var string[]
+	 */
+	private static $rolled_back = array();
 
 	/**
 	 * Stores whether an email was sent.
