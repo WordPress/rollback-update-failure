@@ -87,24 +87,41 @@ class WP_Rollback_Auto_Update {
 	private static $error_types = E_ERROR | E_PARSE | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR;
 
 	/**
-	 * Stores array of regex for error exceptions.
+	 * Stores regex patterns to match acceptable error messages.
 	 *
-	 * These errors occur because a plugin loaded in memory results in some errors
-	 * during 'include()' that do not occur during manual updating as a browser
-	 * redirect clears the memory.
+	 * Some of these errors can occur when an active plugin is loaded into memory prior to being tested.
+	 * They cannot be verified as errors in the plugin file, and must therefore be treated
+	 * as false positives.
+	 *
+	 * Manual updates do not experience these errors because the plugin is deactivated before
+	 * a browser redirect to a file that performs the checks. This class runs during cron,
+	 * where a browser redirect is not possible.
+	 *
+	 * Other errors may not be severe enough to roll back the plugin.
 	 *
 	 * @since 6.4.0
 	 *
-	 * @var array
+	 * @var string[]
 	 */
-	private static $error_exceptions = array(
-		'Cannot declare class', // class defined in main plugin file.
-		'Constant([ _A-Z]+)already defined', // constant defined in main plugin file.
-		'Cannot redeclare', // function defined in main plugin file.
-		'mkdir\(\): File exists', // constant defined in main plugin file.
-		'Passing null to parameter(.*)of type(.*)is deprecated', // PHP8 deprecation error.
-		'Trying to access array offset on value of type null', // PHP8 deprecation error.
-		'ReturnTypeWillChange', // PHP8 deprecation error.
+	private static $acceptable_errors = array(
+		// False positives.
+
+		// A class is defined in the main plugin file.
+		'Cannot declare class',
+		// A constant is defined in the main plugin file.
+		'Constant([ _A-Z]+)already defined',
+		// A function is defined in the main plugin file.
+		'Cannot redeclare',
+
+		// Errors that should not cause the plugin to be rolled back.
+
+		// An existing directory is created in the main plugin file.
+		'mkdir\(\): File exists',
+
+		// PHP8 deprecations.
+		'Passing null to parameter(.*)of type(.*)is deprecated',
+		'Trying to access array offset on value of type null',
+		'ReturnTypeWillChange',
 	);
 
 	/**
