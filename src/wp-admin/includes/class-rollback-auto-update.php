@@ -22,11 +22,11 @@ class WP_Rollback_Auto_Update {
 	private $rollback_data = array();
 
 	/**
-	 * Stores successfully updated plugins.
+	 * Stores plugins and themes that have been processed.
 	 *
 	 * @since 6.4.0
 	 *
-	 * @var array
+	 * @var string[]
 	 */
 	private static $processed = array();
 
