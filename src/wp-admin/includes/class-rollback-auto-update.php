@@ -78,7 +78,7 @@ class WP_Rollback_Auto_Update {
 	private static $plugin_upgrader;
 
 	/**
-	 * Stores error codes.
+	 * Stores error codes to be detected by the error handler.
 	 *
 	 * @since 6.4.0
 	 *
