@@ -40,13 +40,15 @@ class WP_Rollback_Auto_Update {
 	private static $rolled_back = array();
 
 	/**
-	 * Stores active state of plugins being updated.
+	 * Stores plugins that were active before being updated.
+	 *
+	 * Used to reactivate plugins that were deactivated before testing.
 	 *
 	 * @since 6.4.0
 	 *
-	 * @var array
+	 * @var string[]
 	 */
-	private static $is_active = array();
+	private static $previously_active_plugins = array();
 
 	/**
 	 * Stores `update_plugins` transient.
