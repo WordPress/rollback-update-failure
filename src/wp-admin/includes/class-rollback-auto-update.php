@@ -60,13 +60,13 @@ class WP_Rollback_Auto_Update {
 	private static $plugin_updates;
 
 	/**
-	 * Stores `update_themes` transient.
+	 * Stores update data for themes with pending updates.
 	 *
 	 * @since 6.4.0
 	 *
 	 * @var stdClass
 	 */
-	private static $current_themes;
+	private static $theme_updates;
 
 	/**
 	 * Stores instance of Plugin_Upgrader.
