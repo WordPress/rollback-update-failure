@@ -13,13 +13,13 @@
 class WP_Rollback_Auto_Update {
 
 	/**
-	 * Stores handler parameters.
+	 * Stores data to be used when rolling back.
 	 *
 	 * @since 6.4.0
 	 *
 	 * @var array
 	 */
-	private $handler_args = array();
+	private $rollback_data = array();
 
 	/**
 	 * Stores successfully updated plugins.
