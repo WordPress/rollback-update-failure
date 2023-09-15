@@ -125,13 +125,13 @@ class WP_Rollback_Auto_Update {
 	);
 
 	/**
-	 * Stores bool if email has been sent.
+	 * Stores whether an email was sent.
 	 *
 	 * @since 6.4.0
 	 *
 	 * @var bool
 	 */
-	private static $email_sent = false;
+	private static $email_was_sent = false;
 
 	/**
 	 * Get Plugin_Upgrader
