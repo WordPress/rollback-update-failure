@@ -13,60 +13,6 @@
 class WP_Rollback_Auto_Update {
 
 	/**
-	 * Stores handler parameters.
-	 *
-	 * @since 6.4.0
-	 *
-	 * @var array
-	 */
-	private $handler_args = array();
-
-	/**
-	 * Stores successfully updated plugins.
-	 *
-	 * @since 6.4.0
-	 *
-	 * @var array
-	 */
-	private static $processed = array();
-
-	/**
-	 * Stores fataling plugins.
-	 *
-	 * @since 6.4.0
-	 *
-	 * @var array
-	 */
-	private static $fatals = array();
-
-	/**
-	 * Stores active state of plugins being updated.
-	 *
-	 * @since 6.4.0
-	 *
-	 * @var array
-	 */
-	private static $is_active = array();
-
-	/**
-	 * Stores `update_plugins` transient.
-	 *
-	 * @since 6.4.0
-	 *
-	 * @var stdClass
-	 */
-	private static $current_plugins;
-
-	/**
-	 * Stores `update_themes` transient.
-	 *
-	 * @since 6.4.0
-	 *
-	 * @var stdClass
-	 */
-	private static $current_themes;
-
-	/**
 	 * Stores instance of Plugin_Upgrader.
 	 *
 	 * @since 6.4.0
@@ -76,7 +22,36 @@ class WP_Rollback_Auto_Update {
 	private static $plugin_upgrader;
 
 	/**
-	 * Stores error codes.
+	 * Stores update data for plugins with pending updates.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @var stdClass
+	 */
+	private static $plugin_updates;
+
+	/**
+	 * Stores update data for themes with pending updates.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @var stdClass
+	 */
+	private static $theme_updates;
+
+	/**
+	 * Stores plugins that were active before being updated.
+	 *
+	 * Used to reactivate plugins that were deactivated before testing.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @var string[]
+	 */
+	private static $previously_active_plugins = array();
+
+	/**
+	 * Stores error codes to be detected by the error handler.
 	 *
 	 * @since 6.4.0
 	 *
@@ -85,34 +60,78 @@ class WP_Rollback_Auto_Update {
 	private static $error_types = E_ERROR | E_PARSE | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR;
 
 	/**
-	 * Stores array of regex for error exceptions.
+	 * Stores regex patterns to match acceptable error messages.
 	 *
-	 * These errors occur because a plugin loaded in memory results in some errors
-	 * during 'include()' that do not occur during manual updating as a browser
-	 * redirect clears the memory.
+	 * Some of these errors can occur when an active plugin is loaded into memory prior to being tested.
+	 * They cannot be verified as errors in the plugin file, and must therefore be treated
+	 * as false positives.
+	 *
+	 * Manual updates do not experience these errors because the plugin is deactivated before
+	 * a browser redirect to a file that performs the checks. This class runs during cron,
+	 * where a browser redirect is not possible.
+	 *
+	 * Other errors may not be severe enough to roll back the plugin.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @var string[]
+	 */
+	private static $acceptable_errors = array(
+		// False positives.
+
+		// A class is defined in the main plugin file.
+		'Cannot declare class',
+		// A constant is defined in the main plugin file.
+		'Constant([ _A-Z]+)already defined',
+		// A function is defined in the main plugin file.
+		'Cannot redeclare',
+
+		// Errors that should not cause the plugin to be rolled back.
+
+		// An existing directory is created in the main plugin file.
+		'mkdir\(\): File exists',
+
+		// PHP8 deprecations.
+		'Passing null to parameter(.*)of type(.*)is deprecated',
+		'Trying to access array offset on value of type null',
+		'ReturnTypeWillChange',
+	);
+
+	/**
+	 * Stores data to be used when rolling back.
 	 *
 	 * @since 6.4.0
 	 *
 	 * @var array
 	 */
-	private static $error_exceptions = array(
-		'Cannot declare class', // class defined in main plugin file.
-		'Constant([ _A-Z]+)already defined', // constant defined in main plugin file.
-		'Cannot redeclare', // function defined in main plugin file.
-		'mkdir\(\): File exists', // constant defined in main plugin file.
-		'Passing null to parameter(.*)of type(.*)is deprecated', // PHP8 deprecation error.
-		'Trying to access array offset on value of type null', // PHP8 deprecation error.
-		'ReturnTypeWillChange', // PHP8 deprecation error.
-	);
+	private $rollback_data = array();
 
 	/**
-	 * Stores bool if email has been sent.
+	 * Stores plugins and themes that have been processed.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @var string[]
+	 */
+	private static $processed = array();
+
+	/**
+	 * Stores plugins that were rolled back.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @var string[]
+	 */
+	private static $rolled_back = array();
+
+	/**
+	 * Stores whether an email was sent.
 	 *
 	 * @since 6.4.0
 	 *
 	 * @var bool
 	 */
-	private static $email_sent = false;
+	private static $email_was_sent = false;
 
 	/**
 	 * Get Plugin_Upgrader
@@ -151,12 +170,12 @@ class WP_Rollback_Auto_Update {
 		}
 
 		// Already processed.
-		if ( in_array( $hook_extra['plugin'], array_diff( self::$processed, self::$fatals ), true ) ) {
+		if ( in_array( $hook_extra['plugin'], array_diff( self::$processed, self::$rolled_back ), true ) ) {
 			return $result;
 		}
 
-		self::$current_plugins = get_site_transient( 'update_plugins' );
-		self::$current_themes  = get_site_transient( 'update_themes' );
+		self::$plugin_updates = get_site_transient( 'update_plugins' );
+		self::$theme_updates  = get_site_transient( 'update_themes' );
 
 		/*
 		 * This possibly helps to avoid a potential race condition on servers that may start to
@@ -170,7 +189,7 @@ class WP_Rollback_Auto_Update {
 
 		// TODO: include in PR.
 		// static::$plugin_upgrader = $upgrader;
-		$this->handler_args = array(
+		$this->rollback_data = array(
 			'handler_error' => '',
 			'result'        => $result,
 			'hook_extra'    => $hook_extra,
@@ -181,7 +200,7 @@ class WP_Rollback_Auto_Update {
 
 		self::$processed[] = $hook_extra['plugin'];
 		if ( is_plugin_active( $hook_extra['plugin'] ) ) {
-			self::$is_active[] = $hook_extra['plugin'];
+			self::$previously_active_plugins[] = $hook_extra['plugin'];
 			deactivate_plugins( $hook_extra['plugin'] );
 		}
 
@@ -192,7 +211,7 @@ class WP_Rollback_Auto_Update {
 		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $hook_extra['plugin'] );
 		include WP_PLUGIN_DIR . '/' . $hook_extra['plugin'];
 
-		activate_plugins( self::$is_active );
+		activate_plugins( self::$previously_active_plugins );
 
 		return $result;
 	}
@@ -232,8 +251,8 @@ class WP_Rollback_Auto_Update {
 		if ( is_array( $result ) ) {
 			return $result;
 		}
-		$this->handler_args['handler_error'] = 'RAU Error Handler';
-		$this->handler_args['error_msg']     = $int_to_type[ $errno ] . ': ' . $errstr;
+		$this->rollback_data['handler_error'] = 'RAU Error Handler';
+		$this->rollback_data['error_msg']     = $int_to_type[ $errno ] . ': ' . $errstr;
 		$this->handler();
 	}
 
@@ -246,8 +265,8 @@ class WP_Rollback_Auto_Update {
 	 * @return void
 	 */
 	public function exception_handler( Throwable $exception ) {
-		$this->handler_args['handler_error'] = 'RAU Exception Handler';
-		$this->handler_args['error_msg']     = $exception->getMessage();
+		$this->rollback_data['handler_error'] = 'RAU Exception Handler';
+		$this->rollback_data['error_msg']     = $exception->getMessage();
 		$this->handler();
 	}
 
@@ -263,8 +282,8 @@ class WP_Rollback_Auto_Update {
 			$this->restart_updates_and_send_email();
 			exit();
 		}
-		$this->handler_args['handler_error'] = 'RAU Shutdown Function';
-		$this->handler_args['error_msg']     = $last_error['message'];
+		$this->rollback_data['handler_error'] = 'RAU Shutdown Function';
+		$this->rollback_data['error_msg']     = $last_error['message'];
 		$this->handler();
 	}
 
@@ -280,9 +299,9 @@ class WP_Rollback_Auto_Update {
 		if ( empty( $error_msg ) ) {
 			return array();
 		}
-		preg_match( '/(' . implode( '|', static::$error_exceptions ) . ')/', $error_msg, $matches );
+		preg_match( '/(' . implode( '|', static::$acceptable_errors ) . ')/', $error_msg, $matches );
 		if ( ! empty( $matches ) ) {
-			return $this->handler_args['result'];
+			return $this->rollback_data['result'];
 		}
 
 		return false;
@@ -294,11 +313,11 @@ class WP_Rollback_Auto_Update {
 	 * @since 6.4.0
 	 */
 	private function handler() {
-		error_log( var_export( $this->handler_args['handler_error'] . ' - ' . $this->handler_args['error_msg'], true ) );
-		if ( in_array( $this->handler_args['hook_extra']['plugin'], self::$fatals, true ) ) {
+		error_log( var_export( $this->rollback_data['handler_error'] . ' - ' . $this->rollback_data['error_msg'], true ) );
+		if ( in_array( $this->rollback_data['hook_extra']['plugin'], self::$rolled_back, true ) ) {
 			return;
 		}
-		self::$fatals[] = $this->handler_args['hook_extra']['plugin'];
+		self::$rolled_back[] = $this->rollback_data['hook_extra']['plugin'];
 
 		$this->cron_rollback();
 
@@ -334,7 +353,7 @@ class WP_Rollback_Auto_Update {
 		$temp_backup = array(
 			'temp_backup' => array(
 				'dir'  => 'plugins',
-				'slug' => dirname( $this->handler_args['hook_extra']['plugin'] ),
+				'slug' => dirname( $this->rollback_data['hook_extra']['plugin'] ),
 				'src'  => $wp_filesystem->wp_plugins_dir(),
 			),
 		);
@@ -410,19 +429,19 @@ class WP_Rollback_Auto_Update {
 	 * @return array
 	 */
 	private function get_remaining_plugin_auto_updates() {
-		if ( empty( $this->handler_args ) ) {
+		if ( empty( $this->rollback_data ) ) {
 			return array();
 		}
 
 		// Get array of plugins set for auto-updating.
 		$auto_updates    = (array) get_site_option( 'auto_update_plugins', array() );
-		$current_plugins = array_keys( self::$current_plugins->response );
+		$current_plugins = array_keys( self::$plugin_updates->response );
 
 		// Get all auto-updating plugins that have updates available.
 		$current_auto_updates = array_intersect( $auto_updates, $current_plugins );
 
 		// Get array of non-fatal auto-updates remaining.
-		$remaining_auto_updates = array_diff( $current_auto_updates, self::$processed, self::$fatals );
+		$remaining_auto_updates = array_diff( $current_auto_updates, self::$processed, self::$rolled_back );
 
 		return $remaining_auto_updates;
 	}
@@ -435,19 +454,19 @@ class WP_Rollback_Auto_Update {
 	 * @return array
 	 */
 	private function get_remaining_theme_auto_updates() {
-		if ( empty( $this->handler_args ) ) {
+		if ( empty( $this->rollback_data ) ) {
 			return array();
 		}
 
 		// Get array of themes set for auto-updating.
 		$auto_updates   = (array) get_site_option( 'auto_update_themes', array() );
-		$current_themes = array_keys( self::$current_themes->response );
+		$current_themes = array_keys( self::$theme_updates->response );
 
 		// Get all auto-updating plugins that have updates available.
 		$current_auto_updates = array_intersect( $auto_updates, $current_themes );
 
 		// Get array of non-fatal auto-updates remaining.
-		$remaining_auto_updates = array_diff( $current_auto_updates, self::$processed, self::$fatals );
+		$remaining_auto_updates = array_diff( $current_auto_updates, self::$processed, self::$rolled_back );
 
 		return $remaining_auto_updates;
 	}
@@ -468,7 +487,7 @@ class WP_Rollback_Auto_Update {
 		 * Specifically, 'restart_updates()' will re-run until there are no further
 		 * plugin or themes updates remaining.
 		 */
-		activate_plugins( self::$is_active );
+		activate_plugins( self::$previously_active_plugins );
 		$this->send_update_result_email();
 	}
 
@@ -478,7 +497,7 @@ class WP_Rollback_Auto_Update {
 	 * @since 6.4.0
 	 */
 	private function send_update_result_email() {
-		if ( self::$email_sent ) {
+		if ( self::$email_was_sent ) {
 			return;
 		}
 		$result         = true;
@@ -490,7 +509,7 @@ class WP_Rollback_Auto_Update {
 		);
 
 		foreach ( $plugin_theme_email_data as $type => $data ) {
-			$current_items = 'plugin' === $type ? self::$current_plugins : self::$current_themes;
+			$current_items = 'plugin' === $type ? self::$plugin_updates : self::$theme_updates;
 
 			foreach ( array_keys( $current_items->response ) as $file ) {
 				if ( ! in_array( $file, self::$processed, true ) ) {
@@ -499,11 +518,11 @@ class WP_Rollback_Auto_Update {
 
 				$item            = $current_items->response[ $file ];
 				$current_version = property_exists( $current_items, 'checked' ) ? $current_items->checked[ $file ] : __( 'unavailable' );
-				$success         = array_diff( self::$processed, self::$fatals );
+				$success         = array_diff( self::$processed, self::$rolled_back );
 
 				if ( in_array( $file, $success, true ) ) {
 					$result = true;
-				} elseif ( in_array( $file, self::$fatals, true ) ) {
+				} elseif ( in_array( $file, self::$rolled_back, true ) ) {
 					$result = false;
 				}
 
@@ -542,7 +561,7 @@ class WP_Rollback_Auto_Update {
 		$send_plugin_theme_email->invoke( $automatic_upgrader, $update_results );
 
 		remove_filter( 'auto_plugin_theme_update_email', array( $this, 'auto_update_rollback_message' ), 10 );
-		self::$email_sent = true;
+		self::$email_was_sent = true;
 	}
 
 	/**
