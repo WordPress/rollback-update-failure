@@ -206,8 +206,8 @@ class WP_Rollback_Auto_Update {
 		// TODO: remove before commit.
 		static::$plugin_upgrader = $upgrader instanceof Plugin_Upgrader ? $upgrader : static::$plugin_upgrader;
 
-		$this->current_plugin      = $hook_extra['plugin'];
-		self::$processed[] = $this->current_plugin;
+		$this->current_plugin = $hook_extra['plugin'];
+		self::$processed[]    = $this->current_plugin;
 
 		// Register exception and shutdown handlers.
 		$this->initialize_handlers();
