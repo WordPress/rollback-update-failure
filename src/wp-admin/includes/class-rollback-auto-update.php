@@ -236,9 +236,9 @@ class WP_Rollback_Auto_Update {
 	 */
 	private function initialize_handlers() {
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler
-		set_error_handler( array( $this, 'error_handler' ), ( E_ALL ^ self::$error_types ) );
-		set_exception_handler( array( $this, 'exception_handler' ) );
-		register_shutdown_function( array( $this, 'shutdown_function' ) );
+		set_error_handler( array( $this, 'handle_error' ), ( E_ALL ^ self::$error_types ) );
+		set_exception_handler( array( $this, 'handle_exception' ) );
+		register_shutdown_function( array( $this, 'resume_or_roll_back' ) );
 	}
 
 	/**
