@@ -157,8 +157,8 @@ class WP_Rollback_Auto_Update {
 	 *
 	 * @since 6.4.0
 	 *
-	 * @param array       $plugin   Current plugin filepath from $hook_extra.
-	 * @param WP_Upgrader $upgrader WP_Upgrader or child class instance.
+	 * @param array           $plugin   Current plugin filepath from $hook_extra.
+	 * @param Plugin_Upgrader $upgrader Plugin_Upgrader instance.
 	 */
 	public function check_plugin_for_errors( $plugin, $upgrader ) {
 		// Already processed.
