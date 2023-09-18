@@ -153,44 +153,17 @@ class WP_Rollback_Auto_Update {
 	private static $email_was_sent = false;
 
 	/**
-	 * Get Plugin_Upgrader
-	 *
-	 * TODO: remove before commit.
-	 *
-	 * @param string      $source        File source location.
-	 * @param string      $remote_source Remote file source location.
-	 * @param WP_Upgrader $obj           WP_Upgrader or child class instance.
-	 *
-	 * @return string
-	 */
-	public function set_plugin_upgrader( $source, $remote_source, $obj ) {
-		if ( $obj instanceof Plugin_Upgrader ) {
-			static::$plugin_upgrader = $obj;
-		}
-
-		return $source;
-	}
-
-	/**
 	 * Checks the updated plugin for errors.
-	 * TODO: Add $this to passed parameter for 'upgrader_install_package_result' hook.
-	 *       Remove $upgrader default value for PR.
 	 *
 	 * @since 6.4.0
 	 *
-	 * @param array|WP_Error $result     Result from WP_Upgrader::install_package().
-	 * @param array          $hook_extra Extra arguments passed to hooked filters.
-	 * @param WP_Upgrader    $upgrader   WP_Upgrader or child class instance.
-	 * @return array|WP_Error The result from WP_Upgrader::install_package().
+	 * @param array       $plugin   Current plugin filepath from $hook_extra.
+	 * @param WP_Upgrader $upgrader WP_Upgrader or child class instance.
 	 */
-	public function check_plugin_for_errors( $result, $hook_extra, $upgrader = null ) {
-		if ( is_wp_error( $result ) || ! wp_doing_cron() || ! isset( $hook_extra['plugin'] ) ) {
-			return $result;
-		}
-
+	public function check_plugin_for_errors( $plugin, $upgrader ) {
 		// Already processed.
-		if ( in_array( $hook_extra['plugin'], array_diff( self::$processed, self::$rolled_back ), true ) ) {
-			return $result;
+		if ( in_array( $plugin, array_diff( self::$processed, self::$rolled_back ), true ) ) {
+			return;
 		}
 
 		self::$plugin_updates = get_site_transient( 'update_plugins' );
@@ -203,11 +176,9 @@ class WP_Rollback_Auto_Update {
 		 */
 		sleep( 2 );
 
-		// TODO: remove before commit.
-		static::$plugin_upgrader = $upgrader instanceof Plugin_Upgrader ? $upgrader : static::$plugin_upgrader;
-
-		$this->current_plugin = $hook_extra['plugin'];
-		self::$processed[]    = $this->current_plugin;
+		static::$plugin_upgrader = $upgrader;
+		$this->current_plugin    = $plugin;
+		self::$processed[]       = $this->current_plugin;
 
 		// Register exception and shutdown handlers.
 		$this->initialize_handlers();
@@ -225,8 +196,6 @@ class WP_Rollback_Auto_Update {
 		include WP_PLUGIN_DIR . '/' . $this->current_plugin;
 
 		activate_plugins( self::$previously_active_plugins );
-
-		return $result;
 	}
 
 	/**
