@@ -40,7 +40,7 @@ if ( ! defined( 'WPINC' ) ) {
 if ( version_compare( get_bloginfo( 'version' ), '6.4-beta1', '<=' ) ) {
 	require_once __DIR__ . '/src/wp-admin/includes/class-rollback-auto-update.php';
 	add_filter( 'upgrader_source_selection', array( new \WP_Rollback_Auto_Update(), 'set_plugin_upgrader' ), 10, 3 );
-	add_filter( 'upgrader_install_package_result', array( new \WP_Rollback_Auto_Update(), 'auto_update_check' ), 15, 2 );
+	add_filter( 'upgrader_install_package_result', array( new \WP_Rollback_Auto_Update(), 'check_plugin_for_errors' ), 15, 2 );
 	/**
 	 * TODO: For PR add $this as passed parameter for `upgrader_install_package_result` hook.
 	 *
