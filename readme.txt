@@ -7,7 +7,7 @@ License: MIT
 Requires PHP: 7.0
 Requires at least: 6.3
 Tested up to: 6.4
-Stable Tag: 6.2.2
+Stable Tag: 6.3.0
 
 This is a feature plugin for testing automatic rollback of a plugin or theme update failure.
 
@@ -43,6 +43,10 @@ Logo from a meme generator. [Original artwork](http://hyperboleandahalf.blogspot
 ## Changelog
 
 Please see the Github repository: [CHANGELOG.md](https://github.com/afragen/rollback-update-failure/blob/main/CHANGELOG.md).
+
+#### 6.3.0 / 2023-10-21
+* refactor RAU for merge
+* update commit conditional
 
 #### 6.2.2 / 2023-09-13
 * re-activate plugins at end of main loop
