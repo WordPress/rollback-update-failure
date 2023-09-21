@@ -1,5 +1,8 @@
 [unreleased]
+
+#### 6.3.0 / 2023-10-21
 * refactor RAU for merge
+* update commit conditional
 
 #### 6.2.2 / 2023-09-13
 * re-activate plugins at end of main loop
