@@ -67,8 +67,12 @@ class WP_Rollback_Auto_Update {
 	 * @var array
 	 */
 	private static $error_number_to_constant_map = array(
+		1     => 'E_ERROR',
 		2     => 'E_WARNING',
 		8     => 'E_NOTICE',
+		16    => 'E_CORE_ERROR',
+		64    => 'E_COMPILE_ERROR',
+		256   => 'E_USER_ERROR',
 		512   => 'E_USER_WARNING',
 		1024  => 'E_USER_NOTICE',
 		4096  => 'E_RECOVERABLE_ERROR',
@@ -96,8 +100,8 @@ class WP_Rollback_Auto_Update {
 	private static $acceptable_errors = array(
 		// False positives.
 
-		// A class is defined in the main plugin file.
-		'Cannot declare class',
+		// Covers classes, traits, and enums in main plugin file.
+		'Cannot declare (class|trait|enum)',
 		// A constant is defined in the main plugin file.
 		'Constant([ _A-Z]+)already defined',
 		// A function is defined in the main plugin file.
