@@ -106,6 +106,8 @@ class WP_Rollback_Auto_Update {
 		'Constant([ _A-Z]+)already defined',
 		// A function is defined in the main plugin file.
 		'Cannot redeclare',
+		// Calling something incorrectly is not a fatal error.
+		'was called ([<a-z>])+incorrectly([<\/a-z>])+',
 
 		// Errors that should not cause the plugin to be rolled back.
 
