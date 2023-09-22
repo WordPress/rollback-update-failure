@@ -283,7 +283,7 @@ class WP_Rollback_Auto_Update {
 		}
 
 		$type = self::$error_number_to_constant_map[ $last_error['type'] ];
-		$this->rollback( $type, $last_error['message'] );
+		$this->rollback( $type, substr( $last_error['message'], 0, 250 ) . '...' );
 	}
 
 	/**
