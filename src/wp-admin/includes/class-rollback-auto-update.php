@@ -190,7 +190,7 @@ class WP_Rollback_Auto_Update {
 
 		// Already processed.
 		if ( in_array( $hook_extra['plugin'], array_diff( self::$processed, self::$rolled_back ), true ) ) {
-			return $result;
+			return;
 		}
 
 		self::$plugin_updates = get_site_transient( 'update_plugins' );
