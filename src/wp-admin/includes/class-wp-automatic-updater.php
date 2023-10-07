@@ -518,6 +518,9 @@ class WP_Automatic_Updater {
 				set_time_limit( 10 * MINUTE_IN_SECONDS );
 			}
 
+			// Avoid a race condition when there are 2 sequential plugins that have fatal errors.
+			sleep(2);
+
 			/*
 			 * Maintenance mode is disabled after an active plugin
 			 * has been updated during automatic updates.
