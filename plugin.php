@@ -39,7 +39,7 @@ add_action(
 	'plugins_loaded',
 	function () {
 		if ( version_compare( get_bloginfo( 'version' ), '6.5-beta1', '<' ) ) {
-			// require_once __DIR__ . '/src/wp-admin/includes/class-rollback-auto-update.php';
+			class WP_Error extends \WP_Error {}
 			require_once __DIR__ . '/src/wp-admin/includes/class-wp-upgrader.php';
 			require_once __DIR__ . '/src/wp-admin/includes/class-wp-automatic-updater.php';
 			require_once __DIR__ . '/src/wp-admin/includes/class-plugin-upgrader.php';

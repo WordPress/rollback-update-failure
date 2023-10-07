@@ -25,7 +25,7 @@ class Plugin_Upgrader extends WP_Upgrader {
 	 * Plugin upgrade result.
 	 *
 	 * @since 2.8.0
-	 * @var array|\WP_Error $result
+	 * @var array|WP_Error $result
 	 *
 	 * @see WP_Upgrader::$result
 	 */
@@ -114,7 +114,7 @@ class Plugin_Upgrader extends WP_Upgrader {
 	 *     @type bool $clear_update_cache Whether to clear the plugin updates cache if successful.
 	 *                                    Default true.
 	 * }
-	 * @return bool|\WP_Error True if the installation was successful, false or a \WP_Error otherwise.
+	 * @return bool|WP_Error True if the installation was successful, false or a WP_Error otherwise.
 	 */
 	public function install( $package, $args = array() ) {
 		$defaults    = array(
@@ -186,7 +186,7 @@ class Plugin_Upgrader extends WP_Upgrader {
 	 *     @type bool $clear_update_cache Whether to clear the plugin updates cache if successful.
 	 *                                    Default true.
 	 * }
-	 * @return bool|\WP_Error True if the upgrade was successful, false or a \WP_Error object otherwise.
+	 * @return bool|WP_Error True if the upgrade was successful, false or a WP_Error object otherwise.
 	 */
 	public function upgrade( $plugin, $args = array() ) {
 		$defaults    = array(
@@ -349,7 +349,7 @@ class Plugin_Upgrader extends WP_Upgrader {
 			$this->skin->plugin_active = is_plugin_active( $plugin );
 
 			if ( isset( $r->requires ) && ! is_wp_version_compatible( $r->requires ) ) {
-				$result = new \WP_Error(
+				$result = new WP_Error(
 					'incompatible_wp_required_version',
 					sprintf(
 						/* translators: 1: Current WordPress version, 2: WordPress version required by the new plugin version. */
@@ -363,7 +363,7 @@ class Plugin_Upgrader extends WP_Upgrader {
 				$this->skin->error( $result );
 				$this->skin->after();
 			} elseif ( isset( $r->requires_php ) && ! is_php_version_compatible( $r->requires_php ) ) {
-				$result = new \WP_Error(
+				$result = new WP_Error(
 					'incompatible_php_required_version',
 					sprintf(
 						/* translators: 1: Current PHP version, 2: PHP version required by the new plugin version. */
@@ -461,7 +461,7 @@ class Plugin_Upgrader extends WP_Upgrader {
 	 * @global string             $wp_version    The WordPress version string.
 	 *
 	 * @param string $source The path to the downloaded package source.
-	 * @return string|\WP_Error The source as passed, or a \WP_Error object on failure.
+	 * @return string|WP_Error The source as passed, or a WP_Error object on failure.
 	 */
 	public function check_package( $source ) {
 		global $wp_filesystem, $wp_version;
@@ -490,7 +490,7 @@ class Plugin_Upgrader extends WP_Upgrader {
 		}
 
 		if ( empty( $this->new_plugin_data ) ) {
-			return new \WP_Error( 'incompatible_archive_no_plugins', $this->strings['incompatible_archive'], __( 'No valid plugins were found.' ) );
+			return new WP_Error( 'incompatible_archive_no_plugins', $this->strings['incompatible_archive'], __( 'No valid plugins were found.' ) );
 		}
 
 		$requires_php = isset( $info['RequiresPHP'] ) ? $info['RequiresPHP'] : null;
@@ -504,7 +504,7 @@ class Plugin_Upgrader extends WP_Upgrader {
 				$requires_php
 			);
 
-			return new \WP_Error( 'incompatible_php_required_version', $this->strings['incompatible_archive'], $error );
+			return new WP_Error( 'incompatible_php_required_version', $this->strings['incompatible_archive'], $error );
 		}
 
 		if ( ! is_wp_version_compatible( $requires_wp ) ) {
@@ -515,7 +515,7 @@ class Plugin_Upgrader extends WP_Upgrader {
 				$requires_wp
 			);
 
-			return new \WP_Error( 'incompatible_wp_required_version', $this->strings['incompatible_archive'], $error );
+			return new WP_Error( 'incompatible_wp_required_version', $this->strings['incompatible_archive'], $error );
 		}
 
 		return $source;
@@ -558,9 +558,9 @@ class Plugin_Upgrader extends WP_Upgrader {
 	 * @since 2.8.0
 	 * @since 4.1.0 Added a return value.
 	 *
-	 * @param bool|\WP_Error $response The installation response before the installation has started.
-	 * @param array          $plugin   Plugin package arguments.
-	 * @return bool|\WP_Error The original `$response` parameter or \WP_Error.
+	 * @param bool|WP_Error $response The installation response before the installation has started.
+	 * @param array         $plugin   Plugin package arguments.
+	 * @return bool|WP_Error The original `$response` parameter or WP_Error.
 	 */
 	public function deactivate_plugin_before_upgrade( $response, $plugin ) {
 
@@ -575,7 +575,7 @@ class Plugin_Upgrader extends WP_Upgrader {
 
 		$plugin = isset( $plugin['plugin'] ) ? $plugin['plugin'] : '';
 		if ( empty( $plugin ) ) {
-			return new \WP_Error( 'bad_request', $this->strings['bad_request'] );
+			return new WP_Error( 'bad_request', $this->strings['bad_request'] );
 		}
 
 		if ( is_plugin_active( $plugin ) ) {
@@ -593,9 +593,9 @@ class Plugin_Upgrader extends WP_Upgrader {
 	 *
 	 * @since 5.4.0
 	 *
-	 * @param bool|\WP_Error $response The installation response before the installation has started.
-	 * @param array          $plugin   Plugin package arguments.
-	 * @return bool|\WP_Error The original `$response` parameter or \WP_Error.
+	 * @param bool|WP_Error $response The installation response before the installation has started.
+	 * @param array         $plugin   Plugin package arguments.
+	 * @return bool|WP_Error The original `$response` parameter or WP_Error.
 	 */
 	public function active_before( $response, $plugin ) {
 		if ( is_wp_error( $response ) ) {
@@ -629,9 +629,9 @@ class Plugin_Upgrader extends WP_Upgrader {
 	 *
 	 * @since 5.4.0
 	 *
-	 * @param bool|\WP_Error $response The installation response after the installation has finished.
-	 * @param array          $plugin   Plugin package arguments.
-	 * @return bool|\WP_Error The original `$response` parameter or \WP_Error.
+	 * @param bool|WP_Error $response The installation response after the installation has finished.
+	 * @param array         $plugin   Plugin package arguments.
+	 * @return bool|WP_Error The original `$response` parameter or WP_Error.
 	 */
 	public function active_after( $response, $plugin ) {
 		if ( is_wp_error( $response ) ) {
@@ -668,12 +668,12 @@ class Plugin_Upgrader extends WP_Upgrader {
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
-	 * @param bool|\WP_Error $removed            Whether the destination was cleared.
-	 *                                          True on success, \WP_Error on failure.
-	 * @param string         $local_destination  The local package destination.
-	 * @param string         $remote_destination The remote package destination.
-	 * @param array          $plugin             Extra arguments passed to hooked filters.
-	 * @return bool|\WP_Error
+	 * @param bool|WP_Error $removed            Whether the destination was cleared.
+	 *                                          True on success, WP_Error on failure.
+	 * @param string        $local_destination  The local package destination.
+	 * @param string        $remote_destination The remote package destination.
+	 * @param array         $plugin             Extra arguments passed to hooked filters.
+	 * @return bool|WP_Error
 	 */
 	public function delete_old_plugin( $removed, $local_destination, $remote_destination, $plugin ) {
 		global $wp_filesystem;
@@ -684,7 +684,7 @@ class Plugin_Upgrader extends WP_Upgrader {
 
 		$plugin = isset( $plugin['plugin'] ) ? $plugin['plugin'] : '';
 		if ( empty( $plugin ) ) {
-			return new \WP_Error( 'bad_request', $this->strings['bad_request'] );
+			return new WP_Error( 'bad_request', $this->strings['bad_request'] );
 		}
 
 		$plugins_dir     = $wp_filesystem->wp_plugins_dir();
@@ -705,7 +705,7 @@ class Plugin_Upgrader extends WP_Upgrader {
 		}
 
 		if ( ! $deleted ) {
-			return new \WP_Error( 'remove_old_failed', $this->strings['remove_old_failed'] );
+			return new WP_Error( 'remove_old_failed', $this->strings['remove_old_failed'] );
 		}
 
 		return true;

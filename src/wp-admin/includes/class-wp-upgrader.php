@@ -252,38 +252,38 @@ class WP_Upgrader {
 		}
 
 		if ( ! is_object( $wp_filesystem ) ) {
-			return new \WP_Error( 'fs_unavailable', $this->strings['fs_unavailable'] );
+			return new WP_Error( 'fs_unavailable', $this->strings['fs_unavailable'] );
 		}
 
 		if ( is_wp_error( $wp_filesystem->errors ) && $wp_filesystem->errors->has_errors() ) {
-			return new \WP_Error( 'fs_error', $this->strings['fs_error'], $wp_filesystem->errors );
+			return new WP_Error( 'fs_error', $this->strings['fs_error'], $wp_filesystem->errors );
 		}
 
 		foreach ( (array) $directories as $dir ) {
 			switch ( $dir ) {
 				case ABSPATH:
 					if ( ! $wp_filesystem->abspath() ) {
-						return new \WP_Error( 'fs_no_root_dir', $this->strings['fs_no_root_dir'] );
+						return new WP_Error( 'fs_no_root_dir', $this->strings['fs_no_root_dir'] );
 					}
 					break;
 				case WP_CONTENT_DIR:
 					if ( ! $wp_filesystem->wp_content_dir() ) {
-						return new \WP_Error( 'fs_no_content_dir', $this->strings['fs_no_content_dir'] );
+						return new WP_Error( 'fs_no_content_dir', $this->strings['fs_no_content_dir'] );
 					}
 					break;
 				case WP_PLUGIN_DIR:
 					if ( ! $wp_filesystem->wp_plugins_dir() ) {
-						return new \WP_Error( 'fs_no_plugins_dir', $this->strings['fs_no_plugins_dir'] );
+						return new WP_Error( 'fs_no_plugins_dir', $this->strings['fs_no_plugins_dir'] );
 					}
 					break;
 				case get_theme_root():
 					if ( ! $wp_filesystem->wp_themes_dir() ) {
-						return new \WP_Error( 'fs_no_themes_dir', $this->strings['fs_no_themes_dir'] );
+						return new WP_Error( 'fs_no_themes_dir', $this->strings['fs_no_themes_dir'] );
 					}
 					break;
 				default:
 					if ( ! $wp_filesystem->find_folder( $dir ) ) {
-						return new \WP_Error( 'fs_no_folder', sprintf( $this->strings['fs_no_folder'], esc_html( basename( $dir ) ) ) );
+						return new WP_Error( 'fs_no_folder', sprintf( $this->strings['fs_no_folder'], esc_html( basename( $dir ) ) ) );
 					}
 					break;
 			}
@@ -327,7 +327,7 @@ class WP_Upgrader {
 		}
 
 		if ( empty( $package ) ) {
-			return new \WP_Error( 'no_package', $this->strings['no_package'] );
+			return new WP_Error( 'no_package', $this->strings['no_package'] );
 		}
 
 		$this->skin->feedback( 'downloading_package', $package );
@@ -335,7 +335,7 @@ class WP_Upgrader {
 		$download_file = download_url( $package, 300, $check_signatures );
 
 		if ( is_wp_error( $download_file ) && ! $download_file->get_error_data( 'softfail-filename' ) ) {
-			return new \WP_Error( 'download_failed', $this->strings['download_failed'], $download_file->get_error_message() );
+			return new WP_Error( 'download_failed', $this->strings['download_failed'], $download_file->get_error_message() );
 		}
 
 		return $download_file;
@@ -359,7 +359,7 @@ class WP_Upgrader {
 		$this->skin->feedback( 'unpack_package' );
 
 		if ( ! $wp_filesystem->wp_content_dir() ) {
-			return new \WP_Error( 'fs_no_content_dir', $this->strings['fs_no_content_dir'] );
+			return new WP_Error( 'fs_no_content_dir', $this->strings['fs_no_content_dir'] );
 		}
 
 		$upgrade_folder = $wp_filesystem->wp_content_dir() . 'upgrade/';
@@ -385,13 +385,13 @@ class WP_Upgrader {
 
 		// Once extracted, delete the package if required.
 		if ( $delete_package ) {
-			unlink( $package );
+			@unlink( $package );
 		}
 
 		if ( is_wp_error( $result ) ) {
 			$wp_filesystem->delete( $working_dir, true );
 			if ( 'incompatible_archive' === $result->get_error_code() ) {
-				return new \WP_Error( 'incompatible_archive', $this->strings['incompatible_archive'], $result->get_error_data() );
+				return new WP_Error( 'incompatible_archive', $this->strings['incompatible_archive'], $result->get_error_data() );
 			}
 			return $result;
 		}
@@ -465,11 +465,11 @@ class WP_Upgrader {
 		}
 
 		if ( ! empty( $unwritable_files ) ) {
-			return new \WP_Error( 'files_not_writable', $this->strings['files_not_writable'], implode( ', ', $unwritable_files ) );
+			return new WP_Error( 'files_not_writable', $this->strings['files_not_writable'], implode( ', ', $unwritable_files ) );
 		}
 
 		if ( ! $wp_filesystem->delete( $remote_destination, true ) ) {
-			return new \WP_Error( 'remove_old_failed', $this->strings['remove_old_failed'] );
+			return new WP_Error( 'remove_old_failed', $this->strings['remove_old_failed'] );
 		}
 
 		return true;
@@ -530,7 +530,7 @@ class WP_Upgrader {
 		}
 
 		if ( empty( $source ) || empty( $destination ) ) {
-			return new \WP_Error( 'bad_request', $this->strings['bad_request'] );
+			return new WP_Error( 'bad_request', $this->strings['bad_request'] );
 		}
 		$this->skin->feedback( 'installing_package' );
 
@@ -542,7 +542,7 @@ class WP_Upgrader {
 		 *
 		 * @since 2.8.0
 		 *
-		 * @param bool|\WP_Error $response   Installation response.
+		 * @param bool|WP_Error $response   Installation response.
 		 * @param array         $hook_extra Extra arguments passed to hooked filters.
 		 */
 		$res = apply_filters( 'upgrader_pre_install', true, $args['hook_extra'] );
@@ -564,7 +564,7 @@ class WP_Upgrader {
 			$source = trailingslashit( $args['source'] ) . trailingslashit( $source_files[0] );
 		} elseif ( 0 === count( $source_files ) ) {
 			// There are no files?
-			return new \WP_Error( 'incompatible_archive_empty', $this->strings['incompatible_archive'], $this->strings['no_files'] );
+			return new WP_Error( 'incompatible_archive_empty', $this->strings['incompatible_archive'], $this->strings['no_files'] );
 		} else {
 			/*
 			 * It's only a single file, the upgrader will use the folder name of this file as the destination folder.
@@ -653,7 +653,7 @@ class WP_Upgrader {
 			$_files = $wp_filesystem->dirlist( $remote_destination );
 			if ( ! empty( $_files ) ) {
 				$wp_filesystem->delete( $remote_source, true ); // Clear out the source files.
-				return new \WP_Error( 'folder_exists', $this->strings['folder_exists'], $remote_destination );
+				return new WP_Error( 'folder_exists', $this->strings['folder_exists'], $remote_destination );
 			}
 		}
 
@@ -676,7 +676,7 @@ class WP_Upgrader {
 			// Create destination if needed.
 			if ( ! $wp_filesystem->exists( $remote_destination ) ) {
 				if ( ! $wp_filesystem->mkdir( $remote_destination, FS_CHMOD_DIR ) ) {
-					return new \WP_Error( 'mkdir_failed_destination', $this->strings['mkdir_failed'], $remote_destination );
+					return new WP_Error( 'mkdir_failed_destination', $this->strings['mkdir_failed'], $remote_destination );
 				}
 			}
 			$result = copy_dir( $source, $remote_destination );
@@ -840,12 +840,12 @@ class WP_Upgrader {
 				$this->skin->feedback( $download->get_error_message() );
 
 				// Report this failure back to WordPress.org for debugging purposes.
-				wp_version_check(
-					array(
-						'signature_failure_code' => $download->get_error_code(),
-						'signature_failure_data' => $download->get_error_data(),
-					)
-				);
+				// wp_version_check(
+				// array(
+				// 'signature_failure_code' => $download->get_error_code(),
+				// 'signature_failure_data' => $download->get_error_data(),
+				// )
+				// );
 			}
 
 			// Pretend this error didn't happen.
@@ -1102,7 +1102,7 @@ class WP_Upgrader {
 		}
 
 		if ( ! $wp_filesystem->wp_content_dir() ) {
-			return new \WP_Error( 'fs_no_content_dir', $this->strings['fs_no_content_dir'] );
+			return new WP_Error( 'fs_no_content_dir', $this->strings['fs_no_content_dir'] );
 		}
 
 		$dest_dir = $wp_filesystem->wp_content_dir() . 'upgrade-temp-backup/';
@@ -1116,7 +1116,7 @@ class WP_Upgrader {
 
 			if ( ! $wp_filesystem->mkdir( $sub_dir, FS_CHMOD_DIR ) ) {
 				// Could not create the backup directory.
-				return new \WP_Error( 'fs_temp_backup_mkdir', $this->strings['temp_backup_mkdir_failed'] );
+				return new WP_Error( 'fs_temp_backup_mkdir', $this->strings['temp_backup_mkdir_failed'] );
 			}
 		}
 
@@ -1132,7 +1132,7 @@ class WP_Upgrader {
 		// Move to the temporary backup directory.
 		$result = move_dir( $src, $dest, true );
 		if ( is_wp_error( $result ) ) {
-			return new \WP_Error( 'fs_temp_backup_move', $this->strings['temp_backup_move_failed'] );
+			return new WP_Error( 'fs_temp_backup_move', $this->strings['temp_backup_move_failed'] );
 		}
 
 		return true;
@@ -1158,7 +1158,7 @@ class WP_Upgrader {
 	public function restore_temp_backup( $temp_backups = array() ) {
 		global $wp_filesystem;
 
-		$errors = new \WP_Error();
+		$errors = new WP_Error();
 
 		if ( empty( $temp_backups ) ) {
 			$temp_backups = $this->temp_restores;
@@ -1223,7 +1223,7 @@ class WP_Upgrader {
 	public function delete_temp_backup( $temp_backups = array() ) {
 		global $wp_filesystem;
 
-		$errors = new \WP_Error();
+		$errors = new WP_Error();
 
 		if ( empty( $temp_backups ) ) {
 			$temp_backups = $this->temp_backups;

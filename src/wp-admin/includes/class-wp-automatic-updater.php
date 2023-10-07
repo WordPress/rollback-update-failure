@@ -402,7 +402,7 @@ class WP_Automatic_Updater {
 		 * @param string $context The filesystem context (a path) against which filesystem access and status
 		 *                        should be checked.
 		 */
-		// do_action( 'pre_auto_update', $type, $item, $context ); // TODO: commented out for plugin.
+		do_action( 'pre_auto_update', $type, $item, $context );
 
 		$upgrader_item = $item;
 		switch ( $type ) {
@@ -475,7 +475,7 @@ class WP_Automatic_Updater {
 
 		// If the filesystem is unavailable, false is returned.
 		if ( false === $upgrade_result ) {
-			$upgrade_result = new \WP_Error( 'fs_unavailable', __( 'Could not access filesystem.' ) );
+			$upgrade_result = new WP_Error( 'fs_unavailable', __( 'Could not access filesystem.' ) );
 		}
 
 		if ( 'core' === $type ) {
@@ -535,7 +535,7 @@ class WP_Automatic_Updater {
 			 * a fatal error.
 			 */
 			if ( $this->has_fatal_error() ) {
-				$upgrade_result = new \WP_Error();
+				$upgrade_result = new WP_Error();
 				$temp_backup    = array(
 					array(
 						'dir'  => 'plugins',
