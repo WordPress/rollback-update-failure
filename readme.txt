@@ -31,6 +31,8 @@ Rollback parts 1 was merged into WordPress 6.2 as the `move_dir()`. Rollback par
 
 ## Testing
 * This **only** works on auto-updates.
+* Run the following commands from the terminal. You might need to run the command several times to get it started:
+<code>wp cron event run wp_version_check</code><code>wp cron event delete wp_version_check; wp cron event run wp_version_check</code>
 * When updating a plugin, you should be able to see the old plugin in the `wp-content/upgrade-temp-backup/plugins/PLUGINNAME` folder. The same should apply for themes. Since updates sometimes run fast and we may miss the folder creation during testing, you can simulate an update failure to demonstrate.
 * When a plugin auto-update fails, the previous version should be restored. To test that, change the version of a plugin to a previous number, run the update, and on fail the previous version (the one where you changed the version number) should still be installed on the site. To simulate an update failure and confirm this works, use the built-in **Simulate failure** link. Just activate/deactivate from the `plugins.php` page action link. This link will only be present if the plugin has an update pending.
 
