@@ -10,7 +10,7 @@
  * Plugin Name: Rollback Update Failure
  * Author: WP Core Contributors
  * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages.
- * Version: 6.3.1
+ * Version: 6.3.1.1
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
@@ -32,14 +32,44 @@ if ( ! defined( 'WPINC' ) ) {
 if ( version_compare( get_bloginfo( 'version' ), '6.3', '<' ) ) {
 	require_once __DIR__ . '/src/wp-admin/includes/class-wp-site-health.php';
 	require_once __DIR__ . '/src/wp-admin/includes/class-plugin-theme-upgrader.php';
-	require_once __DIR__ . '/src/wp-admin/includes/class-wp-upgrader.php';
 	require_once __DIR__ . '/src/wp-includes/update.php';
 }
 
-if ( version_compare( get_bloginfo( 'version' ), '6.4-beta1', '<' ) ) {
-	require_once __DIR__ . '/src/wp-admin/includes/class-rollback-auto-update.php';
-	add_filter( 'upgrader_source_selection', array( new \WP_Rollback_Auto_Update(), 'set_plugin_upgrader' ), 10, 3 );
-	add_filter( 'upgrader_install_package_result', array( new \WP_Rollback_Auto_Update(), 'check_plugin_for_errors' ), 15, 2 );
-}
+add_action(
+	'plugins_loaded',
+	function () {
+		if ( version_compare( get_bloginfo( 'version' ), '6.5-beta1', '<' ) ) {
+			// require_once __DIR__ . '/src/wp-admin/includes/class-rollback-auto-update.php';
+			require_once __DIR__ . '/src/wp-admin/includes/class-wp-upgrader.php';
+			require_once __DIR__ . '/src/wp-admin/includes/class-wp-automatic-updater.php';
+			require_once __DIR__ . '/src/wp-admin/includes/class-plugin-upgrader.php';
+
+			add_action( 'pre_auto_update', array( new WP_Automatic_Updater(), 'update' ), 10, 2 );
+			add_filter( 'upgrader_source_selection', __NAMESPACE__ . '\upgrader_source_selection', 10, 4 );
+
+			// add_filter( 'upgrader_source_selection', array( new \WP_Rollback_Auto_Update(), 'set_plugin_upgrader' ), 10, 3 );
+			// add_filter( 'upgrader_install_package_result', array( new \WP_Rollback_Auto_Update(), 'check_plugin_for_errors' ), 15, 2 );
+		}
+	}
+);
 
 require_once __DIR__ . '/src/testing/failure-simulator.php';
+
+/**
+ * Correctly rename dependency for activation.
+ *
+ * @param string $source        Path fo $source.
+ * @param string $remote_source Path of $remote_source.
+ *
+ * @return string $new_source
+ */
+function upgrader_source_selection( $source, $remote_source, $obj, $hook_extra ) {
+	if ( isset( $hook_extra['temp_backup']['slug'] ) ) {
+		$new_source = trailingslashit( $remote_source ) . $hook_extra['temp_backup']['slug'];
+		move_dir( $source, $new_source, true );
+
+		return trailingslashit( $new_source );
+	}
+
+	return $source;
+}
