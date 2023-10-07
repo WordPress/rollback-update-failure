@@ -49,6 +49,7 @@ add_action(
 				'wp_maybe_auto_update',
 				function () {
 					$upgrader = new WP_Automatic_Updater();
+					WP_Upgrader::release_lock( 'auto_updater' );
 					$upgrader->run();
 				}
 			);
