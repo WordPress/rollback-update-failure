@@ -50,7 +50,7 @@ add_action(
 						require_once \ABSPATH . 'wp-admin/includes/update.php';
 					}
 					$upgrader = new WP_Automatic_Updater();
-					WP_Upgrader::release_lock( 'auto_updater' );
+					delete_option( 'option_auto_updater.lock' );
 					$upgrader->run();
 				}
 			);
