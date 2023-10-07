@@ -519,7 +519,7 @@ class WP_Automatic_Updater {
 			}
 
 			// Avoid a race condition when there are 2 sequential plugins that have fatal errors.
-			sleep(2);
+			sleep( 2 );
 
 			/*
 			 * Maintenance mode is disabled after an active plugin
