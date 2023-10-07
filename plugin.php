@@ -1,16 +1,16 @@
 <?php
 /**
- * Rollback Update Failure
+ * Rollback Auto Update
  *
  * @package rollback-update-failure
  * @license MIT
  */
 
 /**
- * Plugin Name: Rollback Update Failure
+ * Plugin Name: Rollback Auto Update
  * Author: WP Core Contributors
- * Description: Feature plugin to test plugin/theme update failures and rollback to previous installed packages.
- * Version: 6.3.1.2
+ * Description: A feature plugin now only for testing Rollback Auto Update, aka Rollback part 3. Manual Rollback of update failures has been committed in WordPress 6.3.
+ * Version: 6.3.1.3
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure

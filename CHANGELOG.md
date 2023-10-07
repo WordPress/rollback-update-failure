@@ -1,5 +1,6 @@
 [unreleased]
 * attempt to sync with refactored PR
+* simpler replacement with modified upgrader classes
 
 #### 6.3.1 / 2023-10-22
 * removed too much stuff
