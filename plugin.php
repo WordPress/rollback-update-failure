@@ -51,6 +51,7 @@ add_action(
 					}
 					$upgrader = new WP_Automatic_Updater();
 					delete_option( 'option_auto_updater.lock' );
+					WP_Upgrader::release_lock( 'auto_updater' );
 					$upgrader->run();
 				}
 			);
