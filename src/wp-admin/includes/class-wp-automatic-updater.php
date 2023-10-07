@@ -518,6 +518,9 @@ class WP_Automatic_Updater {
 				set_time_limit( 10 * MINUTE_IN_SECONDS );
 			}
 
+			// TODO: enable maintenance mode here for PR.
+			// load.php has modified wp_is_maintenance_mode().
+
 			// Avoid a race condition when there are 2 sequential plugins that have fatal errors.
 			sleep( 2 );
 
@@ -546,11 +549,11 @@ class WP_Automatic_Updater {
 				);
 
 				/*
-				 * Enable maintenance mode while attempting to restore
-				 * the previously installed version and delete the backup.
+				 * Enable maintenance mode while attempting to detect fatal errors
+				 * and potentially rolling back.
 				 *
-				 * This avoids errors if the site is visited while files
-				 * are still being moved.
+				 * This avoids errors if the site is visited while fatal errors exist
+				 * or while files are still being moved.
 				 */
 				$upgrader->maintenance_mode( true );
 
@@ -582,9 +585,6 @@ class WP_Automatic_Updater {
 					}
 				}
 
-				// All processes are complete. Allow visitors to browse the site again.
-				$upgrader->maintenance_mode( false );
-
 				/*
 				 * Should emails not be working, log the message(s) so that
 				 * the log file contains context for the fatal error,
@@ -598,6 +598,10 @@ class WP_Automatic_Updater {
 			} else {
 				error_log( '    The update for ' . var_export( $item->slug, true ) . ' has no fatal errors.' );
 			}
+
+			// All processes are complete. Allow visitors to browse the site again.
+			$upgrader->maintenance_mode( false );
+
 		}
 
 		$this->update_results[ $type ][] = (object) array(
