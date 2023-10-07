@@ -1155,7 +1155,7 @@ class WP_Upgrader {
 	 * }
 	 * @return bool|WP_Error True on success, false on early exit, otherwise WP_Error.
 	 */
-	public function restore_temp_backup( $temp_backups = array() ) {
+	public function restore_temp_backup( array $temp_backups = array() ) {
 		global $wp_filesystem;
 
 		$errors = new WP_Error();
@@ -1220,7 +1220,7 @@ class WP_Upgrader {
 	 * }
 	 * @return bool|WP_Error True on success, false on early exit, otherwise WP_Error.
 	 */
-	public function delete_temp_backup( $temp_backups = array() ) {
+	public function delete_temp_backup( array $temp_backups = array() ) {
 		global $wp_filesystem;
 
 		$errors = new WP_Error();

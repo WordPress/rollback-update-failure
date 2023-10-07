@@ -36,6 +36,8 @@ add_action(
 	function () {
 		if ( version_compare( get_bloginfo( 'version' ), '6.5-beta1', '<' ) ) {
 			class WP_Error extends \WP_Error {}
+			class Automatic_Upgrader_Skin extends \Automatic_Upgrader_Skin {}
+			class Theme_Upgrader extends \Theme_Upgrader {}
 			require_once __DIR__ . '/src/wp-admin/includes/class-wp-upgrader.php';
 			require_once __DIR__ . '/src/wp-admin/includes/class-wp-automatic-updater.php';
 			require_once __DIR__ . '/src/wp-admin/includes/class-plugin-upgrader.php';
@@ -61,12 +63,13 @@ add_action(
 /**
  * Correctly rename dependency for activation.
  *
- * @param string $source        Path fo $source.
- * @param string $remote_source Path of $remote_source.
- *
- * @return string $new_source
+ * @param string      $source        File source location.
+ * @param string      $remote_source Remote file source location.
+ * @param WP_Upgrader $upgrader      WP_Upgrader instance.
+ * @param array       $hook_extra    Extra arguments passed to hooked filters.
+ * @return string
  */
-function upgrader_source_selection( $source, $remote_source, $obj, $hook_extra ) {
+function upgrader_source_selection( $source, $remote_source, $upgrader, $hook_extra ) {
 	if ( isset( $hook_extra['temp_backup']['slug'] ) ) {
 		$new_source = trailingslashit( $remote_source ) . $hook_extra['temp_backup']['slug'];
 		move_dir( $source, $new_source, true );

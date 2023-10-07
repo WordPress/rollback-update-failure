@@ -6,7 +6,8 @@
  * @subpackage Upgrader
  * @since 4.6.0
  */
-namespace Rollback_Update_Failure;
+
+ namespace Rollback_Update_Failure;
 
 /**
  * Core class used for upgrading/installing plugins.

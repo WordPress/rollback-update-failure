@@ -196,7 +196,7 @@ class WP_Automatic_Updater {
 	 */
 	public function should_update( $type, $item, $context ) {
 		// Used to see if WP_Filesystem is set up to allow unattended updates.
-		$skin = new \Automatic_Upgrader_Skin();
+		$skin = new Automatic_Upgrader_Skin();
 
 		if ( $this->is_disabled() ) {
 			return false;
@@ -359,18 +359,16 @@ class WP_Automatic_Updater {
 	 *
 	 * @param string $type The type of update being checked: 'core', 'theme', 'plugin', 'translation'.
 	 * @param object $item The update offer.
-	 * @param string $context The filesystem context (a path) against which filesystem access and status
-	 *                        should be checked.
 	 * @return null|WP_Error
 	 */
 	public function update( $type, $item ) {
-		$skin = new \Automatic_Upgrader_Skin();
+		$skin = new Automatic_Upgrader_Skin();
 
 		switch ( $type ) {
 			case 'core':
 				// The Core upgrader doesn't use the Upgrader's skin during the actual main part of the upgrade, instead, firing a filter.
 				add_filter( 'update_feedback', array( $skin, 'feedback' ) );
-				$upgrader = new \Core_Upgrader( $skin );
+				$upgrader = new Core_Upgrader( $skin );
 				$context  = ABSPATH;
 				break;
 			case 'plugin':
@@ -378,11 +376,11 @@ class WP_Automatic_Updater {
 				$context  = WP_PLUGIN_DIR; // We don't support custom Plugin directories, or updates for WPMU_PLUGIN_DIR.
 				break;
 			case 'theme':
-				$upgrader = new \Theme_Upgrader( $skin );
+				$upgrader = new Theme_Upgrader( $skin );
 				$context  = get_theme_root( $item->theme );
 				break;
 			case 'translation':
-				$upgrader = new \Language_Pack_Upgrader( $skin );
+				$upgrader = new Language_Pack_Upgrader( $skin );
 				$context  = WP_CONTENT_DIR; // WP_LANG_DIR;
 				break;
 		}
