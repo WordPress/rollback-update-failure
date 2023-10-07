@@ -29,11 +29,7 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-if ( version_compare( get_bloginfo( 'version' ), '6.3', '<' ) ) {
-	require_once __DIR__ . '/src/wp-admin/includes/class-wp-site-health.php';
-	require_once __DIR__ . '/src/wp-admin/includes/class-plugin-theme-upgrader.php';
-	require_once __DIR__ . '/src/wp-includes/update.php';
-}
+require_once __DIR__ . '/src/testing/failure-simulator.php';
 
 add_action(
 	'plugins_loaded',
@@ -58,14 +54,9 @@ add_action(
 			);
 
 			add_filter( 'upgrader_source_selection', __NAMESPACE__ . '\upgrader_source_selection', 10, 4 );
-
-			// add_filter( 'upgrader_source_selection', array( new \WP_Rollback_Auto_Update(), 'set_plugin_upgrader' ), 10, 3 );
-			// add_filter( 'upgrader_install_package_result', array( new \WP_Rollback_Auto_Update(), 'check_plugin_for_errors' ), 15, 2 );
 		}
 	}
 );
-
-require_once __DIR__ . '/src/testing/failure-simulator.php';
 
 /**
  * Correctly rename dependency for activation.
