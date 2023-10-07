@@ -44,7 +44,15 @@ add_action(
 			require_once __DIR__ . '/src/wp-admin/includes/class-wp-automatic-updater.php';
 			require_once __DIR__ . '/src/wp-admin/includes/class-plugin-upgrader.php';
 
-			add_action( 'pre_auto_update', array( new WP_Automatic_Updater(), 'update' ), 10, 2 );
+			remove_action( 'wp_maybe_auto_update', 'wp_maybe_auto_update' );
+			add_action(
+				'wp_maybe_auto_update',
+				function () {
+					$upgrader = new WP_Automatic_Updater();
+					$upgrader->run();
+				}
+			);
+
 			add_filter( 'upgrader_source_selection', __NAMESPACE__ . '\upgrader_source_selection', 10, 4 );
 
 			// add_filter( 'upgrader_source_selection', array( new \WP_Rollback_Auto_Update(), 'set_plugin_upgrader' ), 10, 3 );
