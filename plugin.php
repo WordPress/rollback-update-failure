@@ -52,7 +52,6 @@ add_action(
 					if ( ! function_exists( 'wp_is_auto_update_enabled_for_type' ) ) {
 						require_once \ABSPATH . 'wp-admin/includes/update.php';
 					}
-					//delete_option('auto_plugin_theme_update_emails');
 					add_filter( 'upgrader_source_selection', __NAMESPACE__ . '\fix_mangled_source', 10, 4 );
 					$upgrader = new WP_Automatic_Updater();
 					delete_option( 'option_auto_updater.lock' );
