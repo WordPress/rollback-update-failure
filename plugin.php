@@ -52,14 +52,14 @@ add_action(
 					if ( ! function_exists( 'wp_is_auto_update_enabled_for_type' ) ) {
 						require_once \ABSPATH . 'wp-admin/includes/update.php';
 					}
+					//delete_option('auto_plugin_theme_update_emails');
+					add_filter( 'upgrader_source_selection', __NAMESPACE__ . '\fix_mangled_source', 10, 4 );
 					$upgrader = new WP_Automatic_Updater();
 					delete_option( 'option_auto_updater.lock' );
 					WP_Upgrader::release_lock( 'auto_updater' );
 					$upgrader->run();
 				}
 			);
-
-			add_filter( 'upgrader_source_selection', __NAMESPACE__ . '\upgrader_source_selection', 10, 4 );
 		}
 	}
 );
@@ -73,7 +73,7 @@ add_action(
  * @param array       $hook_extra    Extra arguments passed to hooked filters.
  * @return string
  */
-function upgrader_source_selection( $source, $remote_source, $upgrader, $hook_extra ) {
+function fix_mangled_source( $source, $remote_source, $upgrader, $hook_extra ) {
 	if ( isset( $hook_extra['temp_backup']['slug'] ) ) {
 		$new_source = trailingslashit( $remote_source ) . $hook_extra['temp_backup']['slug'];
 		move_dir( $source, $new_source, true );
