@@ -520,6 +520,14 @@ class WP_Automatic_Updater {
 
 			// TODO: enable maintenance mode here for PR.
 			// load.php has modified wp_is_maintenance_mode().
+			/*
+			 * Enable maintenance mode while attempting to detect fatal errors
+			 * and potentially rolling back.
+			 *
+			 * This avoids errors if the site is visited while fatal errors exist
+			 * or while files are still being moved.
+			 */
+			// $upgrader->maintenance_mode( true );
 
 			// Avoid a race condition when there are 2 sequential plugins that have fatal errors.
 			sleep( 2 );
@@ -548,6 +556,7 @@ class WP_Automatic_Updater {
 					),
 				);
 
+				// TODO: remove for PR.
 				/*
 				 * Enable maintenance mode while attempting to detect fatal errors
 				 * and potentially rolling back.
