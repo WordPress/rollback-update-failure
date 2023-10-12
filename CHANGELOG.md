@@ -1,5 +1,8 @@
 [unreleased]
 
+#### 7.0.1 / 2023-10-12
+* needed to require upgrader classes in main plugin file
+
 #### 7.0.0 / 2023-10-11
 * attempt to sync with refactored PR
 * simpler replacement with modified upgrader classes
