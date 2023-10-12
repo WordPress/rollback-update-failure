@@ -10,7 +10,7 @@
  * Plugin Name: Rollback Auto Update
  * Author: WP Core Contributors
  * Description: A feature plugin now only for testing Rollback Auto Update, aka Rollback part 3. Manual Rollback of update failures has been committed in WordPress 6.3.
- * Version: 7.0.0
+ * Version: 7.0.1
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
@@ -35,6 +35,15 @@ add_action(
 	'plugins_loaded',
 	function () {
 		if ( version_compare( get_bloginfo( 'version' ), '6.5-beta1', '<' ) ) {
+
+			require_once \ABSPATH . \WPINC . '/class-wp-error.php';
+			require_once \ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+			require_once \ABSPATH . 'wp-admin/includes/class-wp-upgrader-skin.php';
+			require_once \ABSPATH . 'wp-admin/includes/class-automatic-upgrader-skin.php';
+			require_once \ABSPATH . 'wp-admin/includes/class-theme-upgrader.php';
+			require_once \ABSPATH . 'wp-admin/includes/class-core-upgrader.php';
+			require_once \ABSPATH . 'wp-admin/includes/class-language-pack-upgrader.php';
+
 			// phpcs:disable Squiz.Commenting.ClassComment.Missing,Generic.Files.OneObjectStructurePerFile.MultipleFound
 			class WP_Error extends \WP_Error {}
 			class Automatic_Upgrader_Skin extends \Automatic_Upgrader_Skin {}
