@@ -29,6 +29,8 @@ Rollback parts 1 was merged into WordPress 6.2 as the `move_dir()`. Rollback par
 
 
 ## Testing
+
+* Requires WordPress 6.3
 * This **only** works on auto-updates.
 * Run the following commands from the terminal. You might need to run the command several times to get it started:
 <code>wp cron event run wp_version_check</code>
