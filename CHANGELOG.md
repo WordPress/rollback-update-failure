@@ -1,5 +1,8 @@
 [unreleased]
 
+#### 7.0.2 / 2023-10-12
+* just a bump for dot org
+
 #### 7.0.1 / 2023-10-12
 * needed to require upgrader classes in main plugin file
 
