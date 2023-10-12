@@ -1,5 +1,10 @@
 [unreleased]
 
+#### 7.0.0 / 2023-10-11
+* attempt to sync with refactored PR
+* simpler replacement with modified upgrader classes
+* error logging present
+
 #### 6.3.1 / 2023-10-22
 * removed too much stuff
 
