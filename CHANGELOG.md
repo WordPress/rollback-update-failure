@@ -1,4 +1,5 @@
 [unreleased]
+* update kill switch
 
 #### 7.0.2 / 2023-10-12
 * just a bump for dot org

@@ -10,7 +10,7 @@
  * Plugin Name: Rollback Auto Update
  * Author: WP Core Contributors
  * Description: A feature plugin now only for testing Rollback Auto Update, aka Rollback part 3. Manual Rollback of update failures has been committed in WordPress 6.3.
- * Version: 7.0.2
+ * Version: 7.0.2.1
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
@@ -29,48 +29,51 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
+// TODO: update with correct version.
+if ( version_compare( get_bloginfo( 'version' ), '6.5-beta1', '>' ) ) {
+	require_once ABSPATH . 'wp-admin/includes/plugin.php';
+	deactivate_plugins( __FILE__ );
+}
+
 require_once __DIR__ . '/src/testing/failure-simulator.php';
 
 add_action(
 	'plugins_loaded',
 	function () {
-		if ( version_compare( get_bloginfo( 'version' ), '6.5-beta1', '<' ) ) {
+		require_once \ABSPATH . \WPINC . '/class-wp-error.php';
+		require_once \ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+		require_once \ABSPATH . 'wp-admin/includes/class-wp-upgrader-skin.php';
+		require_once \ABSPATH . 'wp-admin/includes/class-automatic-upgrader-skin.php';
+		require_once \ABSPATH . 'wp-admin/includes/class-theme-upgrader.php';
+		require_once \ABSPATH . 'wp-admin/includes/class-core-upgrader.php';
+		require_once \ABSPATH . 'wp-admin/includes/class-language-pack-upgrader.php';
 
-			require_once \ABSPATH . \WPINC . '/class-wp-error.php';
-			require_once \ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
-			require_once \ABSPATH . 'wp-admin/includes/class-wp-upgrader-skin.php';
-			require_once \ABSPATH . 'wp-admin/includes/class-automatic-upgrader-skin.php';
-			require_once \ABSPATH . 'wp-admin/includes/class-theme-upgrader.php';
-			require_once \ABSPATH . 'wp-admin/includes/class-core-upgrader.php';
-			require_once \ABSPATH . 'wp-admin/includes/class-language-pack-upgrader.php';
+		// phpcs:disable Squiz.Commenting.ClassComment.Missing,Generic.Files.OneObjectStructurePerFile.MultipleFound
+		class WP_Error extends \WP_Error {}
+		class Automatic_Upgrader_Skin extends \Automatic_Upgrader_Skin {}
+		class Theme_Upgrader extends \Theme_Upgrader {}
+		class Core_Upgrader extends \Core_Upgrader {}
+		class Language_Pack_Upgrader extends \Language_Pack_Upgrader {}
+		// phpcs:enable
 
-			// phpcs:disable Squiz.Commenting.ClassComment.Missing,Generic.Files.OneObjectStructurePerFile.MultipleFound
-			class WP_Error extends \WP_Error {}
-			class Automatic_Upgrader_Skin extends \Automatic_Upgrader_Skin {}
-			class Theme_Upgrader extends \Theme_Upgrader {}
-			class Core_Upgrader extends \Core_Upgrader {}
-			class Language_Pack_Upgrader extends \Language_Pack_Upgrader {}
-			// phpcs:enable
+		require_once __DIR__ . '/src/wp-admin/includes/class-wp-upgrader.php';
+		require_once __DIR__ . '/src/wp-admin/includes/class-wp-automatic-updater.php';
+		require_once __DIR__ . '/src/wp-admin/includes/class-plugin-upgrader.php';
 
-			require_once __DIR__ . '/src/wp-admin/includes/class-wp-upgrader.php';
-			require_once __DIR__ . '/src/wp-admin/includes/class-wp-automatic-updater.php';
-			require_once __DIR__ . '/src/wp-admin/includes/class-plugin-upgrader.php';
-
-			remove_action( 'wp_maybe_auto_update', 'wp_maybe_auto_update' );
-			add_action(
-				'wp_maybe_auto_update',
-				function () {
-					if ( ! function_exists( 'wp_is_auto_update_enabled_for_type' ) ) {
-						require_once \ABSPATH . 'wp-admin/includes/update.php';
-					}
-					add_filter( 'upgrader_source_selection', __NAMESPACE__ . '\fix_mangled_source', 10, 4 );
-					$upgrader = new WP_Automatic_Updater();
-					delete_option( 'option_auto_updater.lock' );
-					WP_Upgrader::release_lock( 'auto_updater' );
-					$upgrader->run();
+		remove_action( 'wp_maybe_auto_update', 'wp_maybe_auto_update' );
+		add_action(
+			'wp_maybe_auto_update',
+			function () {
+				if ( ! function_exists( 'wp_is_auto_update_enabled_for_type' ) ) {
+					require_once \ABSPATH . 'wp-admin/includes/update.php';
 				}
-			);
-		}
+				add_filter( 'upgrader_source_selection', __NAMESPACE__ . '\fix_mangled_source', 10, 4 );
+				$upgrader = new WP_Automatic_Updater();
+				delete_option( 'option_auto_updater.lock' );
+				WP_Upgrader::release_lock( 'auto_updater' );
+				$upgrader->run();
+			}
+		);
 	}
 );
 
