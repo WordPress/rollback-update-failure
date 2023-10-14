@@ -457,6 +457,15 @@ class WP_Automatic_Updater {
 			error_log( '    Upgrading theme ' . var_export( $item->theme, true ) . '...' );
 		}
 
+		/*
+		 * Enable maintenance mode before upgrading the plugin.
+		 *
+		 * This avoids potential non-fatal errors being detected
+		 * while scraping for a fatal error if some files aren't
+		 * being detected yet.
+		 */
+		$upgrader->maintenance_mode( true );
+
 		// Boom, this site's about to get a whole new splash of paint!
 		$upgrade_result = $upgrader->upgrade(
 			$upgrader_item,
@@ -470,6 +479,17 @@ class WP_Automatic_Updater {
 				'allow_relaxed_file_ownership' => $allow_relaxed_file_ownership,
 			)
 		);
+
+		// TODO: enable maintenance mode here for PR.
+		// load.php has modified wp_is_maintenance_mode().
+		/*
+		 * Enable maintenance mode while attempting to detect fatal errors
+		 * and potentially rolling back.
+		 *
+		 * This avoids errors if the site is visited while fatal errors exist
+		 * or while files are still being moved.
+		 */
+		// $upgrader->maintenance_mode( true );
 
 		// If the filesystem is unavailable, false is returned.
 		if ( false === $upgrade_result ) {
@@ -517,17 +537,6 @@ class WP_Automatic_Updater {
 				set_time_limit( 10 * MINUTE_IN_SECONDS );
 			}
 
-			// TODO: enable maintenance mode here for PR.
-			// load.php has modified wp_is_maintenance_mode().
-			/*
-			 * Enable maintenance mode while attempting to detect fatal errors
-			 * and potentially rolling back.
-				*
-			 * This avoids errors if the site is visited while fatal errors exist
-			 * or while files are still being moved.
-			 */
-			// $upgrader->maintenance_mode( true );
-
 			// Avoid a race condition when there are 2 sequential plugins that have fatal errors.
 			sleep( 2 );
 
@@ -555,8 +564,7 @@ class WP_Automatic_Updater {
 					),
 				);
 
-				// TODO: remove for PR.
-				/*
+				/* TODO: remove for PR.
 				 * Enable maintenance mode while attempting to detect fatal errors
 				 * and potentially rolling back.
 				 *
@@ -607,10 +615,11 @@ class WP_Automatic_Updater {
 					error_log( '    The update for ' . var_export( $item->slug, true ) . ' has no fatal errors.' );
 				}
 
-				// All processes are complete. Allow visitors to browse the site again.
-				$upgrader->maintenance_mode( false );
 			}
 		}
+
+		// All processes are complete. Allow visitors to browse the site again.
+		$upgrader->maintenance_mode( false );
 
 		$this->update_results[ $type ][] = (object) array(
 			'item'     => $item,
