@@ -461,8 +461,13 @@ class WP_Automatic_Updater {
 		 * Enable maintenance mode before upgrading the plugin.
 		 *
 		 * This avoids potential non-fatal errors being detected
-		 * while scraping for a fatal error if some files aren't
-		 * being detected yet.
+		 * while scraping for a fatal error if some files are still
+		 * being moved.
+		 *
+		 * While these checks are intended only for plugins,
+		 * maintenance mode is enabled for all upgrade types as any
+		 * update could contain an error or warning, which could cause
+		 * the scrape to miss a fatal error in the plugin update.
 		 */
 		$upgrader->maintenance_mode( true );
 
@@ -480,10 +485,11 @@ class WP_Automatic_Updater {
 			)
 		);
 
-		// TODO: enable maintenance mode here for PR.
-		// load.php has modified wp_is_maintenance_mode().
+		// TODO: enable maintenance mode here for PR,load.php has modified wp_is_maintenance_mode().
 		/*
-		 * Enable maintenance mode while attempting to detect fatal errors
+		 * After WP_Upgrader::upgrade() completes, maintenance mode is disabled.
+		 *
+		 * Re-enable maintenance mode while attempting to detect fatal errors
 		 * and potentially rolling back.
 		 *
 		 * This avoids errors if the site is visited while fatal errors exist
@@ -534,26 +540,12 @@ class WP_Automatic_Updater {
 				 * is about to be performed, increase the time limit to account for this.
 				 */
 				if ( function_exists( 'set_time_limit' ) ) {
-				set_time_limit( 10 * MINUTE_IN_SECONDS );
-			}
+					set_time_limit( 10 * MINUTE_IN_SECONDS );
+				}
 
-			// Avoid a race condition when there are 2 sequential plugins that have fatal errors.
-			sleep( 2 );
+				// Avoid a race condition when there are 2 sequential plugins that have fatal errors.
+				sleep( 2 );
 
-				/*
-				 * Maintenance mode is disabled after an active plugin
-				 * has been updated during automatic updates.
-				 *
-				 * See Plugin_Upgrader::active_after().
-				 *
-				 * This means the loopback request performed here will
-				 * be able to navigate to the site and scrape for errors.
-				 *
-				 * Even if visitors browse the site during this time and
-				 * also see the errors, this process will attempt to restore
-				 * the previously installed version within seconds of detecting
-				 * a fatal error.
-				 */
 				if ( $this->has_fatal_error() ) {
 					$upgrade_result = new WP_Error();
 					$temp_backup    = array(
@@ -564,14 +556,7 @@ class WP_Automatic_Updater {
 					),
 				);
 
-				/* TODO: remove for PR.
-				 * Enable maintenance mode while attempting to detect fatal errors
-				 * and potentially rolling back.
-				 *
-				 * This avoids errors if the site is visited while fatal errors exist
-				 * or while files are still being moved.
-				 */
-				$upgrader->maintenance_mode( true );
+				$upgrader->maintenance_mode( true ); // TODO: remove for PR.
 
 				$backup_restored = $upgrader->restore_temp_backup( $temp_backup );
 				if ( is_wp_error( $backup_restored ) ) {
@@ -614,7 +599,6 @@ class WP_Automatic_Updater {
 				} else {
 					error_log( '    The update for ' . var_export( $item->slug, true ) . ' has no fatal errors.' );
 				}
-
 			}
 		}
 
@@ -1739,9 +1723,12 @@ Thanks! -- The WordPress Team"
 		$needle_start           = "###### wp_scraping_result_start:$scrape_key ######";
 		$needle_end             = "###### wp_scraping_result_end:$scrape_key ######";
 		$url                    = add_query_arg( $scrape_params, home_url( '/' ) );
-		$r                      = wp_remote_get( $url, compact( 'cookies', 'headers', 'timeout', 'sslverify' ) );
-		error_log( var_export( substr( $r['body'], strpos( $r['body'], '###### wp_scraping_result_start:' ) ), true ) );
-		$body                   = wp_remote_retrieve_body( $r );
+		$response               = wp_remote_get( $url, compact( 'cookies', 'headers', 'timeout', 'sslverify' ) );
+
+		// If this outputs `true` in the log, it means there were no fatal errors detected.
+		error_log( var_export( substr( $response['body'], strpos( $response['body'], '###### wp_scraping_result_start:' ) ), true ) );
+
+		$body                   = wp_remote_retrieve_body( $response );
 		$scrape_result_position = strpos( $body, $needle_start );
 		$result                 = null;
 
