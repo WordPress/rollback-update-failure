@@ -10,7 +10,7 @@
  * Plugin Name: Rollback Auto Update
  * Author: WP Core Contributors
  * Description: A feature plugin now only for testing Rollback Auto Update, aka Rollback part 3. Manual Rollback of update failures has been committed in WordPress 6.3.
- * Version: 7.0.2.1
+ * Version: 7.0.2.2
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure

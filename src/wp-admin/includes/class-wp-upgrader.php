@@ -385,7 +385,7 @@ class WP_Upgrader {
 
 		// Once extracted, delete the package if required.
 		if ( $delete_package ) {
-			@unlink( $package );
+			unlink( $package );
 		}
 
 		if ( is_wp_error( $result ) ) {
@@ -840,12 +840,12 @@ class WP_Upgrader {
 				$this->skin->feedback( $download->get_error_message() );
 
 				// Report this failure back to WordPress.org for debugging purposes.
-				// wp_version_check(
-				// array(
-				// 'signature_failure_code' => $download->get_error_code(),
-				// 'signature_failure_data' => $download->get_error_data(),
-				// )
-				// );
+				wp_version_check(
+					array(
+						'signature_failure_code' => $download->get_error_code(),
+						'signature_failure_data' => $download->get_error_data(),
+					)
+				);
 			}
 
 			// Pretend this error didn't happen.
@@ -1045,9 +1045,9 @@ class WP_Upgrader {
 			}
 
 			// There must exist an expired lock, clear it and re-gain it.
-			self::release_lock( $lock_name );
+			WP_Upgrader::release_lock( $lock_name );
 
-			return self::create_lock( $lock_name, $release_timeout );
+			return WP_Upgrader::create_lock( $lock_name, $release_timeout );
 		}
 
 		// Update the lock, as by this point we've definitely got a lock, just need to fire the actions.
