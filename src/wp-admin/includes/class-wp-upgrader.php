@@ -1045,9 +1045,9 @@ class WP_Upgrader {
 			}
 
 			// There must exist an expired lock, clear it and re-gain it.
-			WP_Upgrader::release_lock( $lock_name );
+			self::release_lock( $lock_name );
 
-			return WP_Upgrader::create_lock( $lock_name, $release_timeout );
+			return self::create_lock( $lock_name, $release_timeout );
 		}
 
 		// Update the lock, as by this point we've definitely got a lock, just need to fire the actions.

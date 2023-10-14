@@ -553,14 +553,14 @@ class WP_Automatic_Updater {
 							'dir'  => 'plugins',
 							'slug' => $item->slug,
 							'src'  => WP_PLUGIN_DIR,
-					),
-				);
+						),
+					);
 
-				$upgrader->maintenance_mode( true ); // TODO: remove for PR.
+					$upgrader->maintenance_mode( true ); // TODO: remove for PR.
 
-				$backup_restored = $upgrader->restore_temp_backup( $temp_backup );
-				if ( is_wp_error( $backup_restored ) ) {
-					$upgrade_result->add(
+					$backup_restored = $upgrader->restore_temp_backup( $temp_backup );
+					if ( is_wp_error( $backup_restored ) ) {
+						$upgrade_result->add(
 							'plugin_update_fatal_error_rollback_failed',
 							sprintf(
 								/* translators: %s: The plugin's slug. */
@@ -569,7 +569,7 @@ class WP_Automatic_Updater {
 							)
 						);
 
-						$upgrade_result->merge_from( $backup_restored );
+							$upgrade_result->merge_from( $backup_restored );
 					} else {
 						$upgrade_result->add(
 							'plugin_update_fatal_error_rollback_successful',
@@ -1720,10 +1720,10 @@ Thanks! -- The WordPress Team"
 
 		error_log( '    Scraping home page...' );
 
-		$needle_start           = "###### wp_scraping_result_start:$scrape_key ######";
-		$needle_end             = "###### wp_scraping_result_end:$scrape_key ######";
-		$url                    = add_query_arg( $scrape_params, home_url( '/' ) );
-		$response               = wp_remote_get( $url, compact( 'cookies', 'headers', 'timeout', 'sslverify' ) );
+		$needle_start = "###### wp_scraping_result_start:$scrape_key ######";
+		$needle_end   = "###### wp_scraping_result_end:$scrape_key ######";
+		$url          = add_query_arg( $scrape_params, home_url( '/' ) );
+		$response     = wp_remote_get( $url, compact( 'cookies', 'headers', 'timeout', 'sslverify' ) );
 
 		// If this outputs `true` in the log, it means there were no fatal errors detected.
 		error_log( var_export( substr( $response['body'], strpos( $response['body'], '###### wp_scraping_result_start:' ) ), true ) );
