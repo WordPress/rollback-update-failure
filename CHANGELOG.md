@@ -1,5 +1,10 @@
 [unreleased]
 
+#### 7.0.3 / 2023-10-16
+* update kill switch
+* update for PR
+* fix readme.txt, thanks Otto
+
 #### 7.0.2 / 2023-10-12
 * just a bump for dot org
 

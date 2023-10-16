@@ -385,7 +385,7 @@ class WP_Upgrader {
 
 		// Once extracted, delete the package if required.
 		if ( $delete_package ) {
-			@unlink( $package );
+			unlink( $package );
 		}
 
 		if ( is_wp_error( $result ) ) {
@@ -840,12 +840,12 @@ class WP_Upgrader {
 				$this->skin->feedback( $download->get_error_message() );
 
 				// Report this failure back to WordPress.org for debugging purposes.
-				// wp_version_check(
-				// array(
-				// 'signature_failure_code' => $download->get_error_code(),
-				// 'signature_failure_data' => $download->get_error_data(),
-				// )
-				// );
+				wp_version_check(
+					array(
+						'signature_failure_code' => $download->get_error_code(),
+						'signature_failure_data' => $download->get_error_data(),
+					)
+				);
 			}
 
 			// Pretend this error didn't happen.
