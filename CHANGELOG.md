@@ -1,5 +1,8 @@
 [unreleased]
 
+#### 7.1.0 / 2023-11-07
+* use `( new WP_Upgrader() )->maintenance_mode()` for Upgrader classes, fixes error in `maintenance_mode()` when `$wp_filesystem` not set
+
 #### 7.0.3 / 2023-10-16
 * update kill switch
 * update for PR
