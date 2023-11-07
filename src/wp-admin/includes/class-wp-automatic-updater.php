@@ -469,7 +469,7 @@ class WP_Automatic_Updater {
 		 * update could contain an error or warning, which could cause
 		 * the scrape to miss a fatal error in the plugin update.
 		 */
-		$upgrader->maintenance_mode( true );
+		( new WP_Upgrader() )->maintenance_mode( true );
 
 		// Boom, this site's about to get a whole new splash of paint!
 		$upgrade_result = $upgrader->upgrade(
@@ -556,7 +556,7 @@ class WP_Automatic_Updater {
 						),
 					);
 
-					$upgrader->maintenance_mode( true ); // TODO: remove for PR.
+					( new WP_Upgrader() )->maintenance_mode( true ); // TODO: remove for PR.
 
 					$backup_restored = $upgrader->restore_temp_backup( $temp_backup );
 					if ( is_wp_error( $backup_restored ) ) {
@@ -603,7 +603,7 @@ class WP_Automatic_Updater {
 		}
 
 		// All processes are complete. Allow visitors to browse the site again.
-		$upgrader->maintenance_mode( false );
+		( new WP_Upgrader() )->maintenance_mode( false );
 
 		$this->update_results[ $type ][] = (object) array(
 			'item'     => $item,

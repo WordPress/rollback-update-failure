@@ -51,6 +51,7 @@ add_action(
 		// phpcs:disable Squiz.Commenting.ClassComment.Missing,Generic.Files.OneObjectStructurePerFile.MultipleFound
 		class WP_Error extends \WP_Error {}
 		class Automatic_Upgrader_Skin extends \Automatic_Upgrader_Skin {}
+		class WP_Upgrader_Skin extends \WP_Upgrader_Skin {}
 		class Theme_Upgrader extends \Theme_Upgrader {}
 		class Core_Upgrader extends \Core_Upgrader {}
 		class Language_Pack_Upgrader extends \Language_Pack_Upgrader {}
