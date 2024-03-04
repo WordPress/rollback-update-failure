@@ -10,7 +10,7 @@
  * Plugin Name: Rollback Auto Update
  * Author: WP Core Contributors
  * Description: A feature plugin now only for testing Rollback Auto Update, aka Rollback part 3. Manual Rollback of update failures has been committed in WordPress 6.3.
- * Version: 7.1.1
+ * Version: 7.1.2
  * Network: true
  * License: MIT
  * Text Domain: rollback-update-failure
@@ -33,6 +33,7 @@ if ( ! defined( 'WPINC' ) ) {
 if ( version_compare( get_bloginfo( 'version' ), '6.6-beta1', '>' ) ) {
 	require_once ABSPATH . 'wp-admin/includes/plugin.php';
 	deactivate_plugins( __FILE__ );
+	return;
 }
 
 require_once __DIR__ . '/src/testing/failure-simulator.php';
