@@ -6,7 +6,7 @@ Tags: feature plugin, update, failure, auto-update
 License: MIT
 Requires PHP: 7.0
 Requires at least: 6.3
-Tested up to: 6.4
+Tested up to: 6.5
 Stable Tag: 7.1.2
 
 A feature plugin now only for testing Rollback Auto Update, aka Rollback part 3. Manual Rollback of update failures has been committed in WordPress 6.3.
