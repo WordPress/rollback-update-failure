@@ -1,5 +1,8 @@
 [unreleased]
 
+#### 7.1.2 / 2024-03-03
+* update kill switch
+
 #### 7.1.1 / 2024-02-14
 * update kill switch
 
