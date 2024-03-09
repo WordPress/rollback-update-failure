@@ -1711,6 +1711,9 @@ Thanks! -- The WordPress Team"
 
 		$scrape_key    = md5( $upgrading );
 		$scrape_nonce  = (string) $upgrading;
+		$transient     = 'scrape_key_' . $scrape_key;
+		set_transient($transient, $scrape_nonce, 30);
+
 		$scrape_params = array(
 			'wp_scrape_key'   => $scrape_key,
 			'wp_scrape_nonce' => $scrape_nonce,
