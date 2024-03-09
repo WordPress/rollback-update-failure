@@ -485,7 +485,6 @@ class WP_Automatic_Updater {
 			)
 		);
 
-		// TODO: enable maintenance mode here for PR,load.php has modified wp_is_maintenance_mode().
 		/*
 		 * After WP_Upgrader::upgrade() completes, maintenance mode is disabled.
 		 *
@@ -495,7 +494,7 @@ class WP_Automatic_Updater {
 		 * This avoids errors if the site is visited while fatal errors exist
 		 * or while files are still being moved.
 		 */
-		// $upgrader->maintenance_mode( true );
+		$upgrader->maintenance_mode( true );
 
 		// If the filesystem is unavailable, false is returned.
 		if ( false === $upgrade_result ) {
@@ -1707,6 +1706,8 @@ Thanks! -- The WordPress Team"
 		if ( ! is_int( $upgrading ) ) {
 			return false;
 		}
+
+		( new WP_Upgrader() )->maintenance_mode( false ); // TODO: remove for PR.
 
 		$scrape_key    = md5( $upgrading );
 		$scrape_nonce  = (string) $upgrading;
