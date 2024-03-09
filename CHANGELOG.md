@@ -1,4 +1,5 @@
 [unreleased]
+* update kill switch using `method_exists()`
 
 #### 7.1.2 / 2024-03-03
 * update kill switch
