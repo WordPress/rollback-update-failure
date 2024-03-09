@@ -1709,10 +1709,11 @@ Thanks! -- The WordPress Team"
 
 		( new WP_Upgrader() )->maintenance_mode( false ); // TODO: remove for PR.
 
-		$scrape_key    = md5( $upgrading );
-		$scrape_nonce  = (string) $upgrading;
-		$transient     = 'scrape_key_' . $scrape_key;
-		set_transient($transient, $scrape_nonce, 30);
+		$scrape_key   = md5( $upgrading );
+		$scrape_nonce = (string) $upgrading;
+		$cookies      = wp_unslash( $_COOKIE );
+		$transient    = 'scrape_key_' . $scrape_key;
+		set_transient( $transient, $scrape_nonce, 30 );
 
 		$scrape_params = array(
 			'wp_scrape_key'   => $scrape_key,
@@ -1738,7 +1739,7 @@ Thanks! -- The WordPress Team"
 		$needle_start = "###### wp_scraping_result_start:$scrape_key ######";
 		$needle_end   = "###### wp_scraping_result_end:$scrape_key ######";
 		$url          = add_query_arg( $scrape_params, home_url( '/' ) );
-		$response     = wp_remote_get( $url, compact( 'headers', 'timeout', 'sslverify' ) );
+		$response     = wp_remote_get( $url, compact( 'cookies', 'headers', 'timeout', 'sslverify' ) );
 
 		// If this outputs `true` in the log, it means there were no fatal errors detected.
 		error_log( var_export( substr( $response['body'], strpos( $response['body'], '###### wp_scraping_result_start:' ) ), true ) );
