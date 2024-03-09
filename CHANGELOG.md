@@ -1,5 +1,6 @@
 [unreleased]
 * update kill switch using `method_exists()`
+* update for latest PR, cannot include mods to `load.php`
 
 #### 7.1.2 / 2024-03-03
 * update kill switch

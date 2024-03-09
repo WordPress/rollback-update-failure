@@ -1146,7 +1146,7 @@ class WP_Upgrader {
 	 * Restores the plugin or theme from temporary backup.
 	 *
 	 * @since 6.3.0
-	 * @since 6.5.0 Added the `$temp_backups` parameter.
+	 * @since 6.6.0 Added the `$temp_backups` parameter.
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
@@ -1211,7 +1211,7 @@ class WP_Upgrader {
 	 * Deletes a temporary backup.
 	 *
 	 * @since 6.3.0
-	 * @since 6.5.0 Added the `$temp_backups` parameter.
+	 * @since 6.6.0 Added the `$temp_backups` parameter.
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
