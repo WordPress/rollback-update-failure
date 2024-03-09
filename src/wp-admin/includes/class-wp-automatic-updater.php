@@ -1695,7 +1695,7 @@ Thanks! -- The WordPress Team"
 	 *
 	 * @return bool Whether a fatal error was detected.
 	 */
-	protected function has_fatal_error( $nonce ) {
+	protected function has_fatal_error() {
 		global $upgrading;
 
 		$maintenance_file = ABSPATH . '.maintenance';
