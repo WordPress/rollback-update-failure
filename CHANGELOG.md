@@ -1,4 +1,5 @@
 [unreleased]
+* add check for loopback not working and rollback auto-update for safety
 
 #### 7.2.0 / 2024-03-11
 * update kill switch using `method_exists()`

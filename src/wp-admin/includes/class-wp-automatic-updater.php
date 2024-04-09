@@ -545,8 +545,9 @@ class WP_Automatic_Updater {
 				// Avoid a race condition when there are 2 sequential plugins that have fatal errors.
 				sleep( 2 );
 
-				if ( $this->has_fatal_error() ) {
-					$upgrade_result = new WP_Error();
+				$has_fatal_error = $this->has_fatal_error();
+				if ( $has_fatal_error ) {
+					$upgrade_result = is_wp_error( $has_fatal_error ) ? $has_fatal_error : new WP_Error();
 					$temp_backup    = array(
 						array(
 							'dir'  => 'plugins',
@@ -1692,7 +1693,7 @@ Thanks! -- The WordPress Team"
 	 *
 	 * @global int $upgrading The Unix timestamp marking when upgrading WordPress began.
 	 *
-	 * @return bool Whether a fatal error was detected.
+	 * @return bool|WP_Error Whether a fatal error was detected. WP_Error if loopback request errors.
 	 */
 	protected function has_fatal_error() {
 		global $upgrading;
@@ -1740,6 +1741,12 @@ Thanks! -- The WordPress Team"
 		$needle_end   = "###### wp_scraping_result_end:$scrape_key ######";
 		$url          = add_query_arg( $scrape_params, home_url( '/' ) );
 		$response     = wp_remote_get( $url, compact( 'cookies', 'headers', 'timeout', 'sslverify' ) );
+
+		if ( is_wp_error( $response ) ) {
+			$response->add_data( 'Loopback is having a problem and any auto-updates will be rollback for safety.' );
+
+			return $response;
+		}
 
 		// If this outputs `true` in the log, it means there were no fatal errors detected.
 		error_log( var_export( substr( $response['body'], strpos( $response['body'], '###### wp_scraping_result_start:' ) ), true ) );
