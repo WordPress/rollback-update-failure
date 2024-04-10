@@ -1747,11 +1747,11 @@ Thanks! -- The WordPress Team"
 			$response['body'][] = json_encode(
 				array(
 					'type'    => '1',
-					'message' => 'Loopback is having a problem and any auto-updates will be rollback for safety.',
+					'message' => 'Loopback is having a problem and any auto-updates will be reverted for safety.',
 				)
 			);
 			$response['body'][] = $needle_end;
-			$response['body']   = implode( "\n", $response['body'] );
+			$response['body']   = implode( ' ', $response['body'] );
 		}
 
 		// If this outputs `true` in the log, it means there were no fatal errors detected.
