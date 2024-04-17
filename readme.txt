@@ -7,7 +7,7 @@ License: MIT
 Requires PHP: 7.0
 Requires at least: 6.3
 Tested up to: 6.5
-Stable Tag: 7.2.0
+Stable Tag: 7.2.1
 
 A feature plugin now only for testing Rollback Auto Update, aka Rollback part 3. Manual Rollback of update failures has been committed in WordPress 6.3.
 
@@ -45,6 +45,9 @@ Logo from a meme generator. [Original artwork](http://hyperboleandahalf.blogspot
 ## Changelog
 
 Please see the Github repository: [CHANGELOG.md](https://github.com/afragen/rollback-update-failure/blob/main/CHANGELOG.md).
+
+#### 7.2.1 / 2024-04-17
+* add check for loopback not working and rollback auto-update for safety
 
 #### 7.2.0 / 2024-03-11
 * update kill switch using `method_exists()`
