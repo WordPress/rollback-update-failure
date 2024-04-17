@@ -1,4 +1,6 @@
 [unreleased]
+
+#### 7.2.1 / 2024-04-17
 * add check for loopback not working and rollback auto-update for safety
 
 #### 7.2.0 / 2024-03-11
